@@ -30,7 +30,12 @@ export type Report = {
 const verdictOf = (text: string) => /VERDICT:\s*(clean|blocking)/i.exec(text)?.[1]?.toLowerCase();
 
 // One ticket through the factory. Order is fixed here; models, turns and budget come from config.
-export async function runFactory(deps: Deps, cfg: FactoryConfig, n: number): Promise<Report> {
+export async function runFactory(
+  deps: Deps,
+  cfg: FactoryConfig,
+  n: number,
+  opts: { type?: string } = {},
+): Promise<Report> {
   const issue = await deps.getIssue(n);
   const report: Report = { outcome: "refused", type: "feature", rounds: 0, costUsd: 0, stages: [] };
 
@@ -63,7 +68,8 @@ export async function runFactory(deps: Deps, cfg: FactoryConfig, n: number): Pro
     "triage",
     `Classify this issue.\n${ticket}\nEnd with TYPE: feature|enhancement|bug|epic|docs and DECISION: proceed|refuse.`,
   );
-  report.type = /TYPE:\s*(\w+)/i.exec(triage)?.[1]?.toLowerCase() ?? "feature";
+  // The orchestrator may overrule triage, for example to send a design ticket to the Opus route.
+  report.type = opts.type ?? /TYPE:\s*(\w+)/i.exec(triage)?.[1]?.toLowerCase() ?? "feature";
   if (/DECISION:\s*refuse/i.test(triage)) {
     await deps.comment(n, triage);
     return report;

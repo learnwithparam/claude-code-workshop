@@ -2,10 +2,11 @@ import { loadConfig, STAGE_NAMES, stageFor } from "./config.ts";
 import { runFactory } from "./run.ts";
 import { githubDeps, runStage } from "./stages.ts";
 
-// Usage: tsx factory/main.ts <issue-number> [--dry-run]
+// Usage: tsx factory/main.ts <issue-number> [--dry-run] [--type=epic]
 const [number, flag] = process.argv.slice(2);
+const typeFlag = process.argv.find((a) => a.startsWith("--type="))?.slice(7);
 const cfg = loadConfig();
-if (!number) throw new Error("usage: factory/main.ts <issue-number> [--dry-run]");
+if (!number) throw new Error("usage: factory/main.ts <issue-number> [--dry-run] [--type=epic]");
 
 if (flag === "--dry-run") {
   console.log(`Issue #${number}: stages that would run, from .factory/config.json`);
@@ -21,6 +22,8 @@ if (flag === "--dry-run") {
 } else {
   // The stages need a key. Load it inside this process so it never appears on a command line.
   if (!process.env.ANTHROPIC_API_KEY) process.loadEnvFile(new URL("../api/.env", import.meta.url));
-  const report = await runFactory({ ...githubDeps, runStage }, cfg, Number(number));
+  const report = await runFactory({ ...githubDeps, runStage }, cfg, Number(number), {
+    type: typeFlag,
+  });
   console.log(JSON.stringify(report, null, 2));
 }

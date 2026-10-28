@@ -121,6 +121,12 @@ describe("factory state machine", () => {
     expect((await runFactory(lazy.deps, cfg, 1)).outcome).toBe("needs-human");
   });
 
+  it("lets the orchestrator overrule triage and force the Opus route", async () => {
+    const { deps, calls } = fake({ triage: ["TYPE: feature DECISION: proceed"] });
+    await runFactory(deps, cfg, 1, { type: "epic" });
+    expect(calls).toContain("plan:claude-opus-5-5");
+  });
+
   it("routes an epic plan to Opus", async () => {
     const { deps, calls } = fake({ triage: ["TYPE: epic DECISION: proceed"] });
     await runFactory(deps, cfg, 1);
