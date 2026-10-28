@@ -64,6 +64,7 @@ const examples = fixtures.map((fixture) => ({
     </main>
     <script>
       import { chat, type ChatMessage } from "../lib/api.ts";
+      import { remember } from "../lib/history.ts";
 
       const log = document.getElementById("log") as HTMLElement;
       const form = document.getElementById("form") as HTMLFormElement;
@@ -89,18 +90,12 @@ const examples = fixtures.map((fixture) => ({
         history.push({ role: "user", content });
         add("user", content);
         for await (const ev of chat(history)) {
-          if (ev.event === "question") {
-            history.push({ role: "assistant", content: ev.data.text });
-            add("assistant", ev.data.text);
-          } else if (ev.event === "worksheet") {
-            frame.srcdoc = ev.data.html;
-            history.push({ role: "assistant", content: "Here is your worksheet." });
-            add("assistant", "Here is your worksheet.");
-          } else if (ev.event === "usage") {
+          if (ev.event === "worksheet") frame.srcdoc = ev.data.html;
+          const shown = remember(history, ev);
+          if (shown) add("assistant", shown);
+          if (ev.event === "usage") {
             const u = ev.data;
             chip.textContent = `${u.input} in, ${u.cacheRead} cached, ${u.output} out, $${u.costUsd.toFixed(4)}`;
-          } else {
-            add("assistant", ev.data.message);
           }
         }
         send.disabled = false;

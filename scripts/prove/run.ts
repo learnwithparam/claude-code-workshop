@@ -4,6 +4,7 @@ import { proveDelivery } from "./delivery.ts";
 import { proveExecution } from "./execution.ts";
 import { proveHandBuilt } from "./hand-built.ts";
 import { proveSkills } from "./skills.ts";
+import { proveVerification } from "./verification.ts";
 
 // One proof per teaching level, keyed by the level's name: `make prove LEVEL=boundary`.
 const proofs = {
@@ -12,6 +13,7 @@ const proofs = {
   context: proveContext,
   skills: proveSkills,
   execution: proveExecution,
+  verification: proveVerification,
   delivery: proveDelivery,
 } as const;
 const only = process.argv[2]?.replace(/^LEVEL=/, "");

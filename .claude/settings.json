@@ -5,7 +5,9 @@
   },
   "sandbox": {
     "enabled": true,
-    "filesystem": { "denyRead": ["**/.env*"] }
+    "filesystem": {
+      "denyRead": ["**/.env*"]
+    }
   },
   "hooks": {
     "PreToolUse": [
@@ -15,6 +17,27 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pretooluse-secrets.mjs\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/posttooluse-typecheck.mjs\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop-gate.mjs\""
           }
         ]
       }

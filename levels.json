@@ -12,7 +12,7 @@
     "api/**",
     "api/.*",
     ".claude/settings.json",
-    ".claude/hooks/**",
+    ".claude/hooks/pretooluse-secrets.mjs",
     ".gitleaks.toml",
     "scripts/git/**",
     "scripts/prove/boundary.ts"
@@ -50,5 +50,11 @@
     "factory/main.ts",
     ".github/**",
     "scripts/prove/delivery.ts"
+  ],
+  "verification": [
+    ".claude/hooks/posttooluse-typecheck.mjs",
+    ".claude/hooks/stop-gate.mjs",
+    "tests/structure/hooks.test.ts",
+    "scripts/prove/verification.ts"
   ]
 }
