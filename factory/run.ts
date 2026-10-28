@@ -54,9 +54,11 @@ export type Report = {
 };
 
 // Hidden marker on the runner's plan comments. latestPlan trusts only comments that carry it, and
-// every other comment the runner posts has it stripped, so model text cannot pose as a plan.
+// every other comment the runner posts has its comment openers escaped, so model text cannot pose as a plan.
 export const PLAN_MARK = "<!-- factory:plan -->";
-const unmarked = (t: string) => t.replaceAll(PLAN_MARK, "");
+// No HTML comment opener survives, so nested text like "<!-- fa<!-- factory:plan -->ctory" cannot
+// rebuild the marker after one pass.
+const unmarked = (t: string) => t.replaceAll("<!--", "&lt;!--");
 
 const verdictOf = (text: string) => /VERDICT:\s*(clean|blocking)/i.exec(text)?.[1]?.toLowerCase();
 
