@@ -9,7 +9,7 @@
     "api"
   ],
   "scripts": {
-    "typecheck": "npm run typecheck --workspaces --if-present && tsc --noEmit -p factory",
+    "typecheck": "npm run typecheck --workspaces --if-present && (test ! -d factory || tsc --noEmit -p factory)",
     "test": "vitest run",
     "lint": "biome ci .",
     "prove": "tsx scripts/prove/run.ts"
