@@ -1,12 +1,16 @@
 import { execFileSync } from "node:child_process";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import type { Deps, Issue } from "./run.ts";
 
 const gh = (...args: string[]) => execFileSync("gh", args, { encoding: "utf8" });
 
 let base = "";
+// Matched at any depth: a nested package manifest or config rewrites the gate as well.
 const GATE_FILES =
-  /^(Makefile|package(-lock)?\.json|biome\.json|vitest\.config\.ts|\.github\/|\.claude\/hooks\/|scripts\/|\.factory\/)/;
+  /(^|\/)(G?[Mm]akefile|package(-lock)?\.json|tsconfig[^/]*\.json|biome\.jsonc?|vitest\.config\.[cm]?[jt]s|\.github\/|\.claude\/hooks\/|scripts\/|factory\/|\.factory\/)/;
 
 export const githubDeps: Pick<
   Deps,
@@ -31,16 +35,25 @@ export const githubDeps: Pick<
   // The runner, not the model, runs the gate: a stage in plan mode cannot, and must not be believed.
   async gate() {
     // The build may not rewrite the gate it is judged by, and the gate never sees our tokens.
-    const touched = execFileSync("git", ["diff", "--name-only", base], { encoding: "utf8" })
-      .split("\n")
-      .filter((f) => GATE_FILES.test(f));
+    const lines = (...args: string[]) =>
+      execFileSync("git", args, { encoding: "utf8" }).split("\n").filter(Boolean);
+    const strays = lines("ls-files", "--others", "--exclude-standard");
+    if (strays.length) return { ok: false, output: `untracked files: ${strays.join(", ")}` };
+    const touched = lines("diff", "--name-only", base).filter((f) => GATE_FILES.test(f));
     if (touched.length)
       return { ok: false, output: `build changed gate files: ${touched.join(", ")}` };
-    const env = Object.fromEntries(
-      ["PATH", "HOME", "SHELL", "TERM", "LANG"].flatMap((k) =>
-        process.env[k] ? [[k, process.env[k]]] : [],
+    // Throwaway HOME and empty git and gh config: the edited code finds no credential to read.
+    const home = mkdtempSync(join(tmpdir(), "gate-"));
+    const env = {
+      ...Object.fromEntries(
+        ["PATH", "SHELL", "TERM", "LANG"].flatMap((k) =>
+          process.env[k] ? [[k, process.env[k]]] : [],
+        ),
       ),
-    );
+      HOME: home,
+      GIT_CONFIG_GLOBAL: "/dev/null",
+      GH_CONFIG_DIR: home,
+    };
     try {
       execFileSync("make", ["check"], { encoding: "utf8", stdio: "pipe", env });
       return { ok: true, output: "make check passed" };
