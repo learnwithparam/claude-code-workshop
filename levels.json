@@ -85,6 +85,9 @@
     "scripts/impact.test.ts",
     "scripts/check-affected.ts",
     "tests/structure/impact.test.ts",
+    "scripts/dependencies.ts",
+    "tests/structure/dependency-drift.test.ts",
+    "tests/structure/dependabot.test.ts",
     "tests/structure/hooks.test.ts",
     "scripts/prove/verification.ts",
     "docs/levels/verification.md"
