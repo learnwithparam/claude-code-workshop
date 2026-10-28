@@ -5,6 +5,8 @@ import type { Deps, Issue } from "./run.ts";
 const gh = (...args: string[]) => execFileSync("gh", args, { encoding: "utf8" });
 
 let base = "";
+const GATE_FILES =
+  /^(Makefile|package(-lock)?\.json|biome\.json|vitest\.config\.ts|\.github\/|\.claude\/hooks\/|scripts\/|\.factory\/)/;
 
 export const githubDeps: Pick<
   Deps,
@@ -28,8 +30,19 @@ export const githubDeps: Pick<
   },
   // The runner, not the model, runs the gate: a stage in plan mode cannot, and must not be believed.
   async gate() {
+    // The build may not rewrite the gate it is judged by, and the gate never sees our tokens.
+    const touched = execFileSync("git", ["diff", "--name-only", base], { encoding: "utf8" })
+      .split("\n")
+      .filter((f) => GATE_FILES.test(f));
+    if (touched.length)
+      return { ok: false, output: `build changed gate files: ${touched.join(", ")}` };
+    const env = Object.fromEntries(
+      ["PATH", "HOME", "SHELL", "TERM", "LANG"].flatMap((k) =>
+        process.env[k] ? [[k, process.env[k]]] : [],
+      ),
+    );
     try {
-      execFileSync("make", ["check"], { encoding: "utf8", stdio: "pipe" });
+      execFileSync("make", ["check"], { encoding: "utf8", stdio: "pipe", env });
       return { ok: true, output: "make check passed" };
     } catch (error) {
       return {
