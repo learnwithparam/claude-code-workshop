@@ -59,6 +59,7 @@
     "docs/levels/execution.md"
   ],
   "delivery": [
+    "tests/structure/dependabot.test.ts",
     "factory/run.ts",
     "factory/run.test.ts",
     "factory/stages.ts",
@@ -99,7 +100,6 @@
     "tests/structure/impact.test.ts",
     "scripts/dependencies.ts",
     "tests/structure/dependency-drift.test.ts",
-    "tests/structure/dependabot.test.ts",
     "tests/structure/hooks.test.ts",
     "scripts/prove/verification.ts",
     "docs/levels/verification.md"
