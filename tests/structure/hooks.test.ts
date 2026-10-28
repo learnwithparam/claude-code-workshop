@@ -41,6 +41,9 @@ describe("file guard", () => {
     "web/package-lock.json",
     ".github/workflows/check.yml",
     "skills.lock",
+    ".claude/hooks/stop-gate.mjs",
+    ".claude/settings.json",
+    "./a/../.GitHub/workflows/x.yml",
   ])("blocks an edit to %s", (file) => expect(guardFor(file, {})).toContain("protected"));
   it("lets unprotected files through", () => {
     expect(guardFor("web/src/a.ts", {})).toBeNull();
@@ -68,6 +71,7 @@ describe("settings", () => {
   it("wires the file guard before edits and the session log after every tool", () => {
     const hooks = JSON.parse(readFileSync(".claude/settings.json", "utf8")).hooks;
     expect(JSON.stringify(hooks.PreToolUse)).toContain("pretooluse-file-guard.mjs");
+    expect(JSON.stringify(hooks.PreToolUse)).toContain("MultiEdit|NotebookEdit");
     expect(JSON.stringify(hooks.PostToolUse)).toContain("posttooluse-session-log.mjs");
   });
 });

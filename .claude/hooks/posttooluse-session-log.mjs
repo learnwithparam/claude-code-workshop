@@ -1,6 +1,6 @@
 // One JSON line per tool call, so the retro stage can read what a session did.
 // Tool name and file path only: no command text and no output, which can hold secrets.
-import { appendFileSync, lstatSync, mkdirSync, readFileSync } from "node:fs";
+import { closeSync, constants, mkdirSync, openSync, readFileSync, writeSync } from "node:fs";
 import { dirname } from "node:path";
 
 export function logLine(input, now = new Date()) {
@@ -14,13 +14,17 @@ export function logLine(input, now = new Date()) {
 // .factory/runs is gitignored and writable by the agent, so a planted link must not redirect the log.
 function appendLine(file, line) {
   mkdirSync(dirname(file), { recursive: true });
+  // O_NOFOLLOW makes the open itself fail on a planted link, with no check-then-use gap.
+  const fd = openSync(
+    file,
+    constants.O_WRONLY | constants.O_APPEND | constants.O_CREAT | constants.O_NOFOLLOW,
+    0o600,
+  );
   try {
-    if (lstatSync(file).isSymbolicLink())
-      throw new Error(`refusing to log through symlink ${file}`);
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
+    writeSync(fd, line + "\n");
+  } finally {
+    closeSync(fd);
   }
-  appendFileSync(file, line + "\n");
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
