@@ -1,0 +1,9 @@
+title = "claude-code-workshop"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "anthropic-key"
+description = "Anthropic API key"
+regex = '''sk-ant-[a-zA-Z0-9_-]{20,}'''

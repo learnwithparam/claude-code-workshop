@@ -1,6 +1,7 @@
 import { proveL0 } from "./l0.ts";
+import { proveL1 } from "./l1.ts";
 
-const proofs = { "0": proveL0 } as const;
+const proofs = { "0": proveL0, "1": proveL1 } as const;
 const only = process.argv[2]?.replace(/^L=/, "");
 const chosen = Object.entries(proofs).filter(([level]) => !only || level === only);
 

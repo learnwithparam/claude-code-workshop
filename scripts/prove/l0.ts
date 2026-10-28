@@ -34,8 +34,10 @@ export function proveL0(): Proof {
     if (report.errorCount) problems.push(`${sheet.band}: ${report.errorCount} lint errors`);
   }
 
-  const source = readFileSync("web/src/pages/index.astro", "utf8");
-  if (/fetch\(|api\.anthropic/.test(source)) problems.push("web page makes a network call");
+  const source = ["bands", "check", "render", "schema"]
+    .map((name) => readFileSync(`shared/src/${name}.ts`, "utf8"))
+    .join("\n");
+  if (/fetch\(|api\.anthropic/.test(source)) problems.push("the render path makes a network call");
 
   return {
     level: "L0",

@@ -1,0 +1,17 @@
+{
+  "name": "@workshop/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "latest",
+    "@hono/node-server": "^1.14.0",
+    "@workshop/shared": "*",
+    "hono": "^4.9.0",
+    "zod": "^4.1.0"
+  }
+}
