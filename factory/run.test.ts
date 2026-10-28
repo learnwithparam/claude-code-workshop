@@ -19,13 +19,19 @@ function fake(
   const prompts: Record<string, string> = {};
   const queues = Object.fromEntries(Object.entries(script).map(([k, v]) => [k, [...v]]));
   const adrs: string[] = [];
+  const released: string[] = [];
+  const comments: string[] = [];
   const saved: { ledger?: Ledger; lines?: string[] } = {};
   const deps: Deps = {
     listAdrs: async () => ["docs/adr/0003-old.md"],
     writeAdr: async (f) => void adrs.push(f),
+    applyRelease: async (entry) => {
+      released.push(entry("0.2.0"));
+      return "0.2.0";
+    },
     saveRun: async (_n, ledger, lines) => void Object.assign(saved, { ledger, lines }),
     getIssue: async (n): Promise<Issue> => ({ number: n, title: "t", body: "b", labels }),
-    comment: async () => {},
+    comment: async (_n, b) => void comments.push(b),
     label: async (_n, l) => void calls.push(`label:${l}`),
     latestPlan: async () => plan,
     testResults: async () => results,
@@ -45,7 +51,7 @@ function fake(
       return { text, modelsUsed: [model], costUsd: 0.01 };
     },
   };
-  return { deps, calls, prompts, saved, adrs };
+  return { deps, calls, prompts, saved, adrs, released, comments };
 }
 
 describe("factory state machine", () => {
@@ -256,5 +262,32 @@ describe("factory state machine", () => {
     const r = await runFactory(f.deps, cfg, 1);
     expect(r.outcome).toBe("needs-human");
     expect(f.calls).not.toContain("pr");
+  });
+
+  const facts = (o: object) =>
+    `FACTS: ${JSON.stringify([{ number: 4, apiChange: false, small: true, dependsOn: [], ...o }])}`;
+
+  it("records the delivery decision in an epic's plan comment", async () => {
+    const f = fake({ triage: ["TYPE: epic DECISION: proceed"], delivery: [facts({})] });
+    f.deps.getIssue = async (n) => ({ number: n, title: "t", body: "- [ ] #4 a", labels: [] });
+    await runFactory(f.deps, cfg, 1);
+    expect(f.comments.at(-1)).toContain("DELIVERY: separate-prs");
+  });
+
+  it("hands an epic to a human when the facts cannot be parsed", async () => {
+    const f = fake({ triage: ["TYPE: epic DECISION: proceed"], delivery: ["no facts"] });
+    const r = await runFactory(f.deps, cfg, 1);
+    expect(r.outcome).toBe("needs-human");
+    expect(f.calls.some((c) => c.startsWith("build"))).toBe(false);
+  });
+
+  it("applies the release only when the approved plan says release", async () => {
+    const run = async (plan: string) => {
+      const f = fake({ triage: ["TYPE: epic DECISION: proceed"] }, approved, true, plan);
+      await runFactory(f.deps, cfg, 1);
+      return f.released.length;
+    };
+    expect(await run(`${PLAN}\nDELIVERY: release`)).toBe(1);
+    expect(await run(`${PLAN}\nDELIVERY: separate-prs`)).toBe(0);
   });
 });

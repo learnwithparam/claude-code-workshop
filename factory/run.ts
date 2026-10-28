@@ -1,6 +1,8 @@
 import { nextAdrFile, parseAdr, renderAdr } from "./adr.ts";
 import { type FactoryConfig, type StageName, stageFor } from "./config.ts";
 import { buildLedger, type Entry, type Ledger, NO_TOKENS, type Tokens } from "./cost-ledger.ts";
+import { decideDelivery, parseFacts, subIssueNumbers } from "./delivery.ts";
+import { changelogEntry } from "./release.ts";
 import { parseProposal } from "./retro.ts";
 import { parseTriage, routeTicket } from "./route-ticket.ts";
 import { checkSpec, parseSpec, type TestResult } from "./spec.ts";
@@ -28,6 +30,8 @@ export type Deps = {
   // Existing docs/adr file names, and a writer for the one new record.
   listAdrs?(): Promise<string[]>;
   writeAdr?(file: string, content: string): Promise<void>;
+  // Release only: bump the version and write the CHANGELOG entry; returns the new version.
+  applyRelease?(entry: (version: string) => string): Promise<string>;
   saveRun?(n: number, ledger: Ledger, lines: string[]): Promise<void>;
   runStage(
     stage: StageName,
@@ -148,7 +152,26 @@ async function drive(
       "plan",
       `Plan this issue with NG-n non-goals and one line per acceptance criterion in the form "AC-n | test file | test name", tests first.\n${ticket}`,
     );
-    await deps.comment(n, plan);
+    let planned = plan;
+    if (report.type === "epic") {
+      const subs = subIssueNumbers(issue.body);
+      const facts = parseFacts(
+        await stage(
+          "delivery",
+          `Read these sub-issues of the epic and report facts only.\n${ticket}\nSub-issues: ${subs.map((s) => `#${s}`).join(", ")}\nEnd with FACTS: [{"number","apiChange","small","dependsOn":[numbers]}] on one line.`,
+        ),
+      );
+      const decision = "error" in facts ? facts : decideDelivery(facts);
+      if ("error" in decision) {
+        run.lines.push(`delivery failed: ${decision.error}`);
+        await deps.comment(n, `Delivery decision failed: ${decision.error}`);
+        await deps.label(n, cfg.labels.needsHuman);
+        return { ...report, outcome: "needs-human" };
+      }
+      planned = `${plan}\n\nDELIVERY: ${decision.delivery}\nReasons: ${decision.reasons.join("; ")}`;
+      run.lines.push(`delivery ${decision.delivery}`);
+    }
+    await deps.comment(n, planned);
     await deps.unlabel(n, cfg.labels.approved);
     await deps.label(n, cfg.labels.planned);
     return { ...report, outcome: "awaiting-approval" };
@@ -186,6 +209,14 @@ async function drive(
           run.lines.push("adr failed");
           await deps.label(n, cfg.labels.needsHuman);
           return { ...report, outcome: "needs-human" };
+        }
+        if (/^DELIVERY:\s*release\b/im.test(plan) && deps.applyRelease) {
+          const version = await deps.applyRelease((v) =>
+            changelogEntry(v, new Date().toISOString().slice(0, 10), issue.title, [
+              review.split("\n")[0] ?? "",
+            ]),
+          );
+          run.lines.push(`release ${version}`);
         }
         await deps.openPr(
           n,

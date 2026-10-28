@@ -1,10 +1,19 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { ADR_PATH } from "./adr.ts";
 import { formatReport } from "./cost-report.ts";
+import { nextVersion, prependEntry } from "./release.ts";
 import type { Deps, Issue, StageResult } from "./run.ts";
 import { writeRunFiles } from "./run-files.ts";
 import { parseVitestJson } from "./spec.ts";
@@ -52,6 +61,7 @@ export const githubDeps: Pick<
   | "openPr"
   | "gate"
   | "listAdrs"
+  | "applyRelease"
   | "writeAdr"
   | "testResults"
   | "saveRun"
@@ -134,6 +144,15 @@ export const githubDeps: Pick<
     mkdirSync("docs/adr", { recursive: true });
     writeFileSync(file, content, { flag: "wx" });
   },
+  // The build may not touch package.json, so the runner bumps it itself, after the gate.
+  async applyRelease(entry) {
+    const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+    pkg.version = nextVersion(String(pkg.version));
+    writeFileSync("package.json", `${JSON.stringify(pkg, null, 2)}\n`);
+    const old = existsSync("CHANGELOG.md") ? readFileSync("CHANGELOG.md", "utf8") : "";
+    writeFileSync("CHANGELOG.md", prependEntry(old, entry(pkg.version)));
+    return String(pkg.version);
+  },
   async openPr(n, title, body) {
     // The agent must not have committed or staged anything itself: the diff is what a human reviews.
     const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
@@ -148,11 +167,11 @@ export const githubDeps: Pick<
       encoding: "utf8",
     }).trim();
     // The one new file allowed is the ADR the adr stage had the runner write, by exact path shape.
-    const others = stray.split("\n").filter((f) => f && !ADR_PATH.test(f));
+    const others = stray.split("\n").filter((f) => f && f !== "CHANGELOG.md" && !ADR_PATH.test(f));
     if (others.length)
       throw new Error(`untracked files, a human must review them:\n${others.join("\n")}`);
     execFileSync("git", ["add", "-u"]);
-    for (const f of stray.split("\n").filter((f) => ADR_PATH.test(f)))
+    for (const f of stray.split("\n").filter((f) => f === "CHANGELOG.md" || ADR_PATH.test(f)))
       execFileSync("git", ["add", f]);
     execFileSync("git", ["commit", "-m", `${title} (#${n})`], { stdio: "ignore" });
     execFileSync("git", ["push", "-u", "origin", `HEAD:refs/heads/factory/issue-${n}`], {

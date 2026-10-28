@@ -37,6 +37,12 @@
       "maxBudgetUsd": 0.2,
       "permissionMode": "plan"
     },
+    "delivery": {
+      "model": "claude-opus-5-5",
+      "maxTurns": 6,
+      "maxBudgetUsd": 0.5,
+      "permissionMode": "plan"
+    },
     "retro": {
       "model": "claude-haiku-5-5",
       "maxTurns": 6,

@@ -8,7 +8,16 @@ const stageSchema = z.object({
   permissionMode: z.enum(["plan", "acceptEdits", "default"]),
 });
 
-export const STAGE_NAMES = ["triage", "plan", "build", "review", "verify", "adr", "retro"] as const;
+export const STAGE_NAMES = [
+  "triage",
+  "plan",
+  "build",
+  "review",
+  "verify",
+  "adr",
+  "delivery",
+  "retro",
+] as const;
 export type StageName = (typeof STAGE_NAMES)[number];
 
 export const configSchema = z
