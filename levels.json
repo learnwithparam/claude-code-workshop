@@ -36,7 +36,8 @@
     "tests/structure/levels.test.ts",
     "README.md",
     "scripts/levels.ts",
-    "tests/structure/snapshots.test.ts"
+    "tests/structure/snapshots.test.ts",
+    "vitest.config.ts"
   ],
   "execution": [
     ".claude/agents/**",
