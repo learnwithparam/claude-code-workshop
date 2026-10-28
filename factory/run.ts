@@ -53,6 +53,11 @@ export type Report = {
   retro?: string;
 };
 
+// Hidden marker on the runner's plan comments. latestPlan trusts only comments that carry it, and
+// every other comment the runner posts has it stripped, so model text cannot pose as a plan.
+export const PLAN_MARK = "<!-- factory:plan -->";
+const unmarked = (t: string) => t.replaceAll(PLAN_MARK, "");
+
 const verdictOf = (text: string) => /VERDICT:\s*(clean|blocking)/i.exec(text)?.[1]?.toLowerCase();
 
 type Run = { entries: Entry[]; lines: string[] };
@@ -139,7 +144,7 @@ async function drive(
   routed = routeTicket(cfg, report.type, size, risk);
   run.lines.push(`route type=${report.type} size=${size} risk=${risk}`);
   if (/DECISION:\s*refuse/i.test(triage)) {
-    await deps.comment(n, triage);
+    await deps.comment(n, unmarked(triage));
     return report;
   }
 
@@ -153,7 +158,7 @@ async function drive(
       `Plan this issue with NG-n non-goals and one line per acceptance criterion in the form "AC-n | test file | test name", tests first.\n${ticket}`,
     );
     // A stage reads untrusted issue text, so it cannot speak the runner's decision line.
-    let planned = plan.replace(/^\s*DELIVERY:.*$/gim, "");
+    let planned = unmarked(plan).replace(/^\s*DELIVERY:.*$/gim, "");
     if (report.type === "epic") {
       const subs = subIssueNumbers(issue.body);
       const facts = parseFacts(
@@ -172,7 +177,7 @@ async function drive(
       planned = `${planned}\n\nDELIVERY: ${decision.delivery}\nReasons: ${decision.reasons.join("; ")}`;
       run.lines.push(`delivery ${decision.delivery}`);
     }
-    await deps.comment(n, planned);
+    await deps.comment(n, `${PLAN_MARK}\n${planned}`);
     await deps.unlabel(n, cfg.labels.approved);
     await deps.label(n, cfg.labels.planned);
     return { ...report, outcome: "awaiting-approval" };
@@ -203,7 +208,7 @@ async function drive(
       const problems = gate?.ok ? checkSpec(parseSpec(plan), await deps.testResults()) : [];
       specProblems = problems.length ? `Spec problems:\n${problems.join("\n")}` : "";
       if (specProblems) {
-        await deps.comment(n, specProblems);
+        await deps.comment(n, unmarked(specProblems));
         run.lines.push(`spec ${problems.length} problem(s)`);
       } else if (gate?.ok) {
         if (!(await recordDecision(deps, stage, ticket, plan))) {
@@ -282,7 +287,7 @@ async function retro(deps: Deps, cfg: FactoryConfig, n: number, report: Report, 
     if ("error" in proposal) return `failed: ${proposal.error}`;
     await deps.comment(
       n,
-      `Retro proposal (a human applies it):\n${JSON.stringify(proposal, null, 2)}`,
+      unmarked(`Retro proposal (a human applies it):\n${JSON.stringify(proposal, null, 2)}`),
     );
     return "proposed";
   } catch (error) {

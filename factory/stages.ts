@@ -14,7 +14,7 @@ import { query } from "@anthropic-ai/claude-agent-sdk";
 import { ADR_PATH } from "./adr.ts";
 import { formatReport } from "./cost-report.ts";
 import { nextVersion, prependEntry } from "./release.ts";
-import type { Deps, Issue, StageResult } from "./run.ts";
+import { type Deps, type Issue, PLAN_MARK, type StageResult } from "./run.ts";
 import { writeRunFiles } from "./run-files.ts";
 import { parseVitestJson } from "./spec.ts";
 
@@ -184,11 +184,15 @@ export const githubDeps: Pick<
     if (raw.labels.some((l: { name: string }) => l.name === label))
       gh("issue", "edit", String(n), "--remove-label", label);
   },
-  // The approved plan is the newest comment by the factory's own identity; anyone else's is ignored.
+  // The approved plan is the newest marked comment by the factory's own identity; anyone else's,
+  // and the factory's own refusals, notices and retro proposals, are ignored.
   async latestPlan(n) {
     const me = gh("api", "user", "--jq", ".login").trim();
     const raw = JSON.parse(gh("issue", "view", String(n), "--json", "comments"));
-    const mine = raw.comments.filter((c: { author: { login: string } }) => c.author.login === me);
+    const mine = raw.comments.filter(
+      (c: { author: { login: string }; body: string }) =>
+        c.author.login === me && String(c.body).startsWith(PLAN_MARK),
+    );
     return String(mine.at(-1)?.body ?? "");
   },
 };
