@@ -71,6 +71,8 @@
     "factory/route-ticket.test.ts",
     "factory/run-files.ts",
     "factory/run-files.test.ts",
+    "factory/spec.ts",
+    "factory/spec.test.ts",
     ".github/**",
     "scripts/prove/delivery.ts",
     "docs/levels/delivery.md"

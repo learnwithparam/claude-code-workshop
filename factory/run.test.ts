@@ -5,7 +5,16 @@ import { type Deps, type Issue, runFactory } from "./run.ts";
 
 const cfg = loadConfig();
 
-function fake(script: Record<string, string[]>, labels: string[] = [], gateOk = true) {
+const PLAN = "AC-1 | factory/x.test.ts | does x";
+const PASSING = [{ file: "/r/factory/x.test.ts", name: "does x", status: "passed" }];
+
+function fake(
+  script: Record<string, string[]>,
+  labels: string[] = [],
+  gateOk = true,
+  plan = PLAN,
+  results = PASSING,
+) {
   const calls: string[] = [];
   const prompts: Record<string, string> = {};
   const queues = Object.fromEntries(Object.entries(script).map(([k, v]) => [k, [...v]]));
@@ -15,7 +24,8 @@ function fake(script: Record<string, string[]>, labels: string[] = [], gateOk = 
     getIssue: async (n): Promise<Issue> => ({ number: n, title: "t", body: "b", labels }),
     comment: async () => {},
     label: async (_n, l) => void calls.push(`label:${l}`),
-    latestPlan: async () => "the plan",
+    latestPlan: async () => plan,
+    testResults: async () => results,
     gate: async () => ({ ok: gateOk, output: "gate" }),
     startBranch: async () => void calls.push("branch"),
     openPr: async () => {
@@ -168,5 +178,20 @@ describe("factory state machine", () => {
     const risky = fake({ triage: ["TYPE: bug SIZE: small RISK: high DECISION: proceed"] });
     await runFactory(risky.deps, cfg, 1);
     expect(risky.calls).toContain(`plan:${cfg.tiers.high}`);
+  });
+
+  it("opens no PR while a plan criterion is unmapped or its test did not pass", async () => {
+    const approved = [cfg.labels.approved, cfg.labels.planned];
+    const script = { triage: ["TYPE: bug DECISION: proceed"] };
+    for (const [plan, results] of [
+      ["AC-1: prose only", PASSING],
+      [PLAN, []],
+      [PLAN, [{ file: "/r/factory/x.test.ts", name: "does x", status: "failed" }]],
+    ] as const) {
+      const { deps, calls } = fake(script, approved, true, plan, [...results]);
+      const r = await runFactory(deps, cfg, 1);
+      expect(r.outcome).toBe("needs-human");
+      expect(calls).not.toContain("pr");
+    }
   });
 });

@@ -1,6 +1,7 @@
 import { type FactoryConfig, type StageName, stageFor } from "./config.ts";
 import { buildLedger, type Entry, type Ledger, NO_TOKENS, type Tokens } from "./cost-ledger.ts";
 import { parseTriage, routeTicket } from "./route-ticket.ts";
+import { checkSpec, parseSpec, type TestResult } from "./spec.ts";
 
 export type Issue = { number: number; title: string; body: string; labels: string[] };
 export type StageResult = {
@@ -19,6 +20,8 @@ export type Deps = {
   latestPlan(n: number): Promise<string>;
   startBranch(n: number): Promise<void>;
   gate(): Promise<{ ok: boolean; output: string }>;
+  // Every test the repo ran, so each plan criterion can be matched to a passing one.
+  testResults(): Promise<TestResult[]>;
   openPr(n: number, title: string, body: string): Promise<string>;
   saveRun?(n: number, ledger: Ledger, lines: string[]): Promise<void>;
   runStage(
@@ -132,7 +135,7 @@ async function drive(
   if (!approved) {
     const plan = await stage(
       "plan",
-      `Plan this issue with AC-n acceptance criteria and NG-n non-goals, tests first.\n${ticket}`,
+      `Plan this issue with NG-n non-goals and one line per acceptance criterion in the form "AC-n | test file | test name", tests first.\n${ticket}`,
     );
     await deps.comment(n, plan);
     await deps.unlabel(n, cfg.labels.approved);
@@ -141,10 +144,12 @@ async function drive(
   }
 
   await deps.startBranch(n);
+  const plan = await deps.latestPlan(n);
   await stage(
     "build",
-    `Build the approved plan for this issue. Tests first. Run make check.\n${ticket}\n<plan>\n${await deps.latestPlan(n)}\n</plan>`,
+    `Build the approved plan for this issue. Tests first. Run make check.\n${ticket}\n<plan>\n${plan}\n</plan>`,
   );
+  let specProblems = "";
   for (let round = 1; round <= cfg.reviewLoop.maxRounds; round++) {
     report.rounds = round;
     const review = await stage(
@@ -159,7 +164,13 @@ async function drive(
       // A "clean" verdict that admits it ran nothing is not clean; the real gate decides.
       const unverified = /provisional|did not run|could not run|not run/i.test(verify);
       const gate = verdictOf(verify) === "clean" && !unverified ? await deps.gate() : undefined;
-      if (gate?.ok) {
+      // The plan is executable: each AC must map to a test that ran and passed, or no PR opens.
+      const problems = gate?.ok ? checkSpec(parseSpec(plan), await deps.testResults()) : [];
+      specProblems = problems.length ? `Spec problems:\n${problems.join("\n")}` : "";
+      if (specProblems) {
+        await deps.comment(n, specProblems);
+        run.lines.push(`spec ${problems.length} problem(s)`);
+      } else if (gate?.ok) {
         await deps.openPr(
           n,
           issue.title,
@@ -169,7 +180,10 @@ async function drive(
       }
     }
     if (round < cfg.reviewLoop.maxRounds)
-      await stage("build", `Fix the blocking findings from the review.\n${ticket}`);
+      await stage(
+        "build",
+        `Fix the blocking findings from the review.\n${specProblems}\n${ticket}`,
+      );
   }
   await deps.label(n, cfg.labels.needsHuman);
   return { ...report, outcome: "needs-human" };

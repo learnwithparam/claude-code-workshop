@@ -1,13 +1,39 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { formatReport } from "./cost-report.ts";
 import type { Deps, Issue, StageResult } from "./run.ts";
 import { writeRunFiles } from "./run-files.ts";
+import { parseVitestJson } from "./spec.ts";
 
 const gh = (...args: string[]) => execFileSync("gh", args, { encoding: "utf8" });
+
+// Throwaway HOME and empty git and gh config: the edited code finds no credential to read.
+function scrubbedEnv() {
+  const home = mkdtempSync(join(tmpdir(), "gate-"));
+  return {
+    ...Object.fromEntries(
+      ["PATH", "SHELL", "TERM", "LANG"].flatMap((k) =>
+        process.env[k] ? [[k, process.env[k]]] : [],
+      ),
+    ),
+    HOME: home,
+    GIT_CONFIG_GLOBAL: "/dev/null",
+    GH_CONFIG_DIR: home,
+  };
+}
+
+// Run fn with the scrubbed environment, then delete the throwaway home it was given.
+function withScrubbedEnv<T>(fn: (env: ReturnType<typeof scrubbedEnv>) => T): T {
+  const env = scrubbedEnv();
+  try {
+    return fn(env);
+  } finally {
+    rmSync(env.HOME, { recursive: true, force: true });
+  }
+}
 
 let base = "";
 // Matched at any depth: a nested package manifest or config rewrites the gate as well.
@@ -24,6 +50,7 @@ export const githubDeps: Pick<
   | "startBranch"
   | "openPr"
   | "gate"
+  | "testResults"
   | "saveRun"
 > = {
   async saveRun(n, ledger, lines) {
@@ -68,20 +95,10 @@ export const githubDeps: Pick<
     );
     if (touched.length)
       return { ok: false, output: `build changed gate files: ${touched.join(", ")}` };
-    // Throwaway HOME and empty git and gh config: the edited code finds no credential to read.
-    const home = mkdtempSync(join(tmpdir(), "gate-"));
-    const env = {
-      ...Object.fromEntries(
-        ["PATH", "SHELL", "TERM", "LANG"].flatMap((k) =>
-          process.env[k] ? [[k, process.env[k]]] : [],
-        ),
-      ),
-      HOME: home,
-      GIT_CONFIG_GLOBAL: "/dev/null",
-      GH_CONFIG_DIR: home,
-    };
     try {
-      execFileSync("make", ["check"], { encoding: "utf8", stdio: "pipe", env });
+      withScrubbedEnv((env) =>
+        execFileSync("make", ["check"], { encoding: "utf8", stdio: "pipe", env }),
+      );
       return { ok: true, output: "make check passed" };
     } catch (error) {
       return {
@@ -89,6 +106,18 @@ export const githubDeps: Pick<
         output: String((error as { stdout?: string }).stdout ?? error).slice(-1500),
       };
     }
+  },
+  // Same scrubbed environment as the gate; vitest's json reporter names every test that ran.
+  async testResults() {
+    const out = withScrubbedEnv((env) =>
+      execFileSync("npx", ["vitest", "run", "--reporter=json"], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+        env,
+        maxBuffer: 64 * 1024 * 1024,
+      }),
+    );
+    return parseVitestJson(out);
   },
   async openPr(n, title, body) {
     // The agent must not have committed or staged anything itself: the diff is what a human reviews.
