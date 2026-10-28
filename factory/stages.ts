@@ -4,6 +4,8 @@ import type { Deps, Issue } from "./run.ts";
 
 const gh = (...args: string[]) => execFileSync("gh", args, { encoding: "utf8" });
 
+let base = "";
+
 export const githubDeps: Pick<
   Deps,
   "getIssue" | "comment" | "label" | "unlabel" | "latestPlan" | "startBranch" | "openPr"
@@ -21,9 +23,14 @@ export const githubDeps: Pick<
   },
   // The build happens on its own branch; a person merges the draft PR, never the factory.
   async startBranch(n) {
+    base = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
     execFileSync("git", ["switch", "-c", `factory/issue-${n}`], { stdio: "ignore" });
   },
   async openPr(n, title, body) {
+    // The agent must not have committed or staged anything itself: the diff is what a human reviews.
+    const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+    if (head !== base) throw new Error("HEAD moved during the build; a human must review");
+    execFileSync("git", ["reset", "-q"]);
     // Tracked files only: a new file the agent made (a stray key, a dump) needs a human to add it.
     const stray = execFileSync("git", ["ls-files", "--others", "--exclude-standard"], {
       encoding: "utf8",
@@ -53,6 +60,7 @@ const AGENT_ENV = ["PATH", "HOME", "SHELL", "TERM", "LANG", "ANTHROPIC_API_KEY"]
 // Agent SDK: the right tool for an agent that works on the codebase (files, shell, hooks, skills).
 export const runStage: Deps["runStage"] = async (_stage, model, prompt, limits) => {
   let text = "";
+  let failed: string | undefined;
   let costUsd = 0;
   let modelsUsed: string[] = [];
   try {
@@ -83,7 +91,7 @@ export const runStage: Deps["runStage"] = async (_stage, model, prompt, limits) 
     }
   } catch (error) {
     // A stage that runs out of turns or budget is a failed stage, not a crashed factory.
-    text = `STAGE ERROR: ${error instanceof Error ? error.message : String(error)}\nVERDICT: blocking`;
+    failed = error instanceof Error ? error.message : String(error);
   }
-  return { text, costUsd, modelsUsed };
+  return { text, costUsd, modelsUsed, failed };
 };

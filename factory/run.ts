@@ -1,7 +1,7 @@
 import { type FactoryConfig, type StageName, stageFor } from "./config.ts";
 
 export type Issue = { number: number; title: string; body: string; labels: string[] };
-export type StageResult = { text: string; modelsUsed: string[]; costUsd: number };
+export type StageResult = { text: string; modelsUsed: string[]; costUsd: number; failed?: string };
 export type Deps = {
   getIssue(n: number): Promise<Issue>;
   comment(n: number, body: string): Promise<void>;
@@ -46,6 +46,14 @@ export async function runFactory(deps: Deps, cfg: FactoryConfig, n: number): Pro
       if (!cfg.allowedModels.includes(used))
         throw new Error(`stage ${name} used unlisted model ${used}`);
     report.costUsd += result.costUsd;
+    // Triage and plan gate everything after them, so their failure stops the run. A failed
+    // build, review or verify is a blocking verdict the loop already knows how to cap.
+    if (result.failed) {
+      if (name === "triage" || name === "plan")
+        throw new Error(`stage ${name} failed: ${result.failed}`);
+      report.stages.push(name);
+      return `STAGE ERROR: ${result.failed}\nVERDICT: blocking`;
+    }
     report.stages.push(name);
     return result.text;
   };
