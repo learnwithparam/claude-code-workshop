@@ -80,6 +80,8 @@
   "verification": [
     ".claude/hooks/posttooluse-typecheck.mjs",
     ".claude/hooks/stop-gate.mjs",
+    ".claude/hooks/pretooluse-file-guard.mjs",
+    ".claude/hooks/posttooluse-session-log.mjs",
     "repo.json",
     "scripts/impact.ts",
     "scripts/impact.test.ts",

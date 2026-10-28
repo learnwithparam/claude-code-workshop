@@ -157,7 +157,7 @@ export const githubDeps: Pick<
 const AGENT_ENV = ["PATH", "HOME", "SHELL", "TERM", "LANG", "ANTHROPIC_API_KEY"];
 
 // Agent SDK: the right tool for an agent that works on the codebase (files, shell, hooks, skills).
-export const runStage: Deps["runStage"] = async (_stage, model, prompt, limits) => {
+export const runStage: Deps["runStage"] = async (_stage, model, prompt, limits, extra) => {
   let text = "";
   let failed: string | undefined;
   let costUsd = 0;
@@ -179,6 +179,7 @@ export const runStage: Deps["runStage"] = async (_stage, model, prompt, limits) 
             AGENT_ENV.flatMap((k) => (process.env[k] ? [[k, process.env[k]]] : [])),
           ),
           CLAUDE_CODE_DISABLE_AUTO_MEMORY: "1",
+          ...(extra?.allowProtected ? { FACTORY_ALLOW_PROTECTED: "1" } : {}),
           ANTHROPIC_DEFAULT_HAIKU_MODEL: "claude-haiku-5-5",
         },
       },

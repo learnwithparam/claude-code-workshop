@@ -29,6 +29,8 @@ export type Deps = {
     model: string,
     prompt: string,
     limits: ReturnType<typeof stageFor>,
+    // A person labelled the issue to let the build edit the files the file guard protects.
+    extra?: { allowProtected: boolean },
   ): Promise<StageResult>;
 };
 export type Outcome = "pr-ready" | "awaiting-approval" | "needs-human" | "refused";
@@ -86,7 +88,8 @@ async function drive(
     // The ticket's size and risk, once triage has reported them, may move the model.
     if (name !== "triage" && routed[name]) limits.model = routed[name];
     // Fail closed: a stage that used a model outside its allowed set is an error, not a result.
-    const result = await deps.runStage(name, limits.model, prompt, limits);
+    const allowProtected = name === "build" && issue.labels.includes(cfg.labels.protectedOk);
+    const result = await deps.runStage(name, limits.model, prompt, limits, { allowProtected });
     for (const used of result.modelsUsed)
       if (!cfg.allowedModels.includes(used))
         throw new Error(`stage ${name} used unlisted model ${used}`);

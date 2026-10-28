@@ -58,6 +58,7 @@
     "ready": "factory:ready",
     "planned": "factory:planned",
     "approved": "plan:approved",
-    "needsHuman": "needs-human"
+    "needsHuman": "needs-human",
+    "protectedOk": "factory:protected-ok"
   }
 }

@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
+import { guardFor } from "../../.claude/hooks/pretooluse-file-guard.mjs";
 import { decide } from "../../.claude/hooks/stop-gate.mjs";
 import type { Proof } from "./hand-built.ts";
 
@@ -53,6 +54,14 @@ export function proveVerification(): Proof {
   const settings = JSON.parse(readFileSync(".claude/settings.json", "utf8"));
   if (!settings.hooks?.Stop?.length) problems.push("settings: Stop hook not wired");
   if (!settings.hooks?.PostToolUse?.length) problems.push("settings: PostToolUse hook not wired");
+  if (
+    !settings.hooks?.PreToolUse?.some((h: { hooks: { command: string }[] }) =>
+      JSON.stringify(h).includes("file-guard"),
+    )
+  )
+    problems.push("settings: file guard not wired");
+  if (!guardFor("package-lock.json", {}))
+    problems.push("file guard lets package-lock.json through");
   if (!decide({}, () => ({ ok: false, output: "red" })).block)
     problems.push("stop gate lets red through");
 

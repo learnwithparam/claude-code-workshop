@@ -33,7 +33,8 @@ function fake(
       return "url";
     },
     unlabel: async (_n, l) => void calls.push(`unlabel:${l}`),
-    runStage: async (stage, model, prompt) => {
+    runStage: async (stage, model, prompt, _limits, extra) => {
+      if (extra?.allowProtected) calls.push(`protected:${stage}`);
       calls.push(`${stage}:${model}`);
       prompts[stage] = prompt;
       const text = queues[stage]?.shift() ?? "VERDICT: clean";
@@ -193,5 +194,16 @@ describe("factory state machine", () => {
       expect(r.outcome).toBe("needs-human");
       expect(calls).not.toContain("pr");
     }
+  });
+
+  it("lets only the build stage edit protected files, and only when a person labelled the issue", async () => {
+    const script = { triage: ["TYPE: bug DECISION: proceed"] };
+    const approved = [cfg.labels.approved, cfg.labels.planned];
+    const plain = fake(script, approved);
+    await runFactory(plain.deps, cfg, 1);
+    expect(plain.calls.some((c) => c.startsWith("protected:"))).toBe(false);
+    const labelled = fake(script, [...approved, cfg.labels.protectedOk]);
+    await runFactory(labelled.deps, cfg, 1);
+    expect(labelled.calls.filter((c) => c.startsWith("protected:"))).toEqual(["protected:build"]);
   });
 });

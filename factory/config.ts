@@ -39,6 +39,7 @@ export const configSchema = z
       planned: z.string(),
       approved: z.string(),
       needsHuman: z.string(),
+      protectedOk: z.string(),
     }),
   })
   .superRefine((cfg, ctx) => {

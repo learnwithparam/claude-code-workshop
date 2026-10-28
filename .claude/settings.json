@@ -19,9 +19,27 @@
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pretooluse-secrets.mjs\""
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pretooluse-file-guard.mjs\""
+          }
+        ]
       }
     ],
     "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/posttooluse-session-log.mjs\""
+          }
+        ]
+      },
       {
         "matcher": "Edit|Write",
         "hooks": [
