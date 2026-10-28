@@ -36,10 +36,22 @@ export const githubDeps: Pick<
   async gate() {
     // The build may not rewrite the gate it is judged by, and the gate never sees our tokens.
     const lines = (...args: string[]) =>
-      execFileSync("git", args, { encoding: "utf8" }).split("\n").filter(Boolean);
+      execFileSync(
+        "git",
+        ["-c", "core.fsmonitor=false", "-c", "core.hooksPath=/dev/null", ...args],
+        {
+          encoding: "utf8",
+        },
+      )
+        .split("\n")
+        .filter(Boolean);
     const strays = lines("ls-files", "--others", "--exclude-standard");
     if (strays.length) return { ok: false, output: `untracked files: ${strays.join(", ")}` };
-    const touched = lines("diff", "--name-only", base).filter((f) => GATE_FILES.test(f));
+    // Known gap, by design for the workshop: gitignored files are not inspected and the gate runs
+    // in the working tree. A clean worktree plus npm ci is the next step; a human reviews the PR.
+    const touched = lines("diff", "--name-only", "--no-renames", base).filter((f) =>
+      GATE_FILES.test(f),
+    );
     if (touched.length)
       return { ok: false, output: `build changed gate files: ${touched.join(", ")}` };
     // Throwaway HOME and empty git and gh config: the edited code finds no credential to read.
