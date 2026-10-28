@@ -1,3 +1,4 @@
+import { nextAdrFile, parseAdr, renderAdr } from "./adr.ts";
 import { type FactoryConfig, type StageName, stageFor } from "./config.ts";
 import { buildLedger, type Entry, type Ledger, NO_TOKENS, type Tokens } from "./cost-ledger.ts";
 import { parseProposal } from "./retro.ts";
@@ -24,6 +25,9 @@ export type Deps = {
   // Every test the repo ran, so each plan criterion can be matched to a passing one.
   testResults(): Promise<TestResult[]>;
   openPr(n: number, title: string, body: string): Promise<string>;
+  // Existing docs/adr file names, and a writer for the one new record.
+  listAdrs?(): Promise<string[]>;
+  writeAdr?(file: string, content: string): Promise<void>;
   saveRun?(n: number, ledger: Ledger, lines: string[]): Promise<void>;
   runStage(
     stage: StageName,
@@ -178,6 +182,11 @@ async function drive(
         await deps.comment(n, specProblems);
         run.lines.push(`spec ${problems.length} problem(s)`);
       } else if (gate?.ok) {
+        if (!(await recordDecision(deps, stage, ticket, plan))) {
+          run.lines.push("adr failed");
+          await deps.label(n, cfg.labels.needsHuman);
+          return { ...report, outcome: "needs-human" };
+        }
         await deps.openPr(
           n,
           issue.title,
@@ -194,6 +203,25 @@ async function drive(
   }
   await deps.label(n, cfg.labels.needsHuman);
   return { ...report, outcome: "needs-human" };
+}
+
+// Only a clean, gated change gets here. C1 writes nothing; C2 and C3 write one record into the same commit.
+async function recordDecision(
+  deps: Deps,
+  stage: (name: StageName, prompt: string) => Promise<string>,
+  ticket: string,
+  plan: string,
+): Promise<boolean> {
+  const text = await stage(
+    "adr",
+    `Score the criticality of the uncommitted change and record its decision.\n${ticket}\n<plan>\n${plan}\n</plan>\nEnd with CRITICALITY: C1|C2|C3 (C1 a fix or copy change, C2 a new dependency or contract, C3 a security or data change) and, for C2 and C3, ADR: {"slug","title","context","decision","consequences"} on one line.`,
+  );
+  const adr = parseAdr(text);
+  if (adr === "none") return true;
+  if ("error" in adr || !deps.listAdrs || !deps.writeAdr) return false;
+  const level = /CRITICALITY:\s*(C[23])/i.exec(text)?.[1]?.toUpperCase() ?? "C2";
+  await deps.writeAdr(nextAdrFile(await deps.listAdrs(), adr.slug), renderAdr(adr, level));
+  return true;
 }
 
 // Runs after the outcome is decided. It reports one proposal as a comment and cannot change the result.

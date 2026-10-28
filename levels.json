@@ -73,6 +73,8 @@
     "factory/run-files.test.ts",
     "factory/spec.ts",
     "factory/spec.test.ts",
+    "factory/adr.ts",
+    "factory/adr.test.ts",
     "factory/retro.ts",
     "factory/retro.test.ts",
     ".github/**",

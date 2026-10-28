@@ -18,8 +18,11 @@ function fake(
   const calls: string[] = [];
   const prompts: Record<string, string> = {};
   const queues = Object.fromEntries(Object.entries(script).map(([k, v]) => [k, [...v]]));
+  const adrs: string[] = [];
   const saved: { ledger?: Ledger; lines?: string[] } = {};
   const deps: Deps = {
+    listAdrs: async () => ["docs/adr/0003-old.md"],
+    writeAdr: async (f) => void adrs.push(f),
     saveRun: async (_n, ledger, lines) => void Object.assign(saved, { ledger, lines }),
     getIssue: async (n): Promise<Issue> => ({ number: n, title: "t", body: "b", labels }),
     comment: async () => {},
@@ -37,11 +40,12 @@ function fake(
       if (extra?.allowProtected) calls.push(`protected:${stage}`);
       calls.push(`${stage}:${model}`);
       prompts[stage] = prompt;
-      const text = queues[stage]?.shift() ?? "VERDICT: clean";
+      const text =
+        queues[stage]?.shift() ?? (stage === "adr" ? "CRITICALITY: C1" : "VERDICT: clean");
       return { text, modelsUsed: [model], costUsd: 0.01 };
     },
   };
-  return { deps, calls, prompts, saved };
+  return { deps, calls, prompts, saved, adrs };
 }
 
 describe("factory state machine", () => {
@@ -59,7 +63,7 @@ describe("factory state machine", () => {
     ]);
     const r = await runFactory(deps, cfg, 1);
     expect(r.outcome).toBe("pr-ready");
-    expect(r.stages).toEqual(["triage", "build", "review", "verify"]);
+    expect(r.stages).toEqual(["triage", "build", "review", "verify", "adr"]);
     expect(calls.indexOf("branch")).toBeLessThan(calls.indexOf("build:claude-sonnet-5-5"));
     expect(calls.filter((c) => !c.startsWith("retro")).at(-1)).toBe("pr");
   });
@@ -228,5 +232,29 @@ describe("factory state machine", () => {
     const { deps, calls } = fake({ triage: ["TYPE: bug DECISION: proceed"] });
     await runFactory(deps, cfg, 1);
     expect(calls.some((c) => c.startsWith("retro"))).toBe(false);
+  });
+
+  const approved = [cfg.labels.approved, cfg.labels.planned];
+  const adrText =
+    'CRITICALITY: C2\nADR: {"slug":"x","title":"T","context":"c","decision":"d","consequences":"q"}';
+
+  it("writes no ADR for a C1 change and still opens the PR", async () => {
+    const f = fake({ triage: ["TYPE: bug DECISION: proceed"], adr: ["CRITICALITY: C1"] }, approved);
+    expect((await runFactory(f.deps, cfg, 1)).outcome).toBe("pr-ready");
+    expect(f.adrs).toEqual([]);
+  });
+
+  it("writes the next-numbered ADR before the PR opens for C2", async () => {
+    const f = fake({ triage: ["TYPE: bug DECISION: proceed"], adr: [adrText] }, approved);
+    await runFactory(f.deps, cfg, 1);
+    expect(f.adrs).toEqual(["docs/adr/0004-x.md"]);
+    expect(f.calls.indexOf("adr:claude-haiku-5-5")).toBeLessThan(f.calls.indexOf("pr"));
+  });
+
+  it("hands over to a human, with no PR, when the ADR cannot be parsed", async () => {
+    const f = fake({ triage: ["TYPE: bug DECISION: proceed"], adr: ["CRITICALITY: C3"] }, approved);
+    const r = await runFactory(f.deps, cfg, 1);
+    expect(r.outcome).toBe("needs-human");
+    expect(f.calls).not.toContain("pr");
   });
 });

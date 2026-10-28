@@ -1,8 +1,9 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { ADR_PATH } from "./adr.ts";
 import { formatReport } from "./cost-report.ts";
 import type { Deps, Issue, StageResult } from "./run.ts";
 import { writeRunFiles } from "./run-files.ts";
@@ -50,6 +51,8 @@ export const githubDeps: Pick<
   | "startBranch"
   | "openPr"
   | "gate"
+  | "listAdrs"
+  | "writeAdr"
   | "testResults"
   | "saveRun"
 > = {
@@ -119,6 +122,18 @@ export const githubDeps: Pick<
     );
     return parseVitestJson(out);
   },
+  async listAdrs() {
+    try {
+      return readdirSync("docs/adr").map((f) => `docs/adr/${f}`);
+    } catch {
+      return [];
+    }
+  },
+  async writeAdr(file, content) {
+    if (!ADR_PATH.test(file)) throw new Error(`refusing to write ${file}`);
+    mkdirSync("docs/adr", { recursive: true });
+    writeFileSync(file, content, { flag: "wx" });
+  },
   async openPr(n, title, body) {
     // The agent must not have committed or staged anything itself: the diff is what a human reviews.
     const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
@@ -132,8 +147,13 @@ export const githubDeps: Pick<
     const stray = execFileSync("git", ["ls-files", "--others", "--exclude-standard"], {
       encoding: "utf8",
     }).trim();
-    if (stray) throw new Error(`untracked files, a human must review them:\n${stray}`);
+    // The one new file allowed is the ADR the adr stage had the runner write, by exact path shape.
+    const others = stray.split("\n").filter((f) => f && !ADR_PATH.test(f));
+    if (others.length)
+      throw new Error(`untracked files, a human must review them:\n${others.join("\n")}`);
     execFileSync("git", ["add", "-u"]);
+    for (const f of stray.split("\n").filter((f) => ADR_PATH.test(f)))
+      execFileSync("git", ["add", f]);
     execFileSync("git", ["commit", "-m", `${title} (#${n})`], { stdio: "ignore" });
     execFileSync("git", ["push", "-u", "origin", `HEAD:refs/heads/factory/issue-${n}`], {
       stdio: "ignore",
