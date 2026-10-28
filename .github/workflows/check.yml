@@ -14,6 +14,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - run: npx playwright install --with-deps chromium
       - run: make check
 
   # Each level is generated from trunk and must pass its own gate, so a fix on main
@@ -32,6 +33,8 @@ jobs:
       - run: npm ci
       - run: make levels LEVEL=${{ matrix.level }}
       - run: npm ci
+        working-directory: supplied/${{ matrix.level }}
+      - run: npx playwright install --with-deps chromium
         working-directory: supplied/${{ matrix.level }}
       - run: make check
         working-directory: supplied/${{ matrix.level }}

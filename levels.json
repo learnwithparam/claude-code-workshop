@@ -46,6 +46,7 @@
     "README.md",
     "scripts/levels.ts",
     "tests/structure/snapshots.test.ts",
+    "tests/structure/walkthrough.test.ts",
     "vitest.config.ts",
     "docs/README.md",
     "docs/take-home.md"
@@ -102,6 +103,10 @@
     "tests/structure/dependency-drift.test.ts",
     "tests/structure/hooks.test.ts",
     "scripts/prove/verification.ts",
+    "playwright.config.ts",
+    "tests/e2e/layout.e2e.ts",
+    "tests/take-home/multipage.test.ts",
+    "fixtures/take-home/pack.json",
     "docs/levels/verification.md"
   ]
 }

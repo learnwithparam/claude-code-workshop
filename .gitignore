@@ -10,3 +10,5 @@ CLAUDE.local.md
 .factory/runs/
 *.log
 supplied/
+test-results/
+playwright-report/

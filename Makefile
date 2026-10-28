@@ -1,4 +1,4 @@
-.PHONY: doctor dev check check-affected prove levels claude smoke hooks eval factory
+.PHONY: prove-homework doctor dev check check-affected prove levels claude smoke hooks eval factory
 
 doctor:
 	@node -v | grep -qE '^v2[2-9]' && echo "ok node $$(node -v)" || (echo "need Node 22+" && exit 1)
@@ -15,6 +15,7 @@ check:
 	npm run typecheck
 	npm test
 	npm run build -w web
+	npm run e2e
 	npm run prove
 
 # Only the checks the change reaches, from the impact map in repo.json. BASE=origin/main before a PR.
@@ -23,6 +24,10 @@ check-affected:
 
 prove:
 	npm run prove -- $(LEVEL)
+
+# The take-home. Red until your factory run builds multi-page worksheets; skipped in make check.
+prove-homework:
+	HOMEWORK=1 npx vitest run tests/take-home
 
 smoke:
 	npx tsx api/src/smoke.ts

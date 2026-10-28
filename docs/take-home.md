@@ -14,6 +14,7 @@ File one epic issue and three sub-issues, then run each through `make factory`.
 
 ## Done means
 
+- `make prove-homework` is green. It is red until you build the feature, and `make check` skips it. Record a three-page run into `fixtures/take-home/eval.json` for the token test.
 - `make check` passes with zero errors and zero warnings.
 - The answer key is always the last page.
 - No page goes over its band's `maxItemsPerPage`.

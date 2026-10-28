@@ -40,7 +40,9 @@ export function renderWorksheet(sheet: Worksheet): string {
   #worksheet li { margin-bottom: 0.5em; }
   #worksheet .picture { display: inline-block; min-width: 3.2em; min-height: 3.2em; border: 2px dashed #bdbdbd; border-radius: 8px; margin-right: 0.6em; padding: 0.2em 0.4em; text-align: center; }
   #worksheet .line { display: inline-block; min-width: 4em; border-bottom: 2px solid #171717; margin-left: 0.6em; }
-  #worksheet .key { margin-top: 24px; border-top: 1px solid #d4d4d4; }
+  #worksheet .key { margin-top: 16px; border-top: 1px solid #d4d4d4; font-size: ${Math.min(band.fontPx, 16)}px; }
+  #worksheet .key h2 { font-size: ${Math.min(band.fontPx, 16)}px; margin: 8px 0 2px; }
+  #worksheet .key li { margin-bottom: 0.15em; }
 </style>
 </head>
 <body>

@@ -1,0 +1,75 @@
+{
+  "title": "Addition pack",
+  "band": "grade-3-5",
+  "subject": "Maths",
+  "pages": [
+    {
+      "sections": [
+        {
+          "heading": "Practice",
+          "instruction": "Add the numbers.",
+          "items": [
+            {
+              "prompt": "Q 1 + 4 = ?",
+              "answer": "5"
+            },
+            {
+              "prompt": "Q 2 + 5 = ?",
+              "answer": "7"
+            },
+            {
+              "prompt": "Q 3 + 6 = ?",
+              "answer": "9"
+            },
+            {
+              "prompt": "Q 4 + 7 = ?",
+              "answer": "11"
+            },
+            {
+              "prompt": "Q 5 + 8 = ?",
+              "answer": "13"
+            },
+            {
+              "prompt": "Q 6 + 9 = ?",
+              "answer": "15"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "heading": "Challenge",
+          "instruction": "Add the larger numbers.",
+          "items": [
+            {
+              "prompt": "Q 20 + 23 = ?",
+              "answer": "43"
+            },
+            {
+              "prompt": "Q 21 + 24 = ?",
+              "answer": "45"
+            },
+            {
+              "prompt": "Q 22 + 25 = ?",
+              "answer": "47"
+            },
+            {
+              "prompt": "Q 23 + 26 = ?",
+              "answer": "49"
+            },
+            {
+              "prompt": "Q 24 + 27 = ?",
+              "answer": "51"
+            },
+            {
+              "prompt": "Q 25 + 28 = ?",
+              "answer": "53"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

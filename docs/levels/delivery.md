@@ -25,6 +25,10 @@ Run one agent on a ticket with no stages. There is no plan to approve and no evi
 
 ## With
 
+The same ticket now moves through named stages, and a person decides twice: the plan and the merge.
+
+## Run it
+
 1. File an issue with `gh issue create`. Run `make factory ISSUE=<n>`. Expect a plan comment and a stop at awaiting approval.
 2. Read the plan. Add the approved label.
 3. Run `make factory ISSUE=<n>` again. Expect build, review and verify, then a result of `pr-ready` or `needs-human`.

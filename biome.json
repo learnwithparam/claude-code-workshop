@@ -22,7 +22,12 @@
   },
   "overrides": [
     {
-      "includes": ["web/src/pages/**", "**/astro.config.*", "vitest.config.ts"],
+      "includes": [
+        "web/src/pages/**",
+        "**/astro.config.*",
+        "vitest.config.ts",
+        "playwright.config.ts"
+      ],
       "linter": { "rules": { "style": { "noDefaultExport": "off" } } }
     }
   ]
