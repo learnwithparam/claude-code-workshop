@@ -10,6 +10,18 @@ describe("parseBand", () => {
     expect(parseBand("grade 10 physics")).toBe("grade-9-12");
   });
 
+  it("reads year 1 as grades 1 to 2, ignoring case and punctuation", () => {
+    expect(parseBand("A worksheet for Year 1")).toBe("grade-1-2");
+  });
+
+  it("reads year 2 as grades 1 to 2", () => {
+    expect(parseBand("Year 2, fractions")).toBe("grade-1-2");
+  });
+
+  it("does not let year 1 swallow year 10", () => {
+    expect(parseBand("year 10 maths")).toBeNull();
+  });
+
   it("returns null when the audience is unknown", () => {
     expect(parseBand("a worksheet about volcanoes")).toBeNull();
   });
