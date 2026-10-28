@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { typeErrorFor } from "../../.claude/hooks/posttooluse-typecheck.mjs";
 import { decide } from "../../.claude/hooks/stop-gate.mjs";
@@ -23,5 +24,11 @@ describe("typecheck hook", () => {
   });
   it("ignores files that are not source", () => {
     expect(typeErrorFor("README.md", red)).toBeNull();
+  });
+
+  it("runs the impact-mapped checks, not a fixed loop", () => {
+    const src = readFileSync(".claude/hooks/stop-gate.mjs", "utf8");
+    expect(src).toContain("scripts/check-affected.ts");
+    expect(src).not.toContain('["lint", "typecheck", "test"]');
   });
 });

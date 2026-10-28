@@ -1,0 +1,18 @@
+{
+  "impact": {
+    "always": ["npm run lint"],
+    "workspaces": {
+      "shared": ["npm run typecheck -w shared", "npx vitest run shared/"],
+      "web": ["npm run typecheck -w web", "npx vitest run web/", "npm run build -w web"],
+      "api": ["npm run typecheck -w api", "npx vitest run api/"],
+      "factory": ["npx tsc --noEmit -p factory", "npx vitest run factory/"]
+    },
+    "paths": {
+      "shared/**": ["shared", "web", "api"],
+      "web/**": ["web"],
+      "api/**": ["api"],
+      "factory/**": ["factory"],
+      "docs/**": []
+    }
+  }
+}

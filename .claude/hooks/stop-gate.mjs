@@ -1,4 +1,4 @@
-// Claude cannot finish while lint, types or tests fail. Exit 2 sends the output back as its next task.
+// Claude cannot finish while a check its change reaches fails. Exit 2 sends the output back as its next task.
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
@@ -12,13 +12,12 @@ export function decide(input, run) {
     : { block: true, message: result.output.split("\n").slice(-30).join("\n") };
 }
 
+// Only the checks the change reaches (see repo.json); an unmapped path runs the whole gate.
 const gate = () => {
-  for (const script of ["lint", "typecheck", "test"]) {
-    const r = spawnSync("npm", ["run", script, "--silent"], { encoding: "utf8" });
-    if (r.status !== 0)
-      return { ok: false, output: `npm run ${script} failed\n${r.stdout}${r.stderr}` };
-  }
-  return { ok: true, output: "" };
+  const r = spawnSync("npx", ["tsx", "scripts/check-affected.ts"], { encoding: "utf8" });
+  return r.status === 0
+    ? { ok: true, output: "" }
+    : { ok: false, output: `check-affected failed\n${r.stdout}${r.stderr}` };
 };
 
 if (import.meta.url === `file://${process.argv[1]}`) {

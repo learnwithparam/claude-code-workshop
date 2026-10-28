@@ -1,4 +1,4 @@
-.PHONY: doctor dev check prove levels claude smoke hooks eval factory
+.PHONY: doctor dev check check-affected prove levels claude smoke hooks eval factory
 
 doctor:
 	@node -v | grep -qE '^v2[2-9]' && echo "ok node $$(node -v)" || (echo "need Node 22+" && exit 1)
@@ -16,6 +16,10 @@ check:
 	npm test
 	npm run build -w web
 	npm run prove
+
+# Only the checks the change reaches, from the impact map in repo.json. BASE=origin/main before a PR.
+check-affected:
+	npx tsx scripts/check-affected.ts $(if $(BASE),--base $(BASE))
 
 prove:
 	npm run prove -- $(LEVEL)

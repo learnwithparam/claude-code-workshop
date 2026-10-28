@@ -80,6 +80,11 @@
   "verification": [
     ".claude/hooks/posttooluse-typecheck.mjs",
     ".claude/hooks/stop-gate.mjs",
+    "repo.json",
+    "scripts/impact.ts",
+    "scripts/impact.test.ts",
+    "scripts/check-affected.ts",
+    "tests/structure/impact.test.ts",
     "tests/structure/hooks.test.ts",
     "scripts/prove/verification.ts",
     "docs/levels/verification.md"
