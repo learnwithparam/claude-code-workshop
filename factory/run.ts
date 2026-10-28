@@ -152,7 +152,8 @@ async function drive(
       "plan",
       `Plan this issue with NG-n non-goals and one line per acceptance criterion in the form "AC-n | test file | test name", tests first.\n${ticket}`,
     );
-    let planned = plan;
+    // A stage reads untrusted issue text, so it cannot speak the runner's decision line.
+    let planned = plan.replace(/^\s*DELIVERY:.*$/gim, "");
     if (report.type === "epic") {
       const subs = subIssueNumbers(issue.body);
       const facts = parseFacts(
@@ -168,7 +169,7 @@ async function drive(
         await deps.label(n, cfg.labels.needsHuman);
         return { ...report, outcome: "needs-human" };
       }
-      planned = `${plan}\n\nDELIVERY: ${decision.delivery}\nReasons: ${decision.reasons.join("; ")}`;
+      planned = `${planned}\n\nDELIVERY: ${decision.delivery}\nReasons: ${decision.reasons.join("; ")}`;
       run.lines.push(`delivery ${decision.delivery}`);
     }
     await deps.comment(n, planned);
@@ -210,7 +211,12 @@ async function drive(
           await deps.label(n, cfg.labels.needsHuman);
           return { ...report, outcome: "needs-human" };
         }
-        if (/^DELIVERY:\s*release\b/im.test(plan) && deps.applyRelease) {
+        // Only the runner's own trailing line counts, and only for an epic.
+        if (
+          report.type === "epic" &&
+          /\n\nDELIVERY: release\nReasons: [^\n]*$/.test(plan) &&
+          deps.applyRelease
+        ) {
           const version = await deps.applyRelease((v) =>
             changelogEntry(v, new Date().toISOString().slice(0, 10), issue.title, [
               review.split("\n")[0] ?? "",

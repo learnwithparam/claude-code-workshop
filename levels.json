@@ -79,6 +79,8 @@
     "factory/delivery.test.ts",
     "factory/release.ts",
     "factory/release.test.ts",
+    "factory/fake-deps.ts",
+    "factory/run-later-stages.test.ts",
     "factory/retro.ts",
     "factory/retro.test.ts",
     ".github/**",
