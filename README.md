@@ -17,4 +17,4 @@ make prove LEVEL=boundary
 | `execution`  | execution          | every agent and stage has a model, turn cap, tools and budget                  |
 | `delivery`   | delivery           | tickets flow triage to verify, the review loop is capped, a human merges       |
 
-Levels are listed in `levels.json`. Fix things on `main`; levels are derived from it.
+Start at [docs/README.md](docs/README.md). Levels are listed in `levels.json`. Fix things on `main`; `make levels` derives each level's copy from it.

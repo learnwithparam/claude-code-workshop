@@ -6,7 +6,8 @@
     "fixtures/worksheets.json",
     "scripts/prove/hand-built.ts",
     "biome.json",
-    "tsconfig.base.json"
+    "tsconfig.base.json",
+    "docs/levels/hand-built.md"
   ],
   "boundary": [
     "api/**",
@@ -15,7 +16,8 @@
     ".claude/hooks/pretooluse-secrets.mjs",
     ".gitleaks.toml",
     "scripts/git/**",
-    "scripts/prove/boundary.ts"
+    "scripts/prove/boundary.ts",
+    "docs/levels/boundary.md"
   ],
   "context": [
     "AGENTS.md",
@@ -23,9 +25,16 @@
     ".claude/rules/**",
     "scripts/check-conventions.ts",
     "scripts/prove/context.ts",
-    "tests/structure/conventions.test.ts"
+    "tests/structure/conventions.test.ts",
+    "docs/levels/context.md"
   ],
-  "skills": [".claude/skills/**", "skills.lock", "fixtures/eval.json", "scripts/prove/skills.ts"],
+  "skills": [
+    ".claude/skills/**",
+    "skills.lock",
+    "fixtures/eval.json",
+    "scripts/prove/skills.ts",
+    "docs/levels/skills.md"
+  ],
   "trunk": [
     "Makefile",
     "package.json",
@@ -37,14 +46,17 @@
     "README.md",
     "scripts/levels.ts",
     "tests/structure/snapshots.test.ts",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "docs/README.md",
+    "docs/take-home.md"
   ],
   "execution": [
     ".claude/agents/**",
     ".factory/config.json",
     "factory/config.ts",
     "factory/tsconfig.json",
-    "scripts/prove/execution.ts"
+    "scripts/prove/execution.ts",
+    "docs/levels/execution.md"
   ],
   "delivery": [
     "factory/run.ts",
@@ -52,12 +64,14 @@
     "factory/stages.ts",
     "factory/main.ts",
     ".github/**",
-    "scripts/prove/delivery.ts"
+    "scripts/prove/delivery.ts",
+    "docs/levels/delivery.md"
   ],
   "verification": [
     ".claude/hooks/posttooluse-typecheck.mjs",
     ".claude/hooks/stop-gate.mjs",
     "tests/structure/hooks.test.ts",
-    "scripts/prove/verification.ts"
+    "scripts/prove/verification.ts",
+    "docs/levels/verification.md"
   ]
 }
