@@ -1,4 +1,4 @@
-.PHONY: doctor dev check prove smoke hooks eval factory
+.PHONY: doctor dev check prove levels smoke hooks eval factory
 
 doctor:
 	@node -v | grep -qE '^v2[2-9]' && echo "ok node $$(node -v)" || (echo "need Node 22+" && exit 1)
@@ -29,3 +29,6 @@ eval:
 
 factory:
 	npx tsx factory/main.ts $(ISSUE) $(FLAGS)
+
+levels:
+	npx tsx scripts/levels.ts $(LEVEL)

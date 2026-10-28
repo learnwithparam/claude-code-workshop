@@ -34,7 +34,9 @@
     "levels.json",
     "scripts/prove/run.ts",
     "tests/structure/levels.test.ts",
-    "README.md"
+    "README.md",
+    "scripts/levels.ts",
+    "tests/structure/snapshots.test.ts"
   ],
   "execution": [
     ".claude/agents/**",

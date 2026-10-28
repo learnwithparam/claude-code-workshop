@@ -1,0 +1,37 @@
+name: check
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 5 * * *"
+
+jobs:
+  trunk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: make check
+
+  # Each level is generated from trunk and must pass its own gate, so a fix on main
+  # can never leave a learner's catch-up copy broken.
+  levels:
+    if: github.repository == 'learnwithparam/claude-code-workshop'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        level: [hand-built, boundary, context, skills, execution, verification, delivery]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: make levels LEVEL=${{ matrix.level }}
+      - run: npm ci
+        working-directory: supplied/${{ matrix.level }}
+      - run: make check
+        working-directory: supplied/${{ matrix.level }}
