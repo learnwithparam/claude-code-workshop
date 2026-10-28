@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@workshop/shared": "*",
-    "astro": "6.4.8"
+    "astro": "7.4.2"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4"
