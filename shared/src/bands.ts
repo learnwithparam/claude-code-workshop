@@ -56,7 +56,16 @@ export const BANDS: Record<BandId, Band> = {
   "grade-1-2": {
     id: "grade-1-2",
     label: "Grades 1 to 2",
-    aliases: ["grade 1", "grade 2", "1st grade", "2nd grade", "first grade", "second grade"],
+    aliases: [
+      "grade 1",
+      "grade 2",
+      "1st grade",
+      "2nd grade",
+      "first grade",
+      "second grade",
+      "year 1",
+      "year 2",
+    ],
     font: "Nunito",
     fontPx: 22,
     maxItems: 10,
