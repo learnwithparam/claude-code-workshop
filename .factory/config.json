@@ -27,7 +27,7 @@
     },
     "verify": {
       "model": "claude-haiku-5-5",
-      "maxTurns": 10,
+      "maxTurns": 20,
       "maxBudgetUsd": 0.3,
       "permissionMode": "plan"
     },
