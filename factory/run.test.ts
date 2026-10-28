@@ -4,7 +4,7 @@ import { type Deps, type Issue, runFactory } from "./run.ts";
 
 const cfg = loadConfig();
 
-function fake(script: Record<string, string[]>, labels: string[] = []) {
+function fake(script: Record<string, string[]>, labels: string[] = [], gateOk = true) {
   const calls: string[] = [];
   const prompts: Record<string, string> = {};
   const queues = Object.fromEntries(Object.entries(script).map(([k, v]) => [k, [...v]]));
@@ -13,6 +13,7 @@ function fake(script: Record<string, string[]>, labels: string[] = []) {
     comment: async () => {},
     label: async (_n, l) => void calls.push(`label:${l}`),
     latestPlan: async () => "the plan",
+    gate: async () => ({ ok: gateOk, output: "gate" }),
     startBranch: async () => void calls.push("branch"),
     openPr: async () => {
       calls.push("pr");
@@ -103,6 +104,21 @@ describe("factory state machine", () => {
         ? { text: "", modelsUsed: [], costUsd: 0, failed: "max turns" }
         : inner(stage, ...rest);
     expect((await runFactory(b.deps, cfg, 1)).outcome).toBe("needs-human");
+  });
+
+  it("opens no PR when the real gate fails or the verify admits it ran nothing", async () => {
+    const approved = [cfg.labels.approved, cfg.labels.planned];
+    const red = fake({ triage: ["TYPE: bug DECISION: proceed"] }, approved, false);
+    expect((await runFactory(red.deps, cfg, 1)).outcome).toBe("needs-human");
+    expect(red.calls).not.toContain("pr");
+    const lazy = fake(
+      {
+        triage: ["TYPE: bug DECISION: proceed"],
+        verify: Array(3).fill("VERDICT: clean (provisional), did not run make check"),
+      },
+      approved,
+    );
+    expect((await runFactory(lazy.deps, cfg, 1)).outcome).toBe("needs-human");
   });
 
   it("routes an epic plan to Opus", async () => {

@@ -8,7 +8,7 @@ let base = "";
 
 export const githubDeps: Pick<
   Deps,
-  "getIssue" | "comment" | "label" | "unlabel" | "latestPlan" | "startBranch" | "openPr"
+  "getIssue" | "comment" | "label" | "unlabel" | "latestPlan" | "startBranch" | "openPr" | "gate"
 > = {
   async getIssue(n): Promise<Issue> {
     const raw = JSON.parse(gh("issue", "view", String(n), "--json", "number,title,body,labels"));
@@ -26,10 +26,26 @@ export const githubDeps: Pick<
     base = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
     execFileSync("git", ["switch", "-c", `factory/issue-${n}`], { stdio: "ignore" });
   },
+  // The runner, not the model, runs the gate: a stage in plan mode cannot, and must not be believed.
+  async gate() {
+    try {
+      execFileSync("make", ["check"], { encoding: "utf8", stdio: "pipe" });
+      return { ok: true, output: "make check passed" };
+    } catch (error) {
+      return {
+        ok: false,
+        output: String((error as { stdout?: string }).stdout ?? error).slice(-1500),
+      };
+    }
+  },
   async openPr(n, title, body) {
     // The agent must not have committed or staged anything itself: the diff is what a human reviews.
     const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-    if (head !== base) throw new Error("HEAD moved during the build; a human must review");
+    const branch = execFileSync("git", ["symbolic-ref", "--short", "HEAD"], {
+      encoding: "utf8",
+    }).trim();
+    if (head !== base || branch !== `factory/issue-${n}`)
+      throw new Error("branch or HEAD moved during the build; a human must review");
     execFileSync("git", ["reset", "-q"]);
     // Tracked files only: a new file the agent made (a stray key, a dump) needs a human to add it.
     const stray = execFileSync("git", ["ls-files", "--others", "--exclude-standard"], {
@@ -38,7 +54,9 @@ export const githubDeps: Pick<
     if (stray) throw new Error(`untracked files, a human must review them:\n${stray}`);
     execFileSync("git", ["add", "-u"]);
     execFileSync("git", ["commit", "-m", `${title} (#${n})`], { stdio: "ignore" });
-    execFileSync("git", ["push", "-u", "origin", `factory/issue-${n}`], { stdio: "ignore" });
+    execFileSync("git", ["push", "-u", "origin", `HEAD:refs/heads/factory/issue-${n}`], {
+      stdio: "ignore",
+    });
     return gh("pr", "create", "--draft", "--title", title, "--body", body).trim();
   },
   async unlabel(n, label) {

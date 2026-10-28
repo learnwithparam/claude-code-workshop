@@ -9,6 +9,7 @@ export type Deps = {
   unlabel(n: number, label: string): Promise<void>;
   latestPlan(n: number): Promise<string>;
   startBranch(n: number): Promise<void>;
+  gate(): Promise<{ ok: boolean; output: string }>;
   openPr(n: number, title: string, body: string): Promise<string>;
   runStage(
     stage: StageName,
@@ -99,8 +100,15 @@ export async function runFactory(deps: Deps, cfg: FactoryConfig, n: number): Pro
         "verify",
         `Verify this issue.\n${ticket}\nRun make check, revert the fix, show the test fails. End with VERDICT: clean or blocking.`,
       );
-      if (verdictOf(verify) === "clean") {
-        await deps.openPr(n, issue.title, `Closes #${n}\n\n${review}\n\n${verify}`);
+      // A "clean" verdict that admits it ran nothing is not clean; the real gate decides.
+      const unverified = /provisional|did not run|could not run|not run/i.test(verify);
+      const gate = verdictOf(verify) === "clean" && !unverified ? await deps.gate() : undefined;
+      if (gate?.ok) {
+        await deps.openPr(
+          n,
+          issue.title,
+          `Closes #${n}\n\n${review}\n\n${verify}\n\nGate: ${gate.output}`,
+        );
         return { ...report, outcome: "pr-ready" };
       }
     }
