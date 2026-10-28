@@ -20,6 +20,18 @@ export const configSchema = z
         typeof stageSchema
       >,
     ),
+    // Dollars per million tokens. The Haiku cache-read rate is the usual 0.1x, not a published figure.
+    prices: z.record(
+      z.string(),
+      z.object({
+        input: z.number().nonnegative(),
+        output: z.number().nonnegative(),
+        cacheRead: z.number().nonnegative(),
+        cacheWrite: z.number().nonnegative(),
+      }),
+    ),
+    baselineModel: z.string(),
+    tiers: z.object({ high: z.string(), mid: z.string(), low: z.string() }),
     routes: z.record(z.string(), z.record(z.string(), z.string())),
     reviewLoop: z.object({ maxRounds: z.number().int().min(1).max(5) }),
     labels: z.object({
@@ -34,9 +46,13 @@ export const configSchema = z
       ...Object.values(cfg.stages).map((s) => s.model),
       ...Object.values(cfg.routes).flatMap((r) => Object.values(r)),
     ];
-    for (const model of used)
+    for (const model of [...used, ...Object.values(cfg.tiers), cfg.baselineModel])
       if (!cfg.allowedModels.includes(model))
         ctx.addIssue({ code: "custom", message: `model ${model} is not in allowedModels` });
+    // A model without a price would make the ledger silently under-count.
+    for (const model of cfg.allowedModels)
+      if (!cfg.prices[model])
+        ctx.addIssue({ code: "custom", message: `model ${model} has no price` });
   });
 
 export type FactoryConfig = z.infer<typeof configSchema>;

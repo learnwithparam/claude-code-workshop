@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "./config.ts";
+import type { Ledger } from "./cost-ledger.ts";
 import { type Deps, type Issue, runFactory } from "./run.ts";
 
 const cfg = loadConfig();
@@ -8,7 +9,9 @@ function fake(script: Record<string, string[]>, labels: string[] = [], gateOk = 
   const calls: string[] = [];
   const prompts: Record<string, string> = {};
   const queues = Object.fromEntries(Object.entries(script).map(([k, v]) => [k, [...v]]));
+  const saved: { ledger?: Ledger; lines?: string[] } = {};
   const deps: Deps = {
+    saveRun: async (_n, ledger, lines) => void Object.assign(saved, { ledger, lines }),
     getIssue: async (n): Promise<Issue> => ({ number: n, title: "t", body: "b", labels }),
     comment: async () => {},
     label: async (_n, l) => void calls.push(`label:${l}`),
@@ -27,7 +30,7 @@ function fake(script: Record<string, string[]>, labels: string[] = [], gateOk = 
       return { text, modelsUsed: [model], costUsd: 0.01 };
     },
   };
-  return { deps, calls, prompts };
+  return { deps, calls, prompts, saved };
 }
 
 describe("factory state machine", () => {
@@ -137,5 +140,33 @@ describe("factory state machine", () => {
     const { deps } = fake({});
     deps.runStage = async () => ({ text: "", modelsUsed: ["claude-haiku-4-5"], costUsd: 0 });
     await expect(runFactory(deps, cfg, 1)).rejects.toThrow(/unlisted model/);
+  });
+
+  it("writes a ledger that sums to the report cost and a log line per stage and outcome", async () => {
+    const { deps, saved } = fake(
+      { triage: ["TYPE: bug SIZE: small RISK: low DECISION: proceed"] },
+      [cfg.labels.approved, cfg.labels.planned],
+    );
+    const r = await runFactory(deps, cfg, 1);
+    expect(saved.ledger?.totalUsd).toBeCloseTo(r.costUsd);
+    expect(saved.lines?.filter((l) => /^(triage|build|review|verify) /.test(l))).toHaveLength(4);
+    expect(saved.lines?.at(-1)).toContain("outcome pr-ready");
+  });
+
+  it("still writes the ledger when a stage throws", async () => {
+    const { deps, saved } = fake({});
+    deps.runStage = async () => ({ text: "", modelsUsed: [], costUsd: 0, failed: "max turns" });
+    await expect(runFactory(deps, cfg, 1)).rejects.toThrow();
+    expect(saved.lines?.at(-1)).toContain("error stage triage failed");
+  });
+
+  it("routes a small low-risk ticket to the cheap model and a risky one to Opus", async () => {
+    const approved = [cfg.labels.approved, cfg.labels.planned];
+    const cheap = fake({ triage: ["TYPE: bug SIZE: small RISK: low DECISION: proceed"] }, approved);
+    await runFactory(cheap.deps, cfg, 1);
+    expect(cheap.calls).toContain(`build:${cfg.tiers.low}`);
+    const risky = fake({ triage: ["TYPE: bug SIZE: small RISK: high DECISION: proceed"] });
+    await runFactory(risky.deps, cfg, 1);
+    expect(risky.calls).toContain(`plan:${cfg.tiers.high}`);
   });
 });

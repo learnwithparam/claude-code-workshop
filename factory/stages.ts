@@ -3,7 +3,9 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
-import type { Deps, Issue } from "./run.ts";
+import { formatReport } from "./cost-report.ts";
+import type { Deps, Issue, StageResult } from "./run.ts";
+import { writeRunFiles } from "./run-files.ts";
 
 const gh = (...args: string[]) => execFileSync("gh", args, { encoding: "utf8" });
 
@@ -14,8 +16,20 @@ const GATE_FILES =
 
 export const githubDeps: Pick<
   Deps,
-  "getIssue" | "comment" | "label" | "unlabel" | "latestPlan" | "startBranch" | "openPr" | "gate"
+  | "getIssue"
+  | "comment"
+  | "label"
+  | "unlabel"
+  | "latestPlan"
+  | "startBranch"
+  | "openPr"
+  | "gate"
+  | "saveRun"
 > = {
+  async saveRun(n, ledger, lines) {
+    const dir = writeRunFiles(process.cwd(), n, ledger, lines);
+    console.error(`${formatReport(ledger)}\nwritten to ${dir}`);
+  },
   async getIssue(n): Promise<Issue> {
     const raw = JSON.parse(gh("issue", "view", String(n), "--json", "number,title,body,labels"));
     return { ...raw, labels: raw.labels.map((l: { name: string }) => l.name) };
@@ -119,6 +133,7 @@ export const runStage: Deps["runStage"] = async (_stage, model, prompt, limits) 
   let failed: string | undefined;
   let costUsd = 0;
   let modelsUsed: string[] = [];
+  let usage: StageResult["usage"];
   try {
     for await (const message of query({
       prompt,
@@ -143,11 +158,23 @@ export const runStage: Deps["runStage"] = async (_stage, model, prompt, limits) 
         text = "result" in message ? String(message.result) : "";
         costUsd = message.total_cost_usd;
         modelsUsed = Object.keys(message.modelUsage ?? {});
+        usage = Object.fromEntries(
+          Object.entries(message.modelUsage ?? {}).map(([model, u]) => [
+            model,
+            {
+              inputTokens: u.inputTokens,
+              outputTokens: u.outputTokens,
+              cacheReadInputTokens: u.cacheReadInputTokens,
+              cacheCreationInputTokens: u.cacheCreationInputTokens,
+              costUsd: u.costUSD,
+            },
+          ]),
+        );
       }
     }
   } catch (error) {
     // A stage that runs out of turns or budget is a failed stage, not a crashed factory.
     failed = error instanceof Error ? error.message : String(error);
   }
-  return { text, costUsd, modelsUsed, failed };
+  return { text, costUsd, modelsUsed, usage, failed };
 };
