@@ -56,6 +56,15 @@ export function generateLevel(name: LevelName, outDir: string, root = process.cw
     const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
     pruneHooks(settings, (p) => existsSync(join(outDir, p)));
     writeFileSync(settingsPath, `${JSON.stringify(settings, null, 2)}\n`);
+    // Same formatter as the gate, so a generated file never fails the level's own lint.
+    execFileSync(
+      join(root, "node_modules/.bin/biome"),
+      ["format", "--write", ".claude/settings.json"],
+      {
+        cwd: outDir,
+        stdio: "ignore",
+      },
+    );
   }
   return files;
 }

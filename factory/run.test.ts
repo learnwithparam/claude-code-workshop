@@ -6,19 +6,27 @@ const cfg = loadConfig();
 
 function fake(script: Record<string, string[]>, labels: string[] = []) {
   const calls: string[] = [];
+  const prompts: Record<string, string> = {};
   const queues = Object.fromEntries(Object.entries(script).map(([k, v]) => [k, [...v]]));
   const deps: Deps = {
     getIssue: async (n): Promise<Issue> => ({ number: n, title: "t", body: "b", labels }),
     comment: async () => {},
     label: async (_n, l) => void calls.push(`label:${l}`),
+    latestPlan: async () => "the plan",
+    startBranch: async () => void calls.push("branch"),
+    openPr: async () => {
+      calls.push("pr");
+      return "url";
+    },
     unlabel: async (_n, l) => void calls.push(`unlabel:${l}`),
-    runStage: async (stage, model) => {
+    runStage: async (stage, model, prompt) => {
       calls.push(`${stage}:${model}`);
+      prompts[stage] = prompt;
       const text = queues[stage]?.shift() ?? "VERDICT: clean";
       return { text, modelsUsed: [model], costUsd: 0.01 };
     },
   };
-  return { deps, calls };
+  return { deps, calls, prompts };
 }
 
 describe("factory state machine", () => {
@@ -30,13 +38,15 @@ describe("factory state machine", () => {
   });
 
   it("runs build, review, verify in order once approved", async () => {
-    const { deps } = fake({ triage: ["TYPE: bug DECISION: proceed"] }, [
+    const { deps, calls } = fake({ triage: ["TYPE: bug DECISION: proceed"] }, [
       cfg.labels.approved,
       cfg.labels.planned,
     ]);
     const r = await runFactory(deps, cfg, 1);
     expect(r.outcome).toBe("pr-ready");
     expect(r.stages).toEqual(["triage", "build", "review", "verify"]);
+    expect(calls.indexOf("branch")).toBeLessThan(calls.indexOf("build:claude-sonnet-5-5"));
+    expect(calls.at(-1)).toBe("pr");
   });
 
   it("caps the review loop at maxRounds and hands over to a human", async () => {
@@ -58,6 +68,13 @@ describe("factory state machine", () => {
     expect(r.outcome).toBe("awaiting-approval");
     expect(calls).toContain(`unlabel:${cfg.labels.approved}`);
     expect(calls.some((c) => c.startsWith("build"))).toBe(false);
+  });
+
+  it("puts the issue text in the prompt, since stages cannot reach GitHub", async () => {
+    const { deps, prompts } = fake({ triage: ["TYPE: bug DECISION: proceed"] });
+    await runFactory(deps, cfg, 1);
+    expect(prompts.plan).toContain("<issue");
+    expect(prompts.plan).toContain("untrusted");
   });
 
   it("routes an epic plan to Opus", async () => {

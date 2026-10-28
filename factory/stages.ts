@@ -4,7 +4,10 @@ import type { Deps, Issue } from "./run.ts";
 
 const gh = (...args: string[]) => execFileSync("gh", args, { encoding: "utf8" });
 
-export const githubDeps: Pick<Deps, "getIssue" | "comment" | "label" | "unlabel"> = {
+export const githubDeps: Pick<
+  Deps,
+  "getIssue" | "comment" | "label" | "unlabel" | "latestPlan" | "startBranch" | "openPr"
+> = {
   async getIssue(n): Promise<Issue> {
     const raw = JSON.parse(gh("issue", "view", String(n), "--json", "number,title,body,labels"));
     return { ...raw, labels: raw.labels.map((l: { name: string }) => l.name) };
@@ -13,10 +16,28 @@ export const githubDeps: Pick<Deps, "getIssue" | "comment" | "label" | "unlabel"
     gh("issue", "comment", String(n), "--body", body);
   },
   async label(n, label) {
+    gh("label", "create", label, "--force");
     gh("issue", "edit", String(n), "--add-label", label);
   },
+  // The build happens on its own branch; a person merges the draft PR, never the factory.
+  async startBranch(n) {
+    execFileSync("git", ["switch", "-c", `factory/issue-${n}`], { stdio: "ignore" });
+  },
+  async openPr(n, title, body) {
+    execFileSync("git", ["add", "-A"]);
+    execFileSync("git", ["commit", "-m", `${title} (#${n})`], { stdio: "ignore" });
+    execFileSync("git", ["push", "-u", "origin", `factory/issue-${n}`], { stdio: "ignore" });
+    return gh("pr", "create", "--draft", "--title", title, "--body", body).trim();
+  },
   async unlabel(n, label) {
-    gh("issue", "edit", String(n), "--remove-label", label);
+    const raw = JSON.parse(gh("issue", "view", String(n), "--json", "labels"));
+    if (raw.labels.some((l: { name: string }) => l.name === label))
+      gh("issue", "edit", String(n), "--remove-label", label);
+  },
+  // The approved plan is the newest plan comment, posted by the plan stage.
+  async latestPlan(n) {
+    const raw = JSON.parse(gh("issue", "view", String(n), "--json", "comments"));
+    return String(raw.comments.at(-1)?.body ?? "");
   },
 };
 

@@ -19,6 +19,8 @@ if (flag === "--dry-run") {
     `  review loop: at most ${cfg.reviewLoop.maxRounds} rounds, then label ${cfg.labels.needsHuman}`,
   );
 } else {
+  // The stages need a key. Load it inside this process so it never appears on a command line.
+  if (!process.env.ANTHROPIC_API_KEY) process.loadEnvFile(new URL("../api/.env", import.meta.url));
   const report = await runFactory({ ...githubDeps, runStage }, cfg, Number(number));
   console.log(JSON.stringify(report, null, 2));
 }
