@@ -11,6 +11,7 @@ function fake(script: Record<string, string[]>, labels: string[] = []) {
     getIssue: async (n): Promise<Issue> => ({ number: n, title: "t", body: "b", labels }),
     comment: async () => {},
     label: async (_n, l) => void calls.push(`label:${l}`),
+    unlabel: async (_n, l) => void calls.push(`unlabel:${l}`),
     runStage: async (stage, model) => {
       calls.push(`${stage}:${model}`);
       const text = queues[stage]?.shift() ?? "VERDICT: clean";
@@ -29,21 +30,34 @@ describe("factory state machine", () => {
   });
 
   it("runs build, review, verify in order once approved", async () => {
-    const { deps } = fake({ triage: ["TYPE: bug DECISION: proceed"] }, [cfg.labels.approved]);
+    const { deps } = fake({ triage: ["TYPE: bug DECISION: proceed"] }, [
+      cfg.labels.approved,
+      cfg.labels.planned,
+    ]);
     const r = await runFactory(deps, cfg, 1);
     expect(r.outcome).toBe("pr-ready");
-    expect(r.stages).toEqual(["triage", "plan", "build", "review", "verify"]);
+    expect(r.stages).toEqual(["triage", "build", "review", "verify"]);
   });
 
   it("caps the review loop at maxRounds and hands over to a human", async () => {
     const { deps, calls } = fake(
       { triage: ["TYPE: bug DECISION: proceed"], review: Array(9).fill("VERDICT: blocking") },
-      [cfg.labels.approved],
+      [cfg.labels.approved, cfg.labels.planned],
     );
     const r = await runFactory(deps, cfg, 1);
     expect(r.outcome).toBe("needs-human");
     expect(r.rounds).toBe(cfg.reviewLoop.maxRounds);
     expect(calls).toContain(`label:${cfg.labels.needsHuman}`);
+  });
+
+  it("clears a stale approval when it posts a new plan and never builds in that run", async () => {
+    const { deps, calls } = fake({ triage: ["TYPE: bug DECISION: proceed"] }, [
+      cfg.labels.approved,
+    ]);
+    const r = await runFactory(deps, cfg, 1);
+    expect(r.outcome).toBe("awaiting-approval");
+    expect(calls).toContain(`unlabel:${cfg.labels.approved}`);
+    expect(calls.some((c) => c.startsWith("build"))).toBe(false);
   });
 
   it("routes an epic plan to Opus", async () => {
