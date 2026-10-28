@@ -61,7 +61,7 @@ describe("factory state machine", () => {
     expect(r.outcome).toBe("pr-ready");
     expect(r.stages).toEqual(["triage", "build", "review", "verify"]);
     expect(calls.indexOf("branch")).toBeLessThan(calls.indexOf("build:claude-sonnet-5-5"));
-    expect(calls.at(-1)).toBe("pr");
+    expect(calls.filter((c) => !c.startsWith("retro")).at(-1)).toBe("pr");
   });
 
   it("caps the review loop at maxRounds and hands over to a human", async () => {
@@ -205,5 +205,28 @@ describe("factory state machine", () => {
     const labelled = fake(script, [...approved, cfg.labels.protectedOk]);
     await runFactory(labelled.deps, cfg, 1);
     expect(labelled.calls.filter((c) => c.startsWith("protected:"))).toEqual(["protected:build"]);
+  });
+
+  it("runs retro after a build and keeps the outcome when retro fails", async () => {
+    const labels = [cfg.labels.approved, cfg.labels.planned];
+    const bad = fake(
+      { triage: ["TYPE: bug DECISION: proceed"], retro: ["PROPOSAL: {nope"] },
+      labels,
+    );
+    const r = await runFactory(bad.deps, cfg, 1);
+    expect(r.outcome).toBe("pr-ready");
+    expect(r.retro).toMatch(/^failed/);
+    expect(bad.calls.at(-1)).toMatch(/^retro:/);
+    const good = fake(
+      { triage: ["TYPE: bug DECISION: proceed"], retro: ["PROPOSAL: none"] },
+      labels,
+    );
+    expect((await runFactory(good.deps, cfg, 1)).retro).toBe("none");
+  });
+
+  it("does not run retro when no build was attempted", async () => {
+    const { deps, calls } = fake({ triage: ["TYPE: bug DECISION: proceed"] });
+    await runFactory(deps, cfg, 1);
+    expect(calls.some((c) => c.startsWith("retro"))).toBe(false);
   });
 });

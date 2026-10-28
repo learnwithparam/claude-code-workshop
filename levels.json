@@ -73,6 +73,8 @@
     "factory/run-files.test.ts",
     "factory/spec.ts",
     "factory/spec.test.ts",
+    "factory/retro.ts",
+    "factory/retro.test.ts",
     ".github/**",
     "scripts/prove/delivery.ts",
     "docs/levels/delivery.md"
