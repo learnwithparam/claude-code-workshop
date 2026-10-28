@@ -10,7 +10,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { blocks } from "../../.claude/hooks/pretooluse-secrets.mjs";
-import type { Proof } from "./l0.ts";
+import type { Proof } from "./hand-built.ts";
 
 const ENV_NAME = ".env";
 
@@ -21,8 +21,8 @@ function walk(dir: string): string[] {
   });
 }
 
-// L1 claim: a secret lives in one process. The browser, the image and Claude's shell never hold it.
-export function proveL1(): Proof {
+// Boundary claim: a secret lives in one process. The browser, the image and Claude's shell never hold it.
+export function proveBoundary(): Proof {
   const problems: string[] = [];
   const settings = JSON.parse(readFileSync(".claude/settings.json", "utf8"));
   const deny: string[] = settings.permissions?.deny ?? [];
@@ -76,7 +76,7 @@ export function proveL1(): Proof {
   if (!existsSync("scripts/git/pre-commit")) problems.push("pre-commit hook script missing");
 
   return {
-    level: "L1",
+    level: "boundary",
     claim: "the key exists only in api; the bundle, image and shell cannot reach it",
     passed: problems.length === 0,
     detail: problems.length === 0 ? "boundary holds" : problems.join(" | "),

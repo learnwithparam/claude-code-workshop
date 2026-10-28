@@ -30,7 +30,7 @@ export async function runAgent(client: Anthropic, messages: ChatMessage[]): Prom
 
   const runner = client.beta.messages.toolRunner({
     model: MODEL,
-    max_tokens: 1500,
+    max_tokens: 2000,
     max_iterations: MAX_ITERATIONS,
     system: [{ type: "text", text: buildSystemPrompt(), cache_control: { type: "ephemeral" } }],
     tools: [submit],

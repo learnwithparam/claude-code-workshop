@@ -1,9 +1,21 @@
-import { proveL0 } from "./l0.ts";
-import { proveL1 } from "./l1.ts";
+import { proveBoundary } from "./boundary.ts";
+import { proveContext } from "./context.ts";
+import { proveHandBuilt } from "./hand-built.ts";
+import { proveSkills } from "./skills.ts";
 
-const proofs = { "0": proveL0, "1": proveL1 } as const;
-const only = process.argv[2]?.replace(/^L=/, "");
-const chosen = Object.entries(proofs).filter(([level]) => !only || level === only);
+// One proof per teaching level, keyed by the level's name: `make prove LEVEL=boundary`.
+const proofs = {
+  "hand-built": proveHandBuilt,
+  boundary: proveBoundary,
+  context: proveContext,
+  skills: proveSkills,
+} as const;
+const only = process.argv[2]?.replace(/^LEVEL=/, "");
+const chosen = Object.entries(proofs).filter(([name]) => !only || name === only);
+if (only && chosen.length === 0) {
+  console.error(`Unknown level "${only}". Levels: ${Object.keys(proofs).join(", ")}`);
+  process.exit(1);
+}
 
 let failed = 0;
 for (const [, prove] of chosen) {

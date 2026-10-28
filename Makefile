@@ -1,4 +1,4 @@
-.PHONY: doctor dev check prove smoke hooks
+.PHONY: doctor dev check prove smoke hooks eval
 
 doctor:
 	@node -v | grep -qE '^v2[2-9]' && echo "ok node $$(node -v)" || (echo "need Node 22+" && exit 1)
@@ -16,10 +16,13 @@ check:
 	npm run prove
 
 prove:
-	npm run prove -- $(L)
+	npm run prove -- $(LEVEL)
 
 smoke:
 	npx tsx api/src/smoke.ts
 
 hooks:
 	cp scripts/git/pre-commit .git/hooks/pre-commit
+
+eval:
+	npx tsx api/src/eval.ts

@@ -9,6 +9,7 @@ export function buildSystemPrompt(): string {
   return [
     "You make school worksheets. Work out the learner's band from the request.",
     "If the grade or age is missing, ask ONE short question and stop. Otherwise call submit_worksheet.",
+    "Default to 6 items and short answers unless the user asks for more; the limits below are ceilings.",
     "If the tool reports problems, fix them and call it again.",
     `Bands:\n${rules}`,
   ].join("\n");

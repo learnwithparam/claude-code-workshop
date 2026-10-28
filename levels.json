@@ -1,0 +1,38 @@
+{
+  "hand-built": [
+    "shared/**",
+    "web/**",
+    "tests/structure/bands.test.ts",
+    "fixtures/worksheets.json",
+    "scripts/prove/hand-built.ts",
+    "biome.json",
+    "tsconfig.base.json"
+  ],
+  "boundary": [
+    "api/**",
+    "api/.*",
+    ".claude/settings.json",
+    ".claude/hooks/**",
+    ".gitleaks.toml",
+    "scripts/git/**",
+    "scripts/prove/boundary.ts"
+  ],
+  "context": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".claude/rules/**",
+    "scripts/check-conventions.ts",
+    "scripts/prove/context.ts",
+    "tests/structure/conventions.test.ts"
+  ],
+  "skills": [".claude/skills/**", "skills.lock", "fixtures/eval.json", "scripts/prove/skills.ts"],
+  "trunk": [
+    "Makefile",
+    "package.json",
+    "package-lock.json",
+    ".gitignore",
+    "levels.json",
+    "scripts/prove/run.ts",
+    "tests/structure/levels.test.ts"
+  ]
+}

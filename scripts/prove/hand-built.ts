@@ -7,8 +7,8 @@ import { checkBand, renderWorksheet, worksheetSchema } from "@workshop/shared";
 type Fixture = { prompt: string; worksheet: unknown };
 export type Proof = { level: string; claim: string; passed: boolean; detail: string };
 
-// L0 claim: the hand-built app renders every band into a valid HyperFrames still, with zero API calls.
-export function proveL0(): Proof {
+// claim: the hand-built app renders every band into a valid HyperFrames still, with zero API calls.
+export function proveHandBuilt(): Proof {
   const fixtures: Fixture[] = JSON.parse(readFileSync("fixtures/worksheets.json", "utf8"));
   const dir = mkdtempSync(join(tmpdir(), "l0-"));
   const problems: string[] = [];
@@ -40,7 +40,7 @@ export function proveL0(): Proof {
   if (/fetch\(|api\.anthropic/.test(source)) problems.push("the render path makes a network call");
 
   return {
-    level: "L0",
+    level: "hand-built",
     claim: "every band renders, lints clean, and the app calls no API",
     passed: problems.length === 0,
     detail: problems.length === 0 ? `${fixtures.length} bands ok` : problems.join(" | "),

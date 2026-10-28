@@ -1,0 +1,58 @@
+[
+  {
+    "prompt": "A worksheet for a 4 year old learning the letter B",
+    "kind": "worksheet",
+    "compliant": true,
+    "bandMatches": true,
+    "outputTokens": 1989,
+    "costUsd": 0.01434
+  },
+  {
+    "prompt": "Kindergarten counting to 10 with fruit",
+    "kind": "worksheet",
+    "compliant": true,
+    "bandMatches": true,
+    "outputTokens": 1098,
+    "costUsd": 0.0072
+  },
+  {
+    "prompt": "Grade 1 addition within 20",
+    "kind": "worksheet",
+    "compliant": true,
+    "bandMatches": true,
+    "outputTokens": 638,
+    "costUsd": 0.00415
+  },
+  {
+    "prompt": "Grade 4 fractions, equivalent fractions",
+    "kind": "worksheet",
+    "compliant": true,
+    "bandMatches": true,
+    "outputTokens": 453,
+    "costUsd": 0.00301
+  },
+  {
+    "prompt": "Grade 7 solving one-step equations",
+    "kind": "worksheet",
+    "compliant": true,
+    "bandMatches": true,
+    "outputTokens": 667,
+    "costUsd": 0.00416
+  },
+  {
+    "prompt": "Grade 11 chemistry, balancing equations",
+    "kind": "worksheet",
+    "compliant": true,
+    "bandMatches": true,
+    "outputTokens": 1107,
+    "costUsd": 0.00709
+  },
+  {
+    "prompt": "University statistics: confidence intervals",
+    "kind": "worksheet",
+    "compliant": true,
+    "bandMatches": true,
+    "outputTokens": 1987,
+    "costUsd": 0.01239
+  }
+]

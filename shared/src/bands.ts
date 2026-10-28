@@ -27,7 +27,16 @@ export const BANDS: Record<BandId, Band> = {
   "early-reader": {
     id: "early-reader",
     label: "Early reader",
-    aliases: ["early reader", "pre-k", "prek", "preschool", "age 3", "age 4"],
+    aliases: [
+      "early reader",
+      "pre-k",
+      "prek",
+      "preschool",
+      "age 3",
+      "age 4",
+      "3 year old",
+      "4 year old",
+    ],
     font: "Nunito",
     fontPx: 30,
     maxItems: 6,
@@ -37,7 +46,7 @@ export const BANDS: Record<BandId, Band> = {
   kindergarten: {
     id: "kindergarten",
     label: "Kindergarten",
-    aliases: ["kindergarten", "kinder", "grade k", "k", "age 5"],
+    aliases: ["kindergarten", "kinder", "grade k", "k", "age 5", "5 year old"],
     font: "Nunito",
     fontPx: 26,
     maxItems: 8,

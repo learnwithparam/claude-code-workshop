@@ -1,0 +1,9 @@
+{
+  "source": "addyosmani/agent-skills",
+  "commit": "aeac41d4d005999432bb7312f7ff06383a91d59d",
+  "files": {
+    ".claude/skills/spec-driven-development/SKILL.md": "4ae2cf187ecf1353cdc9946e6184d338c2a8fa929ed83e45ab4f7b10d41362f6",
+    ".claude/skills/test-driven-development/SKILL.md": "6559ef78ae2a4e79469bfa9d92e3934952b8ac160ac15b0fd27ecca70153ca4b",
+    ".claude/skills/frontend-ui-engineering/SKILL.md": "32ee987a849199eaf88669bee65ab454c0226f75bb6214d78aa1b6e6b3a5bc8e"
+  }
+}
