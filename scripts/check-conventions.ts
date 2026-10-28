@@ -12,6 +12,7 @@ const ALLOWED_NAMES = new Set([
   "Dockerfile",
   "Makefile",
   "README.md",
+  "PULL_REQUEST_TEMPLATE.md", // GitHub fixes this name
 ]);
 
 export function findViolations(files: string[], lines: (file: string) => number): string[] {

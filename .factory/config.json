@@ -1,0 +1,52 @@
+{
+  "allowedModels": ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"],
+  "stages": {
+    "triage": {
+      "model": "claude-haiku-5-5",
+      "maxTurns": 4,
+      "maxBudgetUsd": 0.1,
+      "permissionMode": "plan"
+    },
+    "plan": {
+      "model": "claude-sonnet-5-5",
+      "maxTurns": 12,
+      "maxBudgetUsd": 0.5,
+      "permissionMode": "plan"
+    },
+    "build": {
+      "model": "claude-sonnet-5-5",
+      "maxTurns": 40,
+      "maxBudgetUsd": 3,
+      "permissionMode": "acceptEdits"
+    },
+    "review": {
+      "model": "claude-sonnet-5-5",
+      "maxTurns": 15,
+      "maxBudgetUsd": 0.5,
+      "permissionMode": "plan"
+    },
+    "verify": {
+      "model": "claude-haiku-5-5",
+      "maxTurns": 10,
+      "maxBudgetUsd": 0.3,
+      "permissionMode": "plan"
+    },
+    "retro": {
+      "model": "claude-haiku-5-5",
+      "maxTurns": 6,
+      "maxBudgetUsd": 0.2,
+      "permissionMode": "plan"
+    }
+  },
+  "routes": {
+    "epic": { "plan": "claude-opus-5-5" },
+    "docs": { "build": "claude-haiku-5-5" }
+  },
+  "reviewLoop": { "maxRounds": 3 },
+  "labels": {
+    "ready": "factory:ready",
+    "planned": "factory:planned",
+    "approved": "plan:approved",
+    "needsHuman": "needs-human"
+  }
+}

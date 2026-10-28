@@ -33,6 +33,22 @@
     ".gitignore",
     "levels.json",
     "scripts/prove/run.ts",
-    "tests/structure/levels.test.ts"
+    "tests/structure/levels.test.ts",
+    "README.md"
+  ],
+  "execution": [
+    ".claude/agents/**",
+    ".factory/config.json",
+    "factory/config.ts",
+    "factory/tsconfig.json",
+    "scripts/prove/execution.ts"
+  ],
+  "delivery": [
+    "factory/run.ts",
+    "factory/run.test.ts",
+    "factory/stages.ts",
+    "factory/main.ts",
+    ".github/**",
+    "scripts/prove/delivery.ts"
   ]
 }

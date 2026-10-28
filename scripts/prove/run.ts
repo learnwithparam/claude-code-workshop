@@ -1,5 +1,7 @@
 import { proveBoundary } from "./boundary.ts";
 import { proveContext } from "./context.ts";
+import { proveDelivery } from "./delivery.ts";
+import { proveExecution } from "./execution.ts";
 import { proveHandBuilt } from "./hand-built.ts";
 import { proveSkills } from "./skills.ts";
 
@@ -9,6 +11,8 @@ const proofs = {
   boundary: proveBoundary,
   context: proveContext,
   skills: proveSkills,
+  execution: proveExecution,
+  delivery: proveDelivery,
 } as const;
 const only = process.argv[2]?.replace(/^LEVEL=/, "");
 const chosen = Object.entries(proofs).filter(([name]) => !only || name === only);
