@@ -1,0 +1,139 @@
+[
+  {
+    "prompt": "A worksheet for a 4 year old learning the letter B",
+    "worksheet": {
+      "title": "Letter B is for Ball",
+      "band": "early-reader",
+      "subject": "Letters",
+      "sections": [
+        {
+          "heading": "Find the B",
+          "instruction": "Circle the things that start with B.",
+          "items": [
+            { "prompt": "ball", "answer": "circle", "picture": "ball" },
+            { "prompt": "bear", "answer": "circle", "picture": "bear" },
+            { "prompt": "cat", "answer": "no circle", "picture": "cat" },
+            { "prompt": "bus", "answer": "circle", "picture": "bus" }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "Kindergarten counting to 10 with fruit",
+    "worksheet": {
+      "title": "Count the Fruit",
+      "band": "kindergarten",
+      "subject": "Counting",
+      "sections": [
+        {
+          "heading": "How many?",
+          "instruction": "Count and write the number.",
+          "items": [
+            { "prompt": "Count the apples", "answer": "3", "picture": "3 apples" },
+            { "prompt": "Count the bananas", "answer": "5", "picture": "5 bananas" },
+            { "prompt": "Count the grapes", "answer": "8", "picture": "8 grapes" }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "Grade 1 addition within 20",
+    "worksheet": {
+      "title": "Add It Up",
+      "band": "grade-1-2",
+      "subject": "Addition",
+      "sections": [
+        {
+          "heading": "Add the numbers",
+          "instruction": "Write the sum on the line.",
+          "items": [
+            { "prompt": "4 + 3 =", "answer": "7", "picture": "4 dots and 3 dots" },
+            { "prompt": "8 + 6 =", "answer": "14", "picture": "8 dots and 6 dots" },
+            { "prompt": "9 + 9 =", "answer": "18", "picture": "9 dots and 9 dots" }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "Grade 4 fractions, equivalent fractions",
+    "worksheet": {
+      "title": "Equivalent Fractions",
+      "band": "grade-3-5",
+      "subject": "Fractions",
+      "sections": [
+        {
+          "heading": "Fill in the missing number",
+          "instruction": "Make each pair of fractions equal.",
+          "items": [
+            { "prompt": "1/2 = ?/4", "answer": "2" },
+            { "prompt": "3/4 = ?/8", "answer": "6" },
+            { "prompt": "2/3 = ?/12", "answer": "8" },
+            { "prompt": "Is 2/5 equal to 4/10? Explain.", "answer": "Yes, both parts are doubled." }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "Grade 7 solving one-step equations",
+    "worksheet": {
+      "title": "One-Step Equations",
+      "band": "grade-6-8",
+      "subject": "Algebra",
+      "sections": [
+        {
+          "heading": "Solve for x",
+          "instruction": "Show each step, then check your answer.",
+          "items": [
+            { "prompt": "x + 9 = 15", "answer": "x = 6" },
+            { "prompt": "4x = 36", "answer": "x = 9" },
+            { "prompt": "x / 5 = 7", "answer": "x = 35" },
+            { "prompt": "A pack costs $3 and you spend $21. How many packs? Write and solve an equation.", "answer": "3p = 21, p = 7" }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "Grade 11 chemistry, balancing equations",
+    "worksheet": {
+      "title": "Balancing Chemical Equations",
+      "band": "grade-9-12",
+      "subject": "Chemistry",
+      "sections": [
+        {
+          "heading": "Balance each equation",
+          "instruction": "Write the smallest whole-number coefficients.",
+          "items": [
+            { "prompt": "H2 + O2 -> H2O", "answer": "2H2 + O2 -> 2H2O" },
+            { "prompt": "N2 + H2 -> NH3", "answer": "N2 + 3H2 -> 2NH3" },
+            { "prompt": "CH4 + O2 -> CO2 + H2O", "answer": "CH4 + 2O2 -> CO2 + 2H2O" },
+            { "prompt": "Explain why the total mass of atoms must match on both sides.", "answer": "Atoms are conserved in a reaction." }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "prompt": "University statistics: confidence intervals",
+    "worksheet": {
+      "title": "Confidence Intervals",
+      "band": "university",
+      "subject": "Statistics",
+      "sections": [
+        {
+          "heading": "Compute and interpret",
+          "instruction": "Show your working. Round to two decimal places.",
+          "items": [
+            { "prompt": "A sample of n = 36 has mean 50 and standard deviation 12. Give a 95% confidence interval for the population mean.", "answer": "50 +/- 1.96 * 2 = (46.08, 53.92)" },
+            { "prompt": "State in one sentence what the 95% refers to.", "answer": "The procedure captures the true mean in 95% of repeated samples." },
+            { "prompt": "How does the interval change if n quadruples? Why?", "answer": "Width halves because the standard error scales with 1/sqrt(n)." }
+          ]
+        }
+      ]
+    }
+  }
+]

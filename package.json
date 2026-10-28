@@ -1,0 +1,25 @@
+{
+  "name": "claude-code-workshop",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "web",
+    "api"
+  ],
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "lint": "biome ci .",
+    "prove": "tsx scripts/prove/run.ts"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.0",
+    "@types/node": "^22.20.5",
+    "hyperframes": "^0.8.212",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0",
+    "zod": "^4.1.0"
+  }
+}

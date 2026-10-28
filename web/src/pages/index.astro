@@ -1,0 +1,59 @@
+---
+import { renderWorksheet, worksheetSchema } from "@workshop/shared";
+import fixtures from "../../../fixtures/worksheets.json";
+
+const sheets = fixtures.map((fixture) => ({
+  prompt: fixture.prompt,
+  html: renderWorksheet(worksheetSchema.parse(fixture.worksheet)),
+}));
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Worksheet Studio</title>
+    <style>
+      @font-face { font-family: Geist; src: url(/fonts/geist.woff2) format("woff2"); font-weight: 400 600; font-display: swap; }
+      :root { --page: #f7f7f7; --surface: #fff; --ink: #171717; --muted: #5c5c5c; --line: #e5e5e5; --focus: #2563eb; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--page); color: var(--ink); font: 16px/1.5 Geist, system-ui, sans-serif; }
+      main { display: grid; grid-template-columns: minmax(280px, 380px) 1fr; gap: 24px; max-width: 1190px; margin: 0 auto; padding: 24px 16px; }
+      h1 { font-size: 20px; margin: 0 0 4px; }
+      p.lede { color: var(--muted); margin: 0 0 16px; }
+      ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+      button { width: 100%; text-align: left; padding: 10px 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; border-radius: 8px; cursor: pointer; }
+      button[aria-pressed="true"] { border-color: var(--ink); }
+      button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+      iframe { width: 100%; max-width: 816px; aspect-ratio: 816 / 1056; border: 1px solid var(--line); background: var(--surface); }
+      @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section aria-label="Prompts">
+        <h1>Worksheet Studio</h1>
+        <p class="lede">Pick a prompt to see its worksheet.</p>
+        <ul>
+          {sheets.map((sheet, index) => (
+            <li><button type="button" data-index={index} aria-pressed={index === 0}>{sheet.prompt}</button></li>
+          ))}
+        </ul>
+      </section>
+      <section aria-label="Worksheet preview">
+        <iframe id="preview" title="Worksheet preview" srcdoc={sheets[0]?.html}></iframe>
+      </section>
+    </main>
+    <script define:vars={{ sheets }}>
+      const frame = document.getElementById("preview");
+      const buttons = document.querySelectorAll("button[data-index]");
+      for (const button of buttons) {
+        button.addEventListener("click", () => {
+          for (const other of buttons) other.setAttribute("aria-pressed", String(other === button));
+          frame.srcdoc = sheets[Number(button.dataset.index)].html;
+        });
+      }
+    </script>
+  </body>
+</html>
