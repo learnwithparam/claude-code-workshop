@@ -1,6 +1,7 @@
 import type { Check } from "../types.ts";
 import { commandCheck } from "./exec-check.ts";
 import { lock } from "./lock.ts";
+import { mutation } from "./mutation.ts";
 import { planDriftCheck } from "./plan-drift.ts";
 import { red } from "./red.ts";
 
@@ -37,7 +38,7 @@ export const CHECKS: Record<string, Check> = {
     "npx",
     vitestFor((n) => `specs/${n}/golden`),
   ),
-  mutation: commandCheck("large", "npx", () => ["stryker", "run", "--incremental"]),
+  mutation,
   contract: commandCheck(
     "medium",
     "npx",
