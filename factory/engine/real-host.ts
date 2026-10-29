@@ -169,7 +169,7 @@ export function realHost(o: RealHostOptions): Host {
         const e = parts[i] ?? "";
         if (e.length < 4) continue;
         dirty.push(e.slice(3));
-        if (e[0] === "R" || e[0] === "C") dirty.push(parts[++i] ?? "");
+        if ("RC".includes(e[0] ?? "") || "RC".includes(e[1] ?? "")) dirty.push(parts[++i] ?? "");
       }
       return [...new Set([...diff, ...dirty])].filter(Boolean);
     },
@@ -179,7 +179,9 @@ export function realHost(o: RealHostOptions): Host {
       if (!existsSync(f)) return null;
       const [t, ...rest] = readFileSync(f, "utf8").split("\n");
       const v = rest.join("\n");
-      return t === tag(v) ? v : null;
+      // A bad tag must stop the run: reading it as "no baseline" would let the lock re-record edited tests.
+      if (t !== tag(v)) throw new Error(`runner state "${k}" was changed outside the runner`);
+      return v;
     },
     async remember(k, value) {
       mkdirSync(state, { recursive: true });

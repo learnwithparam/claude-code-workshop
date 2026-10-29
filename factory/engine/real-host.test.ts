@@ -69,12 +69,21 @@ describe("realHost over a git repo", () => {
     const f = join(cwd, "..", "state-forge");
     mkdirSync(f, { recursive: true });
     writeFileSync(join(f, "lock"), "forged");
-    expect(await realHost({ cwd, base: "HEAD", stateDir: f }).recall("lock")).toBeNull();
+    await expect(realHost({ cwd, base: "HEAD", stateDir: f }).recall("lock")).rejects.toThrow(
+      /outside the runner/,
+    );
   });
   it("lists both sides of a rename and files with odd names", async () => {
     const { host, cwd } = repo();
     git(cwd, "mv", "a.txt", "b c.txt");
     expect((await host.changedFiles()).sort()).toEqual(["a.txt", "b c.txt"]);
+  });
+  it("lists the original path of a worktree-only rename", async () => {
+    const { host, cwd } = repo();
+    git(cwd, "mv", "a.txt", "r.txt");
+    git(cwd, "reset", "-q");
+    git(cwd, "add", "-N", "r.txt");
+    expect(await host.changedFiles()).toEqual(expect.arrayContaining(["a.txt", "r.txt"]));
   });
   it("keeps recalled state outside the worktree", async () => {
     const { host } = repo();
