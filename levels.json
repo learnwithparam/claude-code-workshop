@@ -34,7 +34,9 @@
     "fixtures/eval.json",
     "scripts/prove/skills.ts",
     "docs/levels/skills.md",
-    "docs/agent/**"
+    "docs/agent/one-call.md",
+    "docs/agent/manual-loop.md",
+    "docs/agent/tool-runner.md"
   ],
   "trunk": [
     "Makefile",
@@ -59,6 +61,8 @@
     "factory/tsconfig.json",
     "scripts/prove/execution.ts",
     "lab/**",
+    "docs/agent/mini-claude.md",
+    "docs/agent/agent-sdk.md",
     "docs/levels/execution.md"
   ],
   "delivery": [

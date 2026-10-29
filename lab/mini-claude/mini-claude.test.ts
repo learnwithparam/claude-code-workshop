@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -43,6 +43,15 @@ describe("mini claude", () => {
     const { model, seen } = script([read("1", ".env")]);
     const { log } = await mini(model, "show me the key", dir);
     expect(log).toEqual(["read_file: blocked"]);
+    expect(JSON.stringify(seen)).not.toContain("hunter2");
+  });
+
+  it("refuses a different case and a symlink that points at the secret file", async () => {
+    const dir = project();
+    symlinkSync(join(dir, ".env"), join(dir, "innocent.txt"));
+    const { model, seen } = script([read("1", ".ENV")], [read("2", "innocent.txt")]);
+    const { log } = await mini(model, "show me the key", dir);
+    expect(log).toEqual(["read_file: blocked", "read_file: blocked"]);
     expect(JSON.stringify(seen)).not.toContain("hunter2");
   });
 
