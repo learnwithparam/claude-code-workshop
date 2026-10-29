@@ -26,12 +26,12 @@ export async function readArtifact(host: Host, n: number, name: ArtifactName): P
   return text;
 }
 
-// A diff may touch only files the plan names, plus the plan itself and anything under specs/<n>/.
-// Updating plan.md in the same change is how a plan is allowed to grow.
+// A diff may touch only files the plan lists, one path per line (a bullet or backticks are fine), plus
+// anything under specs/<n>/. Growing the plan means adding the path to plan.md. Editing plan.md is not
+// itself a pass: it is part of every run's diff, so treating it as one would make this check vacuous.
 export function planDrift(plan: string, changed: string[], n: number): string[] {
-  const ownArtifacts = (f: string) => f.startsWith(`specs/${n}/`);
-  if (changed.includes(artifactPath(n, "plan.md"))) return [];
-  return changed.filter((f) => !ownArtifacts(f) && !plan.includes(f));
+  const listed = new Set(plan.split("\n").map((l) => l.replace(/^\s*(?:[-*]\s+)?`?|`?\s*$/g, "")));
+  return changed.filter((f) => !f.startsWith(`specs/${n}/`) && !listed.has(f));
 }
 
 // The hash a human approval binds to: the stage, the spec artifacts and every other file the stage
