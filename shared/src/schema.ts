@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { activitySchema } from "./activity-kinds";
 import { bandIdSchema } from "./bands";
 
 export const itemSchema = z.object({
@@ -7,11 +8,17 @@ export const itemSchema = z.object({
   picture: z.string().optional(),
 });
 
-export const sectionSchema = z.object({
-  heading: z.string().min(1),
-  instruction: z.string().min(1),
-  items: z.array(itemSchema).min(1),
-});
+// A section is either plain prompt/answer items or one drawn activity, never both.
+export const sectionSchema = z
+  .object({
+    heading: z.string().min(1),
+    instruction: z.string().min(1),
+    items: z.array(itemSchema).min(1).optional(),
+    activity: activitySchema.optional(),
+  })
+  .refine((s) => (s.items === undefined) !== (s.activity === undefined), {
+    message: "a section needs items or an activity, not both",
+  });
 
 // The only thing the model writes. Layout, fonts and limits come from the band table.
 export const worksheetSchema = z.object({

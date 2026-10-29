@@ -1,6 +1,7 @@
 {
   "hand-built": [
     "shared/**",
+    "features/**",
     "web/**",
     "tests/structure/bands.test.ts",
     "fixtures/worksheets.json",

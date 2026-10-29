@@ -9,9 +9,16 @@ const wordCount = (text: string) => text.trim().split(/\s+/).filter(Boolean).len
 export function checkBand(sheet: Worksheet): BandCheck {
   const band = BANDS[sheet.band];
   const problems: string[] = [];
-  const items = sheet.sections.flatMap((section) => section.items);
-  if (items.length > band.maxItems) {
-    problems.push(`${items.length} items, band allows ${band.maxItems}`);
+  const items = sheet.sections.flatMap((section) => section.items ?? []);
+  const activities = sheet.sections.flatMap((section) => section.activity ?? []);
+  for (const activity of activities) {
+    if (!band.kinds.includes(activity.kind)) {
+      problems.push(`kind ${activity.kind} not allowed for ${band.id}`);
+    }
+  }
+  const total = items.length + activities.reduce((sum, a) => sum + a.items.length, 0);
+  if (total > band.maxItems) {
+    problems.push(`${total} items, band allows ${band.maxItems}`);
   }
   for (const item of items) {
     const words = wordCount(item.prompt);

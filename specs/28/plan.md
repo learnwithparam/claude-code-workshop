@@ -1,0 +1,14 @@
+shared/src/activity-kinds.ts
+shared/src/activity-kinds.test.ts
+shared/src/render-activity.ts
+shared/src/bands.ts
+shared/src/schema.ts
+shared/src/check.ts
+shared/src/render-item.ts
+shared/src/render-section.ts
+shared/src/index.ts
+shared/src/bands.test.ts
+shared/src/render.test.ts
+api/src/agent/prompt.ts
+features/activity-kinds.feature
+levels.json

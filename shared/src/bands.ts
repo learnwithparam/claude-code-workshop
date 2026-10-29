@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { ActivityKind } from "./activity-kinds";
 
 export const bandIdSchema = z.enum([
   "early-reader",
@@ -20,6 +21,7 @@ export type Band = {
   maxItems: number;
   maxWordsPerItem: number;
   pictureBoxes: boolean;
+  kinds: ActivityKind[];
 };
 
 // Truth outside the model: the band table decides layout and limits, the model only fills content.
@@ -42,6 +44,7 @@ export const BANDS: Record<BandId, Band> = {
     maxItems: 6,
     maxWordsPerItem: 6,
     pictureBoxes: true,
+    kinds: ["count", "circle", "trace", "match"],
   },
   kindergarten: {
     id: "kindergarten",
@@ -52,6 +55,7 @@ export const BANDS: Record<BandId, Band> = {
     maxItems: 8,
     maxWordsPerItem: 8,
     pictureBoxes: true,
+    kinds: ["count", "circle", "ten-frame", "trace", "match"],
   },
   "grade-1-2": {
     id: "grade-1-2",
@@ -71,6 +75,7 @@ export const BANDS: Record<BandId, Band> = {
     maxItems: 10,
     maxWordsPerItem: 14,
     pictureBoxes: true,
+    kinds: ["count", "match", "fill-blank", "number-line", "ten-frame", "short", "steps"],
   },
   "grade-3-5": {
     id: "grade-3-5",
@@ -81,6 +86,7 @@ export const BANDS: Record<BandId, Band> = {
     maxItems: 12,
     maxWordsPerItem: 24,
     pictureBoxes: false,
+    kinds: ["fill-blank", "number-line", "fraction-bar", "steps", "short", "table", "match"],
   },
   "grade-6-8": {
     id: "grade-6-8",
@@ -99,6 +105,7 @@ export const BANDS: Record<BandId, Band> = {
     maxItems: 14,
     maxWordsPerItem: 36,
     pictureBoxes: false,
+    kinds: ["fill-blank", "fraction-bar", "table", "steps", "short"],
   },
   "grade-9-12": {
     id: "grade-9-12",
@@ -109,6 +116,7 @@ export const BANDS: Record<BandId, Band> = {
     maxItems: 16,
     maxWordsPerItem: 50,
     pictureBoxes: false,
+    kinds: ["fill-blank", "table", "steps", "short"],
   },
   university: {
     id: "university",
@@ -119,6 +127,7 @@ export const BANDS: Record<BandId, Band> = {
     maxItems: 20,
     maxWordsPerItem: 80,
     pictureBoxes: false,
+    kinds: ["fill-blank", "table", "steps", "short"],
   },
 };
 
