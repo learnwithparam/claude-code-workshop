@@ -24,4 +24,11 @@ describe("mutation", () => {
     expect(calls.join()).toContain("--mutate shared/src/render.ts");
     expect(calls.join()).not.toContain("a.test.ts");
   });
+  it("fails closed on a file name that could rewrite the mutate list", async () => {
+    const { calls, run } = ctx(["shared/src/a,!shared/src/render.ts.ts"]);
+    const r = await run();
+    expect(r.ok).toBe(false);
+    expect(r.evidence).toContain("glob characters");
+    expect(calls.join()).not.toContain("stryker");
+  });
 });
