@@ -40,6 +40,10 @@ Track A: add a band alias such as "year 1" and make the structural test pass. Tr
 
 Catch up with `make levels LEVEL=hand-built`, then open `supplied/hand-built`.
 
+## Go further: a clean place to start
+
+Run `make doctor` before anything else. It names what is missing instead of failing three steps later. `/help` lists the commands in your version, and `/doctor` checks the install.
+
 ## Discussion
 
 Which parts of your own product are decided by a person and should stay that way?
