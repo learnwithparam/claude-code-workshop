@@ -4,17 +4,29 @@ method: incident to eval to fix
 source: Anthropic AI-native SDLC playbook
 for: incidents and band breaches
 steps:
-  - { stage: diagnose, agent: verifier }
+  - {
+      stage: diagnose,
+      agent: verifier,
+      writes: intent.md,
+      brief: "From the incident in the ticket, state the failing behaviour, the likely cause and the evidence. Change nothing. Reply with the record only.",
+    }
   - {
       stage: plan,
       writes: plan.md,
       agent: planner,
       brief: "Reply with the plan and nothing else: one repo path per line for every file you will create or change. The runner saves your reply as specs/<issue>/plan.md, and later stages may touch only the files listed.",
     }
-  - { stage: eval, agent: builder, checks: [red, lock], loop: { until: [red], max: 2 } }
+  - {
+      stage: eval,
+      agent: builder,
+      brief: "Turn the incident into a test in specs/<issue>/golden that fails on the base commit the same way production failed. Write no source.",
+      checks: [red, lock],
+      loop: { until: [red], max: 2 },
+    }
   - {
       stage: fix,
       agent: builder,
+      brief: "Fix the cause with the smallest change. Never edit the test.",
       phase: fix,
       checks: [green, lock, gate],
       loop: { until: [green, lock, gate], max: 3 },

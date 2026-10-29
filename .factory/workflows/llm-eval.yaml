@@ -10,10 +10,17 @@ steps:
       agent: planner,
       brief: "Reply with the plan and nothing else: one repo path per line for every file you will create or change. The runner saves your reply as specs/<issue>/plan.md, and later stages may touch only the files listed.",
     }
-  - { stage: rows, agent: builder, checks: [red, lock], loop: { until: [red], max: 2 } }
+  - {
+      stage: rows,
+      agent: builder,
+      brief: "Add eval rows that fail against main for the behaviour in the ticket. Write no prompt or source change yet.",
+      checks: [red, lock],
+      loop: { until: [red], max: 2 },
+    }
   - {
       stage: tune,
       agent: builder,
+      brief: "Change the prompt or model call until the new rows pass without a regression or a higher token count. Never edit the rows.",
       phase: fix,
       checks: [eval, lock],
       loop: { until: [eval, lock], max: 4 },

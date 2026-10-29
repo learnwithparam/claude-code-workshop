@@ -10,10 +10,17 @@ steps:
       agent: planner,
       brief: "Reply with the plan and nothing else: one repo path per line for every file you will create or change. The runner saves your reply as specs/<issue>/plan.md, and later stages may touch only the files listed.",
     }
-  - { stage: contract, agent: builder, checks: [red, lock], loop: { until: [red], max: 2 } }
+  - {
+      stage: contract,
+      agent: builder,
+      brief: "Write the contract test first in specs/<issue>/golden: it replays recorded events through both sides and fails on the base commit. Write no source.",
+      checks: [red, lock],
+      loop: { until: [red], max: 2 },
+    }
   - {
       stage: sides,
       agent: builder,
+      brief: "Change the api and the web side until the contract test passes. Never edit the test.",
       phase: fix,
       checks: [contract, lock, gate],
       loop: { until: [contract, lock, gate], max: 3 },

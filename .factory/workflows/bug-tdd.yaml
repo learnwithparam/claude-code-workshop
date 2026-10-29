@@ -32,4 +32,10 @@ steps:
       checks: [mutation],
     }
   - { stage: review, agent: reviewer, checks: [plan-drift] }
-  - { stage: ci, agent: builder, checks: [ci], loop: { until: [ci], max: 2 } }
+  - {
+      stage: ci,
+      agent: builder,
+      brief: "Read the failing CI job log and fix what it names. Never edit the locked tests.",
+      checks: [ci],
+      loop: { until: [ci], max: 2 },
+    }
