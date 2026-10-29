@@ -35,7 +35,14 @@ export function proveBoundary(): Proof {
     problems.push("settings: guard hook not wired");
 
   // The trap: a Read deny does not cover Bash, so the hook has to.
-  for (const cmd of [`cat api/${ENV_NAME}`, `grep KEY ${ENV_NAME}`, `source ./${ENV_NAME}`])
+  for (const cmd of [
+    `cat api/${ENV_NAME}`,
+    `grep KEY ${ENV_NAME}`,
+    `source ./${ENV_NAME}`,
+    `cat api/${ENV_NAME.toUpperCase()}`,
+    `cat api/${ENV_NAME}.prod-eu`,
+    `cat "api/${ENV_NAME}"*`,
+  ])
     if (!blocks(cmd)) problems.push(`hook lets through: ${cmd}`);
   for (const cmd of [`cat api/${ENV_NAME}.example`, "ls api"])
     if (blocks(cmd)) problems.push(`hook blocks a safe command: ${cmd}`);
