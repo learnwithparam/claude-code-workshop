@@ -184,6 +184,13 @@ describe("checks", () => {
     // Run 29 changed icons, the goldens were regenerated, and the plan could not list them: the gate owns that folder.
     const snap = "specs/25/golden/__snapshots__/early-reader.html";
     expect(planDrift("a.ts", ["a.ts", snap], 29)).toEqual([]);
+    // Only snapshot files in a numbered spec's folder: no traversal, no scripts dressed as snapshots.
+    for (const bad of [
+      "specs/../golden/__snapshots__/a.html",
+      "specs/25/golden/__snapshots__/a.ts",
+      "specs/25/golden/__snapshots__/sub/a.html",
+    ])
+      expect(planDrift("a.ts", [bad], 29)).toEqual([bad]);
     expect(planDrift("a.ts", ["specs/25/golden/other.test.ts"], 29)).toEqual([
       "specs/25/golden/other.test.ts",
     ]);
