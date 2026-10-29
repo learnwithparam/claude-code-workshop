@@ -1,5 +1,6 @@
 import { parse } from "yaml";
 import { z } from "zod";
+import { AGENT_ARTIFACTS } from "./artifacts.ts";
 
 export const CHECK_NAMES = [
   "red",
@@ -25,6 +26,8 @@ const stepSchema = z.object({
   agent: z.string(),
   // What the agent is asked to do in this stage. Without it the agent only sees the ticket and guesses.
   brief: z.string().optional(),
+  // A read-only agent cannot write its own artifact, so the runner saves its reply as this one.
+  writes: z.enum(AGENT_ARTIFACTS).optional(),
   checks: z.array(z.enum(CHECK_NAMES)).default([]),
   // Repeat the agent until every check in `until` passes, at most `max` times.
   loop: z
