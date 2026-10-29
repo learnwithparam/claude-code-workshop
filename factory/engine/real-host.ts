@@ -59,7 +59,11 @@ export type RealHostOptions = {
 };
 
 export function realHost(o: RealHostOptions): Host {
-  const state = o.stateDir ?? join(homedir(), ".factory", "state");
+  // One folder per process: a file left by an earlier run was signed with another key and must never be read.
+  const state =
+    o.stateDir ??
+    join(homedir(), ".factory", "state", `${process.pid}-${randomBytes(4).toString("hex")}`);
+  if (!o.stateDir) process.once("exit", () => rmSync(state, { recursive: true, force: true }));
   // Checks run code the agent wrote: no API key, no GitHub token, a throwaway HOME and no global git config.
   const home = mkdtempSync(join(tmpdir(), "factory-home-"));
   process.once("exit", () => rmSync(home, { recursive: true, force: true }));
@@ -85,7 +89,9 @@ export function realHost(o: RealHostOptions): Host {
     const out = r.stdout ?? "";
     if (r.status !== 0 || !out.trim()) throw new Error("cannot read the repo git config");
     // Config can name programs that git runs while staging or committing; none is allowed.
-    const names = sh("git", ["config", "--list", "--includes", "--name-only", "-z"]).stdout ?? "";
+    const n = sh("git", ["config", "--list", "--includes", "--name-only", "-z"]);
+    if (n.status !== 0) throw new Error("cannot read the repo git config");
+    const names = n.stdout ?? "";
     if (
       names.split("\0").some((k) => /^(filter\..+|diff\..+\.textconv|merge\..+\.driver)$/i.test(k))
     )
