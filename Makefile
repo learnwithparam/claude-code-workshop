@@ -1,4 +1,4 @@
-.PHONY: prove-homework doctor dev check check-affected prove levels claude smoke hooks eval factory
+.PHONY: prove-homework doctor dev check check-affected prove levels claude smoke hooks eval factory exercise
 
 doctor:
 	@node -v | grep -qE '^v2[2-9]' && echo "ok node $$(node -v)" || (echo "need Node 22+" && exit 1)
@@ -40,6 +40,10 @@ eval:
 
 factory:
 	npx tsx factory/main.ts $(ISSUE) $(FLAGS)
+
+# PASS or FAIL for one level's proof. TRACK=a adds the hint; TRACK=b prints only the failing line.
+exercise:
+	npx tsx scripts/exercise.ts $(LEVEL) $(TRACK)
 
 levels:
 	npx tsx scripts/levels.ts $(LEVEL)
