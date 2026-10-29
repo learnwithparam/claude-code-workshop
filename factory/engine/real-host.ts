@@ -1,6 +1,14 @@
 import { execFileSync, spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import type { Host } from "./types.ts";
@@ -43,8 +51,20 @@ export type RealHostOptions = {
 
 export function realHost(o: RealHostOptions): Host {
   const state = o.stateDir ?? join(homedir(), ".factory", "state");
-  const sh = (cmd: string, args: string[], cwd = o.cwd) =>
-    spawnSync(cmd, args, { cwd, encoding: "utf8", maxBuffer: 64 << 20 });
+  // Checks run code the agent wrote: no API key, no GitHub token, a throwaway HOME and no global git config.
+  const home = mkdtempSync(join(tmpdir(), "factory-home-"));
+  process.once("exit", () => rmSync(home, { recursive: true, force: true }));
+  const SAFE_ENV = {
+    ...Object.fromEntries(
+      ["PATH", "SHELL", "TERM", "LANG"].flatMap((k) =>
+        process.env[k] ? [[k, process.env[k]]] : [],
+      ),
+    ),
+    HOME: home,
+    GIT_CONFIG_GLOBAL: "/dev/null",
+  };
+  const sh = (cmd: string, args: string[], cwd = o.cwd, env: NodeJS.ProcessEnv = SAFE_ENV) =>
+    spawnSync(cmd, args, { cwd, encoding: "utf8", maxBuffer: 64 << 20, env });
   const git = (...a: string[]) => execFileSync("git", a, { cwd: o.cwd, encoding: "utf8" });
   const tracked = () => git("ls-files", "-co", "--exclude-standard").split("\n").filter(Boolean);
   let phase: string | null = null;
@@ -65,7 +85,7 @@ export function realHost(o: RealHostOptions): Host {
             model: MODELS[fm.model ?? "sonnet"] ?? fm.model,
             maxTurns: Number(fm.maxTurns ?? 20),
             maxBudgetUsd: o.maxUsdPerAgent ?? 3,
-            permissionMode: (fm.permissionMode as "plan" | "acceptEdits") ?? "plan",
+            permissionMode: fm.permissionMode === "acceptEdits" ? "acceptEdits" : "plan",
             allowedTools: fm.tools?.split(",").map((t) => t.trim()),
             systemPrompt: { type: "preset", preset: "claude_code", append: body },
             settingSources: ["project"],
@@ -146,7 +166,8 @@ export function realHost(o: RealHostOptions): Host {
       phase = p;
     },
     async approved(n, stage, digest) {
-      const r = sh("gh", ["issue", "view", String(n), "--json", "comments"]);
+      // Runner-side call with the real environment: gh needs the person's login, the agents never see it.
+      const r = sh("gh", ["issue", "view", String(n), "--json", "comments"], o.cwd, process.env);
       if (r.status !== 0) return false;
       return approvalIn(JSON.parse(r.stdout).comments ?? [], stage, digest);
     },

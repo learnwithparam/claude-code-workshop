@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { parseEnv } from "node:util";
 import { loadConfig } from "../config.ts";
 import { ready, report, runIssue } from "./cli.ts";
 
@@ -11,8 +13,12 @@ else if (first === "--watch")
   console.log(JSON.stringify(ready(loadConfig().labels.ready), null, 2));
 else if (first && workflow) {
   // The agents need a key. Load it inside this process so it never appears on a command line.
-  if (!process.env.ANTHROPIC_API_KEY)
-    process.loadEnvFile(new URL("../../api/.env", import.meta.url));
+  // Only that one variable is taken from the file, so nothing else in it reaches the run.
+  if (!process.env.ANTHROPIC_API_KEY) {
+    const file = readFileSync(new URL("../../api/.env", import.meta.url), "utf8");
+    const key = parseEnv(file).ANTHROPIC_API_KEY;
+    if (key) process.env.ANTHROPIC_API_KEY = key;
+  }
   const r = await runIssue(Number(first), workflow);
   console.log(
     JSON.stringify(

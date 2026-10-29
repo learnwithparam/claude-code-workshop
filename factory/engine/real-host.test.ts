@@ -73,3 +73,22 @@ describe("realHost over a git repo", () => {
     expect((await host.exec("sh", ["-c", "cat a.txt"])).output).toBe("head");
   });
 });
+
+describe("realHost isolation", () => {
+  it("runs checks without the API key or a GitHub token", async () => {
+    const { host } = repo();
+    process.env.ANTHROPIC_API_KEY = "k";
+    process.env.GH_TOKEN = "g";
+    const r = await host.exec("sh", ["-c", 'echo "[$ANTHROPIC_API_KEY][$GH_TOKEN]"']);
+    expect(r.output.trim()).toBe("[][]");
+  });
+});
+
+describe("realHost home", () => {
+  it("gives checks a throwaway HOME, not the person's", async () => {
+    const { host } = repo();
+    const r = await host.exec("sh", ["-c", 'echo "$HOME"']);
+    expect(r.output.trim()).not.toBe(process.env.HOME);
+    expect(r.output).toContain("factory-home-");
+  });
+});
