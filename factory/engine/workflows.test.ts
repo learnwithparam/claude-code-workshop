@@ -68,3 +68,12 @@ describe("workflow set", () => {
     expect(settings.permissions.deny).toContain("Read(.factory/holdout/**)");
   });
 });
+
+describe("plan-drift needs a plan", () => {
+  it.each(files)("%s writes plan.md before it checks plan-drift", (file) => {
+    const wf = loadWorkflow(readFileSync(`${dir}/${file}`, "utf8"));
+    const at = wf.steps.findIndex((s) => s.checks?.includes("plan-drift"));
+    if (at < 0) return;
+    expect(wf.steps.slice(0, at + 1).some((s) => s.stage === "plan")).toBe(true);
+  });
+});
