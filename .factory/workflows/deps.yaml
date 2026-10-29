@@ -3,6 +3,7 @@ name: deps
 method: vet then gate
 source: Anthropic AI-native SDLC playbook
 for: dependency updates
+manifests: true
 steps:
   - {
       stage: vet,
@@ -19,8 +20,8 @@ steps:
   - {
       stage: bump,
       agent: builder,
-      brief: "Bump only the packages the plan lists with npm, fix any breakage the bump causes, and keep the lockfile in step.",
-      checks: [gate],
-      loop: { until: [gate], max: 3 },
+      brief: "Bump only the packages the plan lists with npm, fix any breakage the bump causes, and keep the lockfile in step. Change dependency versions only: never scripts, config or other fields of a manifest.",
+      checks: [manifest-deps, gate],
+      loop: { until: [manifest-deps, gate], max: 3 },
     }
-  - { stage: review, agent: reviewer, checks: [plan-drift] }
+  - { stage: review, agent: reviewer, checks: [plan-drift, manifest-deps] }

@@ -1,6 +1,7 @@
 import type { Check } from "../types.ts";
 import { commandCheck } from "./exec-check.ts";
 import { lock } from "./lock.ts";
+import { manifestDeps } from "./manifest-deps.ts";
 import { mutation } from "./mutation.ts";
 import { planDriftCheck } from "./plan-drift.ts";
 import { red } from "./red.ts";
@@ -39,6 +40,7 @@ export const CHECKS: Record<string, Check> = {
     vitestFor((n) => `specs/${n}/golden`),
   ),
   mutation,
+  "manifest-deps": manifestDeps,
   contract: commandCheck(
     "medium",
     "npx",
@@ -49,5 +51,5 @@ export const CHECKS: Record<string, Check> = {
   gate: commandCheck("large", "make", () => ["check"]),
   prepush: commandCheck("small", "bash", () => ["scripts/git/pre-push"]),
   ci: commandCheck("large", "gh", () => ["pr", "checks", "--watch"]),
-  prose: commandCheck("small", "python3", () => ["scripts/check-prose.py", "docs"]),
+  prose: commandCheck("small", "npx", () => ["tsx", "scripts/check-prose.ts", "docs"]),
 };

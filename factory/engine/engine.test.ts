@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { artifactDigest, planDrift } from "./artifacts.ts";
+import { artifactDigest, badPlanLines, planDrift } from "./artifacts.ts";
 import { lock } from "./checks/lock.ts";
 import { red } from "./checks/red.ts";
 import { fakeHost } from "./fake-host.ts";
@@ -148,5 +148,13 @@ describe("checks", () => {
     expect(planDrift("- `a.ts`\n* b.ts\n", ["a.ts", "b.ts"], 1)).toEqual([]);
     // A path that only appears inside a longer one is not listed.
     expect(planDrift("src/a.ts.bak", ["a.ts"], 1)).toEqual(["a.ts"]);
+  });
+});
+
+describe("badPlanLines for a dependency update", () => {
+  it("lists manifests only when the workflow allows them, and never a script", () => {
+    const plan = "package.json\npackage-lock.json\nscripts/x.ts";
+    expect(badPlanLines(plan)).toEqual(["package.json", "package-lock.json", "scripts/x.ts"]);
+    expect(badPlanLines(plan, true)).toEqual(["scripts/x.ts"]);
   });
 });

@@ -19,6 +19,10 @@ describe.each(files)("workflow %s", (file) => {
     expect(wf.method.length).toBeGreaterThan(0);
     expect(wf.source.length).toBeGreaterThan(0);
   });
+  it("lets the plan list manifests only if a step holds them to dependency fields", () => {
+    const guarded = wf.steps.some((s) => s.checks.includes("manifest-deps"));
+    expect(wf.manifests ? guarded : true).toBe(true);
+  });
   it("uses only agents that exist in .claude/agents", () => {
     for (const s of wf.steps) expect(agents.has(s.agent), `${s.stage}: ${s.agent}`).toBe(true);
   });
@@ -89,9 +93,13 @@ describe("read-only planner stages", () => {
 });
 
 describe("every step knows its job", () => {
-  it.each(files)("%s gives each step a brief unless it only reviews the plan", (file) => {
+  // A final review step has no work to brief: it only re-runs checks that hold the diff to the plan.
+  const REVIEW_ONLY = ["plan-drift", "manifest-deps"];
+  it.each(files)("%s gives each step a brief unless it only re-checks the plan", (file) => {
     const wf = loadWorkflow(readFileSync(`${dir}/${file}`, "utf8"));
-    for (const s of wf.steps.filter((x) => !x.brief))
-      expect(s.checks, `${file} ${s.stage}`).toEqual(["plan-drift"]);
+    for (const s of wf.steps.filter((x) => !x.brief)) {
+      expect(s.checks[0], `${file} ${s.stage}`).toBe("plan-drift");
+      for (const c of s.checks) expect(REVIEW_ONLY, `${file} ${s.stage}`).toContain(c);
+    }
   });
 });
