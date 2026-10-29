@@ -44,7 +44,8 @@ export function planDrift(plan: string, changed: string[], n: number): string[] 
 // The plan is the allowlist, and a model writes it, so it may name only ordinary repo files: no prose, globs,
 // absolute or parent paths, and nothing the gate itself is made of.
 const PLAN_PATH = /^[A-Za-z0-9_][A-Za-z0-9_.@/-]*$/;
-const GATE_OWNED = /^(\.github|\.claude|\.factory)\//;
+const GATE_OWNED =
+  /^((\.github|\.claude|\.factory|factory|scripts|specs\/[^/]+\/golden)\/|(makefile|package(-lock)?\.json|levels\.json|biome\.json|stryker.*|vitest.*|tsconfig.*|playwright\.config.*)$)/i;
 export function badPlanLines(plan: string): string[] {
   return planLines(plan).filter(
     (l) => !PLAN_PATH.test(l) || l.split("/").includes("..") || GATE_OWNED.test(l),

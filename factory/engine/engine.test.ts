@@ -49,6 +49,9 @@ describe("runWorkflow", () => {
       ".github/workflows/check.yml",
       ".claude/settings.json",
       "../outside.ts",
+      "factory/engine/checks/red.ts",
+      "Package.json",
+      "Makefile",
       "/etc/passwd",
       "shared/**",
     ]) {
