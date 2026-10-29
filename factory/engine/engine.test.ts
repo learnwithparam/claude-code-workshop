@@ -51,6 +51,8 @@ describe("runWorkflow", () => {
       "../outside.ts",
       "factory/engine/checks/red.ts",
       "Package.json",
+      "web/package.json",
+      "api/tsconfig.build.json",
       "Makefile",
       "/etc/passwd",
       "shared/**",
