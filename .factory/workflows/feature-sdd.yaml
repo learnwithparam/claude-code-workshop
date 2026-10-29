@@ -4,9 +4,9 @@ method: SDD with phase gates and properties
 source: Spec Kit and Kiro
 for: large features and epics
 steps:
-  - { stage: intent, agent: planner }
-  - { stage: spec, agent: planner, gate: human }
-  - { stage: plan, agent: planner, gate: human, checks: [plan-drift] }
+  - { stage: intent, agent: planner, writes: intent.md }
+  - { stage: spec, agent: planner, writes: spec.md, gate: human }
+  - { stage: plan, agent: planner, writes: plan.md, gate: human, checks: [plan-drift] }
   - {
       stage: tests,
       agent: builder,

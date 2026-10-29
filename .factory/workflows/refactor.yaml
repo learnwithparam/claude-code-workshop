@@ -6,8 +6,9 @@ for: refactors
 steps:
   - {
       stage: plan,
+      writes: plan.md,
       agent: planner,
-      brief: "Write specs/<issue>/plan.md: one repo path per line for every file you will create or change. Later stages may touch only those files.",
+      brief: "Reply with the plan and nothing else: one repo path per line for every file you will create or change. The runner saves your reply as specs/<issue>/plan.md, and later stages may touch only the files listed.",
     }
   - {
       stage: characterize,

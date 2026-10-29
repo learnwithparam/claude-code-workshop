@@ -86,6 +86,8 @@ async function runStep(
       stage: step.stage,
     });
     res.costUsd += out.costUsd;
+    if (step.writes && !out.failed && out.text.trim())
+      await writeArtifact(host, n, step.writes, `${out.text.trim()}\n`);
     res.log.push(
       `${step.stage} round ${round} $${out.costUsd.toFixed(4)}${out.failed ? ` FAILED ${out.failed}` : ""}`,
     );

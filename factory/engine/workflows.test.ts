@@ -6,6 +6,8 @@ import { loadWorkflow } from "./workflow.ts";
 
 const dir = ".factory/workflows";
 const files = readdirSync(dir).filter((f) => f.endsWith(".yaml"));
+// The planner has no Write tool, so these stages only produce an artifact if the runner saves the reply.
+const ARTIFACT_STAGES = new Set(["intent", "spec", "plan"]);
 const agents = new Set(readdirSync(".claude/agents").map((f) => f.replace(/\.md$/, "")));
 
 describe.each(files)("workflow %s", (file) => {
@@ -75,5 +77,13 @@ describe("plan-drift needs a plan", () => {
     const at = wf.steps.findIndex((s) => s.checks?.includes("plan-drift"));
     if (at < 0) return;
     expect(wf.steps.slice(0, at + 1).some((s) => s.stage === "plan")).toBe(true);
+  });
+});
+
+describe("read-only planner stages", () => {
+  it.each(files)("%s saves each planner artifact through the runner", (file) => {
+    const wf = loadWorkflow(readFileSync(`${dir}/${file}`, "utf8"));
+    for (const s of wf.steps.filter((x) => x.agent === "planner" && ARTIFACT_STAGES.has(x.stage)))
+      expect(s.writes, `${file} ${s.stage}`).toBe(`${s.stage}.md`);
   });
 });
