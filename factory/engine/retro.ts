@@ -4,9 +4,10 @@ import type { Host } from "./types.ts";
 // Everything up to the first whole-line closing `---`, line endings and BOM normalised. A file that
 // opens a header but never closes it counts as all header, so any edit to it is a change.
 const frontmatter = (text: string | null) => {
-  const t = (text ?? "").replace(/^\uFEFF/, "").replaceAll("\r\n", "\n");
-  if (!/^---[ \t]*\n/.test(t)) return "";
-  return /^---[ \t]*\n[\s\S]*?\n---[ \t]*(\n|$)/.exec(t)?.[0] ?? t;
+  const t = (text ?? "").replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
+  // Any file that starts with --- may open a header for some reader, so it is treated as one.
+  if (!t.startsWith("---")) return "";
+  return /^---[^\n]*\n[\s\S]*?\n---[^\n]*(\n|$)/.exec(t)?.[0] ?? t;
 };
 
 export type RetroOutcome =
