@@ -14,7 +14,7 @@ steps:
       stage: plan,
       writes: plan.md,
       agent: planner,
-      brief: "Reply with the plan and nothing else: one repo path per line for every file you will create or change. The runner saves your reply as specs/<issue>/plan.md, and later stages may touch only the files listed.",
+      brief: "Reply with the plan and nothing else: one repo path per line for every file you will create or change, never a script you only run. The runner saves your reply as specs/<issue>/plan.md, and later stages may touch only the files listed.",
     }
   - {
       stage: build,
