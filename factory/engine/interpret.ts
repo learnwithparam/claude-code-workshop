@@ -1,4 +1,10 @@
-import { artifactDigest, artifactPath, badPlanLines, writeArtifact } from "./artifacts.ts";
+import {
+  artifactDigest,
+  artifactPath,
+  badPlanLines,
+  dropSpecLines,
+  writeArtifact,
+} from "./artifacts.ts";
 import { CHECKS } from "./checks/index.ts";
 import type { CheckResult, Host } from "./types.ts";
 import type { Step, Workflow } from "./workflow.ts";
@@ -45,16 +51,20 @@ export async function runWorkflow(
     return res;
   };
 
-  for (const step of wf.steps) {
-    // A human gate approves what the stage produced, by hash. A stage whose artifacts were already
-    // approved is not run again, because regenerating them would change what the person signed.
+  // A human gate approves what the stage produced, by hash. Every step up to the last approved gate is
+  // not run again, because regenerating its artifacts would change what the person signed.
+  let resumeAt = 0;
+  for (const [i, step] of wf.steps.entries()) {
     if (
       step.gate === "human" &&
       (await host.approved(n, step.stage, await artifactDigest(host, n, step.stage)))
     ) {
       res.log.push(`gate ${step.stage} already approved, skipped`);
-      continue;
+      resumeAt = i + 1;
     }
+  }
+
+  for (const step of wf.steps.slice(resumeAt)) {
     const stopped = await runStep(host, step, n, ticket, res, wf.manifests);
     if (stopped) return finish("needs-human", step.stage);
     if (
@@ -89,10 +99,11 @@ async function runStep(
     res.costUsd += out.costUsd;
     let refused = "";
     if (step.writes && !out.failed && out.text.trim()) {
-      const odd = step.writes === "plan.md" ? badPlanLines(out.text, manifests) : [];
+      const text = step.writes === "plan.md" ? dropSpecLines(out.text, n) : out.text;
+      const odd = step.writes === "plan.md" ? badPlanLines(text, manifests) : [];
       if (odd.length)
         refused = `plan.md refused, these lines are not ordinary repo paths: ${odd.slice(0, 5).join(" | ")}`;
-      else await writeArtifact(host, n, step.writes, `${out.text.trim()}\n`);
+      else await writeArtifact(host, n, step.writes, `${text.trim()}\n`);
     }
     res.log.push(
       `${step.stage} round ${round} $${out.costUsd.toFixed(4)}${out.failed ? ` FAILED ${out.failed}` : ""}`,

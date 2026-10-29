@@ -190,6 +190,7 @@
   ],
   "workflows": [
     "specs/**",
+    "tests/contract/**",
     "factory/engine/**",
     ".factory/workflows/**",
     ".factory/bands.yaml",

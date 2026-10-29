@@ -23,18 +23,40 @@ describe.each(files)("workflow %s", (file) => {
     const guarded = wf.steps.some((s) => s.checks.includes("manifest-deps"));
     expect(wf.manifests ? guarded : true).toBe(true);
   });
+  it("tells the planner that files under specs/<issue>/ are not listed", () => {
+    // Run 31 listed its golden test and the plan was refused; the runner already allows specs/<issue>/.
+    const plan = wf.steps.find((s) => s.stage === "plan");
+    if (plan) expect(plan.brief).toContain("Do not list files under specs/<issue>/");
+  });
+  it("tells the planner to list levels.json and to add no commentary", () => {
+    // Run 31 added files, levels.json had to change, and plan-drift failed; run 29's plan held a note.
+    const plan = wf.steps.find((s) => s.stage === "plan");
+    if (plan) expect(plan.brief).toContain("list levels.json whenever you add a file");
+    if (plan) expect(plan.brief).toContain("Commentary of any kind makes the plan unusable");
+  });
   it("uses only agents that exist in .claude/agents", () => {
     for (const s of wf.steps) expect(agents.has(s.agent), `${s.stage}: ${s.agent}`).toBe(true);
   });
   it("dry-runs every step in order", async () => {
+    // A deps workflow must change a manifest to pass, so its dry run bumps one dependency.
+    const manifest = (v: string) => JSON.stringify({ dependencies: { zod: v } });
+    const [before, bumped] = [manifest("^4.0.0"), manifest("^4.1.0")];
+    const plan = wf.manifests ? "plan\npackage.json" : "plan";
     const {
       host: base,
       files: fs,
       calls,
     } = fakeHost({
-      files: { "specs/1/plan.md": "plan", "specs/1/a.test.ts": "t" },
-      changed: ["specs/1/plan.md", "specs/1/a.test.ts"],
-      exec: [{ match: "npx vitest", ref: "base", result: { code: 1, output: "red" } }],
+      files: {
+        "specs/1/plan.md": plan,
+        "specs/1/a.test.ts": "t",
+        ...(wf.manifests ? { "package.json": bumped } : {}),
+      },
+      changed: ["specs/1/plan.md", "specs/1/a.test.ts", ...(wf.manifests ? ["package.json"] : [])],
+      exec: [
+        { match: "npx vitest", ref: "base", result: { code: 1, output: "red" } },
+        { match: "git show HEAD:package.json", ref: "base", result: { code: 0, output: before } },
+      ],
     });
     // A person approves a gate only after reading what its stage produced.
     const host = {
