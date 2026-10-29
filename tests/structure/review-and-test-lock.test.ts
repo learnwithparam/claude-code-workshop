@@ -7,6 +7,12 @@ describe("test lock", () => {
     "blocks an edit to %s during a fix",
     (file) => expect(testLockFor(file, { FACTORY_PHASE: "fix" })).toContain("is a test"),
   );
+  it("matches by case and through dot segments", () => {
+    expect(testLockFor("api/src/A.TEST.ts", { FACTORY_PHASE: "fix" })).toContain("is a test");
+    expect(testLockFor("api/src/../src/a.test.ts", { FACTORY_PHASE: "fix" })).toContain(
+      "is a test",
+    );
+  });
   it("lets the code under test change during a fix", () => {
     expect(testLockFor("api/src/a.ts", { FACTORY_PHASE: "fix" })).toBeNull();
   });

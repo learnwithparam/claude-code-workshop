@@ -15,6 +15,11 @@ describe("prompt routing", () => {
 });
 
 describe("integrity hash", () => {
+  it("watches every hook, not only the secrets guard", () => {
+    const files = Object.keys(hashes(() => "a"));
+    expect(files).toContain(".claude/hooks/pretooluse-test-lock.mjs");
+    expect(files).toContain(".claude/settings.json");
+  });
   it("names the file whose hash moved and says nothing on the first run", () => {
     const before = hashes(() => "a");
     const after = hashes((f: string) => (f.endsWith("settings.json") ? "b" : "a"));

@@ -1,14 +1,24 @@
 // Pattern: SessionStart integrity hash. A changed hook or setting file is told to the model before it trusts the config.
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
-const WATCHED = [".claude/settings.json", ".claude/hooks/pretooluse-secrets.mjs"];
+// Every hook and both settings files: a changed hook is as much a config change as a changed setting.
+// The baseline sits in the working tree, so it catches drift between sessions, not a determined edit
+// of both files; a hardened setup keeps it outside the tree or signs it.
+function watched() {
+  const hooks = readdirSync(".claude/hooks")
+    .filter((f) => f.endsWith(".mjs"))
+    .map((f) => `.claude/hooks/${f}`);
+  return [".claude/settings.json", ".claude/settings.local.json", ...hooks].filter((f) =>
+    existsSync(f),
+  );
+}
 const STORE = ".claude/.cc-writes/integrity.json";
 
-export function hashes(read) {
+export function hashes(read, files = watched()) {
   return Object.fromEntries(
-    WATCHED.map((f) => [f, createHash("sha256").update(read(f)).digest("hex")]),
+    files.map((f) => [f, createHash("sha256").update(read(f)).digest("hex")]),
   );
 }
 

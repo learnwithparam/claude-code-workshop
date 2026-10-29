@@ -13,7 +13,8 @@ describe("context files", () => {
 
   it("ships a CLAUDE.local.md example and ignores the real one", () => {
     expect(existsSync("docs/examples/CLAUDE.local.md")).toBe(true);
-    expect(ignored).toContain("CLAUDE.local.md");
+    // Anchored to the root, so the committed example under docs/ is not ignored with it.
+    expect(ignored).toContain("/CLAUDE.local.md");
   });
 
   it("copies only gitignored files into a worktree, never a secrets file", () => {
@@ -23,7 +24,7 @@ describe("context files", () => {
     expect(lines.length).toBeGreaterThan(0);
     for (const line of lines) {
       expect(line).not.toMatch(/\.env/);
-      expect(ignored.some((g) => g === line)).toBe(true);
+      expect(ignored.some((g) => g.replace(/^\//, "") === line)).toBe(true);
     }
   });
 });
