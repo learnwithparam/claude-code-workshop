@@ -39,6 +39,7 @@ export function fakeHost(script: FakeScript = {}) {
     write: async (p, t) => void files.set(p, t),
     list: async (d) => [...files.keys()].filter((k) => k.startsWith(d)),
     changedFiles: async () => script.changed ?? [...files.keys()],
+    commit: async (m) => void calls.push(`commit ${m}`),
     recall: async (k) => state.get(k) ?? null,
     remember: async (k, v) => void state.set(k, v),
     setPhase: (p) => void phases.push(p),

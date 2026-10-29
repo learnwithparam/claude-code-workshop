@@ -174,6 +174,11 @@ export function realHost(o: RealHostOptions): Host {
       return [...new Set([...diff, ...dirty])].filter(Boolean);
     },
 
+    async commit(message) {
+      git("add", "-A");
+      git("-c", "user.name=factory", "-c", "user.email=factory@localhost", "commit", "-m", message);
+    },
+
     async recall(k) {
       const f = join(state, k.replaceAll(/[^\w.-]/g, "_"));
       if (!existsSync(f)) return null;
