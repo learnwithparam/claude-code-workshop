@@ -19,6 +19,7 @@ export const CHECK_NAMES = [
   "prepush",
   "ci",
   "prose",
+  "manifest-deps",
 ] as const;
 
 const stepSchema = z.object({
@@ -44,6 +45,8 @@ export const workflowSchema = z.object({
   method: z.string(),
   source: z.string(),
   for: z.string(),
+  // Lets the plan list package.json and the lockfile. Only dependency updates need that.
+  manifests: z.boolean().default(false),
   steps: z.array(stepSchema).min(1),
 });
 export type Workflow = z.infer<typeof workflowSchema>;

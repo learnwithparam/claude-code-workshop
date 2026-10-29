@@ -19,6 +19,10 @@ describe.each(files)("workflow %s", (file) => {
     expect(wf.method.length).toBeGreaterThan(0);
     expect(wf.source.length).toBeGreaterThan(0);
   });
+  it("lets the plan list manifests only if a step holds them to dependency fields", () => {
+    const guarded = wf.steps.some((s) => s.checks.includes("manifest-deps"));
+    expect(wf.manifests ? guarded : true).toBe(true);
+  });
   it("uses only agents that exist in .claude/agents", () => {
     for (const s of wf.steps) expect(agents.has(s.agent), `${s.stage}: ${s.agent}`).toBe(true);
   });

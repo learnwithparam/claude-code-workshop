@@ -194,6 +194,8 @@
     ".factory/workflows/**",
     ".factory/bands.yaml",
     "scripts/prove/workflows.ts",
+    "scripts/check-prose.ts",
+    "scripts/check-prose.test.ts",
     "docs/levels/workflows.md",
     "docs/recordings/workflows.cast",
     "docs/recordings/workflows.gif",

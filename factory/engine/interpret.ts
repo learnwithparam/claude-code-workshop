@@ -55,7 +55,7 @@ export async function runWorkflow(
       res.log.push(`gate ${step.stage} already approved, skipped`);
       continue;
     }
-    const stopped = await runStep(host, step, n, ticket, res);
+    const stopped = await runStep(host, step, n, ticket, res, wf.manifests);
     if (stopped) return finish("needs-human", step.stage);
     if (
       step.gate === "human" &&
@@ -75,6 +75,7 @@ async function runStep(
   n: number,
   ticket: string,
   res: Result,
+  manifests = false,
 ): Promise<boolean> {
   const max = step.loop?.max ?? 1;
   let feedback = "";
@@ -88,7 +89,7 @@ async function runStep(
     res.costUsd += out.costUsd;
     let refused = "";
     if (step.writes && !out.failed && out.text.trim()) {
-      const odd = step.writes === "plan.md" ? badPlanLines(out.text) : [];
+      const odd = step.writes === "plan.md" ? badPlanLines(out.text, manifests) : [];
       if (odd.length)
         refused = `plan.md refused, these lines are not ordinary repo paths: ${odd.slice(0, 5).join(" | ")}`;
       else await writeArtifact(host, n, step.writes, `${out.text.trim()}\n`);
