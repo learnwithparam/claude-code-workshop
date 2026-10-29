@@ -27,3 +27,27 @@ describe("metrics", () => {
     expect(r.costByWorkflow["bug-tdd"]).toBe(1);
   });
 });
+
+describe("report", () => {
+  it("rolls up every saved metrics.json and skips a half-written run", async () => {
+    const { mkdtempSync, mkdirSync, writeFileSync } = await import("node:fs");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const { report } = await import("./cli.ts");
+    const dir = mkdtempSync(join(tmpdir(), "runs-"));
+    for (const [n, body] of [
+      ["1", { ticket: 1, workflow: "bug-tdd", outcome: "done", rounds: { fix: 1 }, costUsd: 0.5 }],
+      ["2", "{broken"],
+    ] as const) {
+      mkdirSync(join(dir, n));
+      writeFileSync(
+        join(dir, n, "metrics.json"),
+        typeof body === "string" ? body : JSON.stringify(body),
+      );
+    }
+    const r = report(dir);
+    expect(r.runs).toBe(1);
+    expect(r.firstPassRate).toBe(1);
+    expect(r.costUsd).toBe(0.5);
+  });
+});

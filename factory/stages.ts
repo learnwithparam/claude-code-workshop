@@ -48,7 +48,7 @@ function withScrubbedEnv<T>(fn: (env: ReturnType<typeof scrubbedEnv>) => T): T {
 let base = "";
 // Matched at any depth: a nested package manifest or config rewrites the gate as well.
 const GATE_FILES =
-  /(^|\/)(G?[Mm]akefile|package(-lock)?\.json|tsconfig[^/]*\.json|biome\.jsonc?|vitest\.config\.[cm]?[jt]s|\.github\/|\.claude\/hooks\/|\.claude\/settings[^/]*\.json|levels\.json|scripts\/|factory\/|\.factory\/)/;
+  /(^|\/)(G?[Mm]akefile|package(-lock)?\.json|tsconfig[^/]*\.json|biome\.jsonc?|vitest\.config\.[cm]?[jt]s|\.github\/|\.claude\/(hooks|agents)\/|\.claude\/settings[^/]*\.json|levels\.json|scripts\/|factory\/|\.factory\/)/;
 
 export const githubDeps: Pick<
   Deps,
