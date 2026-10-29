@@ -8,7 +8,8 @@ steps:
       stage: scenarios,
       agent: planner,
       writes: spec.md,
-      brief: "Write Gherkin scenarios for the ticket: Given, When, Then with concrete values, one behaviour each. Reply with the scenarios only.",
+      startsWith: "Feature:",
+      brief: "Write Gherkin scenarios for the ticket: Given, When, Then with concrete values, one behaviour each. Begin your reply with Feature: and reply with the scenarios only; the runner saves it as the spec, so a summary or a note about plan mode makes the spec unusable.",
     }
   - {
       stage: amigos,
