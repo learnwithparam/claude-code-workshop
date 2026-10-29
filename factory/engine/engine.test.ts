@@ -70,6 +70,20 @@ describe("runWorkflow", () => {
     expect((await runWorkflow(host, plan, 3, "t")).outcome).toBe("done");
     expect(files.get("specs/3/plan.md")).toBe("shared/src/a.ts\n");
   });
+  it("refuses a reply that does not begin as the step requires, and saves nothing", async () => {
+    // Run 28 saved the planner's chat apology as the spec, and it reached the amigos gate as if it were Gherkin.
+    const scenarios = wf(
+      '  - {stage: scenarios, agent: planner, writes: spec.md, startsWith: "Feature:"}',
+    );
+    const chat = fakeHost({
+      agents: [{ text: "I drafted the scenarios, but plan mode blocks edits." }],
+    });
+    expect((await runWorkflow(chat.host, scenarios, 4, "t")).outcome).toBe("needs-human");
+    expect(chat.files.has("specs/4/spec.md")).toBe(false);
+    const real = fakeHost({ agents: [{ text: "\nFeature: kinds\n  Scenario: one" }] });
+    expect((await runWorkflow(real.host, scenarios, 4, "t")).outcome).toBe("done");
+    expect(real.files.get("specs/4/spec.md")).toBe("Feature: kinds\n  Scenario: one\n");
+  });
   it("stops at the cap and writes run.log", async () => {
     const { host, files } = fakeHost({
       exec: [{ match: "npx vitest", result: { code: 1, output: "x" } }],

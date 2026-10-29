@@ -29,6 +29,8 @@ const stepSchema = z.object({
   brief: z.string().optional(),
   // A read-only agent cannot write its own artifact, so the runner saves its reply as this one.
   writes: z.enum(AGENT_ARTIFACTS).optional(),
+  // The reply must begin with this text, or it is chat and not the artifact; nothing is saved.
+  startsWith: z.string().optional(),
   checks: z.array(z.enum(CHECK_NAMES)).default([]),
   // Repeat the agent until every check in `until` passes, at most `max` times.
   loop: z

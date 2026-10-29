@@ -103,6 +103,8 @@ async function runStep(
       const odd = step.writes === "plan.md" ? badPlanLines(text, manifests) : [];
       if (odd.length)
         refused = `plan.md refused, these lines are not ordinary repo paths: ${odd.slice(0, 5).join(" | ")}`;
+      else if (step.startsWith && !text.trim().startsWith(step.startsWith))
+        refused = `${step.writes} refused, the reply must begin with "${step.startsWith}" and hold the artifact only`;
       else await writeArtifact(host, n, step.writes, `${text.trim()}\n`);
     }
     res.log.push(
