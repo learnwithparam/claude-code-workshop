@@ -43,9 +43,13 @@ export const dropSpecLines = (plan: string, n: number) =>
     .filter((l) => !planLines(l).some((p) => p.startsWith(`specs/${n}/`)))
     .join("\n");
 
+// A visual change regenerates the golden snapshots, and the gate owns that folder so a plan cannot list it.
+// The feedback gate shows a human the changed files, so the snapshots are reviewed there, not by the plan.
+const SNAPSHOT = /^specs\/[^/]+\/golden\/__snapshots__\//;
+
 export function planDrift(plan: string, changed: string[], n: number): string[] {
   const listed = new Set(planLines(plan));
-  return changed.filter((f) => !f.startsWith(`specs/${n}/`) && !listed.has(f));
+  return changed.filter((f) => !f.startsWith(`specs/${n}/`) && !SNAPSHOT.test(f) && !listed.has(f));
 }
 
 // The plan is the allowlist, and a model writes it, so it may name only ordinary repo files: no prose, globs,
