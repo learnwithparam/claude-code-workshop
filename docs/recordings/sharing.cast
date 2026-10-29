@@ -1,0 +1,4 @@
+{"version":3,"term":{"cols":70,"rows":22},"timestamp":1793278047,"command":"bash -c 'echo \"$ make prove LEVEL=sharing\"; make prove LEVEL=sharing 2>&1 | tail -16'","env":{"SHELL":"/bin/zsh"}}
+[0.008, "o", "$ make prove LEVEL=sharing\r\n"]
+[0.962, "o", "npm run prove -- sharing\r\n\r\n> claude-code-workshop@0.1.0 prove\r\n> tsx scripts/prove/run.ts sharing\r\n\r\nPASS sharing: the factory installs from a marketplace as one plugin built from .claude/ (claude plugin validate --strict passed)\r\n"]
+[0.001, "x", "0"]

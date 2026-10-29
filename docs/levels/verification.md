@@ -34,6 +34,8 @@ Break the code and let Claude try to stop. The gate refuses and prints the failu
 
 The proof undoes each fix in turn, runs the named test, expects it to fail, then restores the file. It also checks both hooks are wired in `.claude/settings.json`. Expect `3 bugs bite, hooks wired`.
 
+![The proof passing](../recordings/verification.gif)
+
 The layout test reads the page source. A browser replay with Playwright and axe is the next step and is part of the take-home.
 
 ## Exercise

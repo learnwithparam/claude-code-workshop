@@ -1,0 +1,4 @@
+{"version":3,"term":{"cols":70,"rows":22},"timestamp":1793278039,"command":"bash -c 'echo \"$ make prove LEVEL=context\"; make prove LEVEL=context 2>&1 | tail -16'","env":{"SHELL":"/bin/zsh"}}
+[0.009, "o", "$ make prove LEVEL=context\r\n"]
+[1.751, "o", "npm run prove -- context\r\n\r\n> claude-code-workshop@0.1.0 prove\r\n> tsx scripts/prove/run.ts context\r\n\r\nPASS context: the standards load by default, every rule matches real files, and the repo obeys them (context holds)\r\n"]
+[0.001, "x", "0"]

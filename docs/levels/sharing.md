@@ -44,6 +44,8 @@ When you bump `version` and push, `claude plugin update` brings the change to ev
 
 `make prove LEVEL=sharing` rebuilds the plugin in a temporary folder, compares each skill with the committed copy, checks the marketplace lists `factory-kit`, and runs `claude plugin validate --strict` when `claude` is on the path. `tests/structure/plugin.test.ts` also checks that every file is a byte copy of `.claude/`, every hook path resolves inside the plugin, and that the version changed if any plugin file changed since the last tag.
 
+![The proof passing](../recordings/sharing.gif)
+
 ## Exercise
 
 Track A: install the kit into a fresh empty repo and run `/factory-kit:issue-triage` on an issue. Track B: move one more skill into the kit, add it to `KIT` in `scripts/plugin.ts`, bump the version, add an eval case for it, and pass `claude plugin validate --strict`.

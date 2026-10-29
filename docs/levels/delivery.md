@@ -37,6 +37,8 @@ The same ticket now moves through named stages, and a person decides twice: the 
 
 `make prove LEVEL=delivery` runs the dry run, checks the six stages appear in order with the loop cap, and checks the PR template. The state machine tests use a fake runner and cover approval, order, the cap, routing and the unlisted-model failure.
 
+![The proof passing](../recordings/delivery.gif)
+
 ## Exercise
 
 Track A: file a bug ticket for the Kindergarten parser and run it through the dry run. Track B: add a retro stage that proposes one change to `.claude/` and must keep the eval score.

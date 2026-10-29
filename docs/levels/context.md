@@ -35,6 +35,8 @@ Run the same prompt. Claude adds `formatBand` to `shared/src/bands.ts` with a te
 
 `make prove LEVEL=context` checks that `CLAUDE.md` imports `AGENTS.md` and is short, that every rule's `paths` glob matches a real file, and that the repo passes its own conventions.
 
+![The proof passing](../recordings/context.gif)
+
 ## Exercise
 
 Track A: add a rule for `tests/`. Track B: add a convention to `check-conventions.ts` and watch the proof catch a violation.
