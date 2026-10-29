@@ -78,10 +78,13 @@ async function runStep(
 ): Promise<boolean> {
   const max = step.loop?.max ?? 1;
   let feedback = "";
+  const brief = `Stage: ${step.stage}. ${step.brief ?? ""}\nWrite this stage's artifacts under specs/${n}/.`;
   for (let round = 1; round <= max; round++) {
     res.rounds[step.stage] = round;
     host.setPhase(round > 1 || step.phase === "fix" ? "fix" : "build");
-    const out = await host.agent(step.agent, `${ticket}\n${feedback}`, { stage: step.stage });
+    const out = await host.agent(step.agent, `${brief}\n${ticket}\n${feedback}`, {
+      stage: step.stage,
+    });
     res.costUsd += out.costUsd;
     res.log.push(
       `${step.stage} round ${round} $${out.costUsd.toFixed(4)}${out.failed ? ` FAILED ${out.failed}` : ""}`,
