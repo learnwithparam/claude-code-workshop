@@ -189,6 +189,7 @@
     "plugins/factory-status/.claude-plugin/**"
   ],
   "workflows": [
+    "specs/**",
     "factory/engine/**",
     ".factory/workflows/**",
     ".factory/bands.yaml",

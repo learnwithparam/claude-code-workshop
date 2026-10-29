@@ -1,26 +1,8 @@
 import { BANDS } from "./bands";
-import type { Item, Section, Worksheet } from "./schema";
-
-const escapeHtml = (text: string) =>
-  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
-const renderItem = (item: Item, index: number, pictureBoxes: boolean) => {
-  const picture = pictureBoxes
-    ? `<div class="picture">${escapeHtml(item.picture ?? "")}</div>`
-    : "";
-  return `<li value="${index + 1}">${picture}<span class="prompt">${escapeHtml(item.prompt)}</span><span class="line"></span></li>`;
-};
-
-const renderSection = (section: Section, pictureBoxes: boolean) =>
-  `<section><h2>${escapeHtml(section.heading)}</h2><p class="instruction">${escapeHtml(section.instruction)}</p><ol>${section.items
-    .map((item, index) => renderItem(item, index, pictureBoxes))
-    .join("")}</ol></section>`;
-
-const renderAnswerKey = (sheet: Worksheet) =>
-  `<section class="key"><h2>Answer key</h2><ol>${sheet.sections
-    .flatMap((section) => section.items)
-    .map((item, index) => `<li value="${index + 1}">${escapeHtml(item.answer)}</li>`)
-    .join("")}</ol></section>`;
+import { escapeHtml } from "./escape-html";
+import { renderAnswerKey } from "./render-answer-key";
+import { renderSection } from "./render-section";
+import type { Worksheet } from "./schema";
 
 // Worksheet JSON in, HyperFrames still composition out. No model writes markup.
 export function renderWorksheet(sheet: Worksheet): string {
