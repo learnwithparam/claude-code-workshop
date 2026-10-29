@@ -1,0 +1,4 @@
+{"version":3,"term":{"cols":70,"rows":22},"timestamp":1793278039,"command":"bash -c 'echo \"$ make prove LEVEL=boundary\"; make prove LEVEL=boundary 2>&1 | tail -16'","env":{"SHELL":"/bin/zsh"}}
+[0.008, "o", "$ make prove LEVEL=boundary\r\n"]
+[0.357, "o", "npm run prove -- boundary\r\n\r\n> claude-code-workshop@0.1.0 prove\r\n> tsx scripts/prove/run.ts boundary\r\n\r\nPASS boundary: the key exists only in api; the bundle, image and shell cannot reach it (boundary holds)\r\n"]
+[0.001, "x", "0"]

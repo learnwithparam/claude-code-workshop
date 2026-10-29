@@ -9,7 +9,9 @@
     "tsconfig.base.json",
     "docs/levels/hand-built.md",
     "docs/electives/built-in-help.md",
-    ".devcontainer/devcontainer.json"
+    ".devcontainer/devcontainer.json",
+    "docs/recordings/hand-built.cast",
+    "docs/recordings/hand-built.gif"
   ],
   "boundary": [
     "api/**",
@@ -19,7 +21,9 @@
     ".gitleaks.toml",
     "scripts/git/**",
     "scripts/prove/boundary.ts",
-    "docs/levels/boundary.md"
+    "docs/levels/boundary.md",
+    "docs/recordings/boundary.cast",
+    "docs/recordings/boundary.gif"
   ],
   "context": [
     "AGENTS.md",
@@ -32,7 +36,9 @@
     "docs/electives/status-line.md",
     "docs/electives/ide.md",
     ".claude/statusline.mjs",
-    "tests/structure/status-line.test.ts"
+    "tests/structure/status-line.test.ts",
+    "docs/recordings/context.cast",
+    "docs/recordings/context.gif"
   ],
   "skills": [
     ".claude/skills/**",
@@ -42,7 +48,9 @@
     "docs/levels/skills.md",
     "docs/agent/one-call.md",
     "docs/agent/manual-loop.md",
-    "docs/agent/tool-runner.md"
+    "docs/agent/tool-runner.md",
+    "docs/recordings/skills.cast",
+    "docs/recordings/skills.gif"
   ],
   "trunk": [
     "Makefile",
@@ -63,7 +71,8 @@
     "scripts/exercise.test.ts",
     "scripts/commands.ts",
     "scripts/commands.test.ts",
-    "docs/commands-by-level.md"
+    "docs/commands-by-level.md",
+    "tests/structure/recordings.test.ts"
   ],
   "execution": [
     ".claude/agents/**",
@@ -79,7 +88,9 @@
     ".claude/hooks/teammateidle-log.mjs",
     "tests/structure/teams.test.ts",
     "docs/electives/agent-teams.md",
-    "docs/electives/fast-mode.md"
+    "docs/electives/fast-mode.md",
+    "docs/recordings/execution.cast",
+    "docs/recordings/execution.gif"
   ],
   "delivery": [
     "tests/structure/dependabot.test.ts",
@@ -115,7 +126,9 @@
     "tests/structure/workflows.test.ts",
     "docs/electives/loop-and-routines.md",
     "docs/versions.md",
-    "tests/structure/versions.test.ts"
+    "tests/structure/versions.test.ts",
+    "docs/recordings/delivery.cast",
+    "docs/recordings/delivery.gif"
   ],
   "verification": [
     ".claude/hooks/posttooluse-typecheck.mjs",
@@ -138,7 +151,9 @@
     "docs/levels/verification.md",
     "docs/electives/chrome.md",
     "docs/electives/screenshots.md",
-    "tests/e2e/gallery.e2e.ts"
+    "tests/e2e/gallery.e2e.ts",
+    "docs/recordings/verification.cast",
+    "docs/recordings/verification.gif"
   ],
   "sharing": [
     "scripts/plugin.ts",
@@ -149,6 +164,8 @@
     "scripts/prove/sharing.ts",
     "docs/levels/sharing.md",
     "docs/when-to-use-what.md",
-    "tests/structure/when-to-use-what.test.ts"
+    "tests/structure/when-to-use-what.test.ts",
+    "docs/recordings/sharing.cast",
+    "docs/recordings/sharing.gif"
   ]
 }

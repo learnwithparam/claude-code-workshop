@@ -1,0 +1,4 @@
+{"version":3,"term":{"cols":70,"rows":22},"timestamp":1793278036,"command":"bash -c 'echo \"$ make prove LEVEL=hand-built\"; make prove LEVEL=hand-built 2>&1 | tail -16'","env":{"SHELL":"/bin/zsh"}}
+[0.013, "o", "$ make prove LEVEL=hand-built\r\n"]
+[2.767, "o", "npm run prove -- hand-built\r\n\r\n> claude-code-workshop@0.1.0 prove\r\n> tsx scripts/prove/run.ts hand-built\r\n\r\nPASS hand-built: every band renders, lints clean, and the app calls no API (7 bands ok)\r\n"]
+[0.000, "x", "0"]

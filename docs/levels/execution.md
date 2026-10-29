@@ -34,6 +34,8 @@ Run `make factory ISSUE=1 FLAGS=--dry-run`. It prints each stage with its limits
 
 `make prove LEVEL=execution` checks every agent has `model`, `maxTurns` and `tools`, the config validates, every stage model is allowed, and prints the worst-case cost of one pass.
 
+![The proof passing](../recordings/execution.gif)
+
 ## Exercise
 
 Track A: add a stage budget and see the worst case change. Track B: write a new agent for accessibility review.

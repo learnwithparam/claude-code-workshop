@@ -1,0 +1,4 @@
+{"version":3,"term":{"cols":70,"rows":22},"timestamp":1793278047,"command":"bash -c 'echo \"$ make prove LEVEL=delivery\"; make prove LEVEL=delivery 2>&1 | tail -16'","env":{"SHELL":"/bin/zsh"}}
+[0.009, "o", "$ make prove LEVEL=delivery\r\n"]
+[0.761, "o", "npm run prove -- delivery\r\n\r\n> claude-code-workshop@0.1.0 prove\r\n> tsx scripts/prove/run.ts delivery\r\n\r\nPASS delivery: tickets flow triage to verify in order, the review loop is capped, a human merges (six stages, capped loop, human merge)\r\n"]
+[0.001, "x", "0"]

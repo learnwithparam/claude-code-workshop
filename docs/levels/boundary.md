@@ -38,6 +38,8 @@ Repeat the "debug the env" prompt. The hook blocks the command and tells Claude 
 
 `make prove LEVEL=boundary` greps the built bundle for key shapes, checks that `web/` reads only `PUBLIC_` variables, checks the Dockerfile, checks the 500 body has no model name or stack, and runs the hook against known bad commands.
 
+![The proof passing](../recordings/boundary.gif)
+
 ## Exercise
 
 Track A: add a second secret to `api/src/env.ts` and prove the bundle stays clean. Track B: write a hook case for a command that reads the file through `base64`.

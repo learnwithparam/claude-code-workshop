@@ -1,0 +1,4 @@
+{"version":3,"term":{"cols":70,"rows":22},"timestamp":1793278041,"command":"bash -c 'echo \"$ make prove LEVEL=execution\"; make prove LEVEL=execution 2>&1 | tail -16'","env":{"SHELL":"/bin/zsh"}}
+[0.009, "o", "$ make prove LEVEL=execution\r\n"]
+[0.316, "o", "npm run prove -- execution\r\n\r\n> claude-code-workshop@0.1.0 prove\r\n> tsx scripts/prove/run.ts execution\r\n\r\nPASS execution: every agent and stage is bounded: model, turns, tools and budget (7 agents, worst case $5.3 per pass)\r\n"]
+[0.001, "x", "0"]

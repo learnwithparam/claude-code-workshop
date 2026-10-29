@@ -37,6 +37,8 @@ Run `make eval` and compare. Seven of seven worksheets pass their band, median 1
 
 `make prove LEVEL=skills` checks each skill has a name and description, verifies the hashes in `skills.lock`, and replays `fixtures/eval.json`: 7/7 on band and a median under 1,200 tokens. It costs nothing.
 
+![The proof passing](../recordings/skills.gif)
+
 ## Exercise
 
 Track A: change a skill file and watch the lock fail. Track B: add an eighth eval prompt and re-record the fixture.
