@@ -28,6 +28,12 @@ describe.each(files)("workflow %s", (file) => {
     const plan = wf.steps.find((s) => s.stage === "plan");
     if (plan) expect(plan.brief).toContain("Do not list files under specs/<issue>/");
   });
+  it("tells the planner to list levels.json and to add no commentary", () => {
+    // Run 31 added files, levels.json had to change, and plan-drift failed; run 29's plan held a note.
+    const plan = wf.steps.find((s) => s.stage === "plan");
+    if (plan) expect(plan.brief).toContain("list levels.json whenever you add a file");
+    if (plan) expect(plan.brief).toContain("Commentary of any kind makes the plan unusable");
+  });
   it("uses only agents that exist in .claude/agents", () => {
     for (const s of wf.steps) expect(agents.has(s.agent), `${s.stage}: ${s.agent}`).toBe(true);
   });
