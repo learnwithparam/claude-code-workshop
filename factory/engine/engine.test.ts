@@ -121,8 +121,11 @@ describe("checks", () => {
     files.set("api/old.test.ts", "y");
     expect((await lock.run({ host, n: 1 })).evidence).toContain("api/old.test.ts");
   });
-  it("plan-drift fails on a stray file and passes when plan.md changes too", () => {
-    expect(planDrift("touch a.ts", ["a.ts", "b.ts"], 1)).toEqual(["b.ts"]);
-    expect(planDrift("touch a.ts", ["b.ts", "specs/1/plan.md"], 1)).toEqual([]);
+  it("plan-drift fails on a stray file, even when plan.md is in the diff", () => {
+    expect(planDrift("a.ts", ["a.ts", "b.ts"], 1)).toEqual(["b.ts"]);
+    expect(planDrift("a.ts", ["b.ts", "specs/1/plan.md"], 1)).toEqual(["b.ts"]);
+    expect(planDrift("- `a.ts`\n* b.ts\n", ["a.ts", "b.ts"], 1)).toEqual([]);
+    // A path that only appears inside a longer one is not listed.
+    expect(planDrift("src/a.ts.bak", ["a.ts"], 1)).toEqual(["a.ts"]);
   });
 });
