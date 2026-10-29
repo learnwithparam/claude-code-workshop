@@ -5,7 +5,10 @@ import { type AgentResult, runAgent } from "./agent.ts";
 import { runManualAgent } from "./manual-loop.ts";
 
 const good = worksheets[0]?.worksheet;
-const overfull = { ...good, sections: [{ ...good?.sections[0], items: Array(60).fill(good?.sections[0]?.items[0]) }] };
+const overfull = {
+  ...good,
+  sections: [{ ...good?.sections[0], items: Array(60).fill(good?.sections[0]?.items[0]) }],
+};
 
 const toolTurn = (id: string, input: unknown) => ({
   id: `msg_${id}`,
