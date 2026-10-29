@@ -11,7 +11,8 @@ const isLockfile = (f: string) => /(^|\/)package-lock\.json$/.test(f);
 // A plain version or range. This refuses file:, link:, git, URL and npm: alias specs, which can pull code from anywhere.
 const VERSION = /^[~^]?\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/;
 // Other files that decide what npm, yarn or pnpm install. None of them is checked, so none may change.
-const INSTALL_CONFIG = /(^|\/)(npm-shrinkwrap\.json|\.npmrc|yarn\.lock|pnpm-lock\.yaml)$/;
+const INSTALL_CONFIG =
+  /(^|\/)(npm-shrinkwrap\.json|\.npmrc|\.yarnrc(\.yml)?|yarn\.lock|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.pnpmfile\.cjs|bun\.lockb?|bunfig\.toml)$|(^|\/)\.yarn\//;
 
 type Json = Record<string, unknown>;
 
@@ -37,30 +38,31 @@ function dependencyProblems(base: Json, head: Json): string[] {
 }
 
 type LockEntry = { name?: string; version?: string; resolved?: string; link?: boolean };
+const PLAIN_VERSION = /^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/;
+const sameEntry = (a?: LockEntry, b?: LockEntry) => JSON.stringify(a) === JSON.stringify(b);
 
-// The only URL an entry may resolve to: the registry's tarball for exactly that package and version.
-function registryUrl(key: string, entry: LockEntry): string {
-  const name = entry.name ?? key.split("node_modules/").pop() ?? "";
-  const file = name.split("/").pop();
-  return `https://registry.npmjs.org/${name}/-/${file}-${entry.version}.tgz`;
+// The tarball URL comes from the install path alone, never from a field the entry supplies about itself.
+function registryUrl(key: string, version: string): string {
+  const name = key.split("node_modules/").pop() ?? "";
+  return `https://registry.npmjs.org/${name}/-/${name.split("/").pop()}-${version}.tgz`;
 }
 
-// Entries whose resolution is new in the head lockfile and is not the registry tarball for their version.
+// Every installed package that is new or changed must be the registry tarball for its exact version.
 function lockfileProblems(base: Json, head: Json): string[] {
   if (head.lockfileVersion !== 2 && head.lockfileVersion !== 3)
     return ["lockfileVersion is not 2 or 3"];
   const before = (base.packages ?? {}) as Record<string, LockEntry>;
   const problems: string[] = [];
   for (const [key, entry] of Object.entries((head.packages ?? {}) as Record<string, LockEntry>)) {
-    const known = before[key];
-    if (entry.link && !known?.link) problems.push(`${key} is a new link`);
-    if (
-      entry.resolved &&
-      entry.resolved !== known?.resolved &&
-      entry.resolved !== registryUrl(key, entry)
-    )
+    // Workspace packages and the root entry are not installed from the registry.
+    if (!key.includes("node_modules/") || sameEntry(entry, before[key])) continue;
+    if (entry.link) problems.push(`${key} is a link`);
+    else if (entry.name) problems.push(`${key} is an alias of ${entry.name}`);
+    else if (!PLAIN_VERSION.test(entry.version ?? ""))
+      problems.push(`${key} has version "${entry.version}"`);
+    else if (entry.resolved !== registryUrl(key, entry.version as string))
       problems.push(
-        `${key} resolves to ${entry.resolved}, not the registry tarball for ${entry.version}`,
+        `${key} resolves to ${entry.resolved ?? "nothing"}, not the registry tarball for ${entry.version}`,
       );
   }
   return problems;
