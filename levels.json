@@ -63,7 +63,11 @@
     "lab/**",
     "docs/agent/mini-claude.md",
     "docs/agent/agent-sdk.md",
-    "docs/levels/execution.md"
+    "docs/levels/execution.md",
+    ".claude/teams.json",
+    ".claude/hooks/teammateidle-log.mjs",
+    "tests/structure/teams.test.ts",
+    "docs/electives/agent-teams.md"
   ],
   "delivery": [
     "tests/structure/dependabot.test.ts",
