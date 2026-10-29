@@ -63,6 +63,13 @@ describe("runWorkflow", () => {
       expect(r.outcome).toBe("needs-human");
     }
   });
+  it("drops plan lines under specs/<n>/ instead of refusing the plan", async () => {
+    // Run 27 listed specs/27/intent.md, which the runner allows anyway, and the whole plan was refused.
+    const plan = wf("  - {stage: plan, agent: planner, writes: plan.md}");
+    const { host, files } = fakeHost({ agents: [{ text: "shared/src/a.ts\nspecs/3/intent.md" }] });
+    expect((await runWorkflow(host, plan, 3, "t")).outcome).toBe("done");
+    expect(files.get("specs/3/plan.md")).toBe("shared/src/a.ts\n");
+  });
   it("stops at the cap and writes run.log", async () => {
     const { host, files } = fakeHost({
       exec: [{ match: "npx vitest", result: { code: 1, output: "x" } }],
@@ -84,6 +91,16 @@ describe("runWorkflow", () => {
     const done = await runWorkflow(b.host, gated, 2, "t");
     expect(done.outcome).toBe("done");
     expect(b.calls).toHaveLength(0);
+  });
+  it("on resume skips every step before the last approved gate, so the signed artifacts stay put", async () => {
+    // Run 28 reran its scenarios stage on resume, the spec changed, and the approval no longer matched.
+    const two = wf(
+      "  - {stage: scenarios, agent: planner}\n  - {stage: amigos, agent: reviewer, gate: human}\n  - {stage: build, agent: builder}",
+    );
+    const { host, calls } = fakeHost({ approvals: ["4:amigos"] });
+    const r = await runWorkflow(host, two, 4, "t");
+    expect(r.outcome).toBe("done");
+    expect(calls.filter((c) => c.startsWith("agent"))).toHaveLength(1);
   });
   it("digest tells a missing file from an empty one and a moved boundary from the same text", async () => {
     const d = (files: Record<string, string>) =>

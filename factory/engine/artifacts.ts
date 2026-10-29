@@ -36,6 +36,13 @@ export const planLines = (plan: string) =>
     .map((l) => l.replace(/^\s*(?:[-*]\s+)?`?|`?\s*$/g, ""))
     .filter(Boolean);
 
+// The runner already allows specs/<n>/, so a planner that lists those files is not wrong enough to refuse its plan.
+export const dropSpecLines = (plan: string, n: number) =>
+  plan
+    .split("\n")
+    .filter((l) => !planLines(l).some((p) => p.startsWith(`specs/${n}/`)))
+    .join("\n");
+
 export function planDrift(plan: string, changed: string[], n: number): string[] {
   const listed = new Set(planLines(plan));
   return changed.filter((f) => !f.startsWith(`specs/${n}/`) && !listed.has(f));
