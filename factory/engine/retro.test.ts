@@ -7,6 +7,15 @@ const PROPOSAL = (file: string) =>
 const EVAL: [string, ...string[]] = ["eval"];
 
 describe("retro", () => {
+  it("leaves agent and config proposals to a person", async () => {
+    const { host, calls } = fakeHost({
+      byAgent: (n) =>
+        n === "planner" ? { text: PROPOSAL(".claude/agents/builder.md") } : undefined,
+    });
+    host.exec = async () => ({ code: 0, output: "SCORE 1" });
+    expect(await retro(host, 1, EVAL, async () => {})).toMatchObject({ kind: "error" });
+    expect(calls.filter((c) => c === "agent builder retro")).toEqual([]);
+  });
   it("keeps a lesson whose eval score did not fall and reports the change", async () => {
     const { host } = fakeHost({
       changed: [".claude/skills/a/SKILL.md"],

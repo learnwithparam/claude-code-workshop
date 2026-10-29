@@ -175,8 +175,21 @@ export function realHost(o: RealHostOptions): Host {
     },
 
     async commit(message) {
-      git("add", "-A");
-      git("-c", "user.name=factory", "-c", "user.email=factory@localhost", "commit", "-m", message);
+      // No repo hooks or fsmonitor: the agent can write .git/hooks, and a commit must not run them.
+      const g = (...a: string[]) =>
+        sh("git", ["-c", "core.hooksPath=/dev/null", "-c", "core.fsmonitor=false", ...a]);
+      g("add", "-A");
+      const r = g(
+        "-c",
+        "user.name=factory",
+        "-c",
+        "user.email=factory@localhost",
+        "commit",
+        "--no-verify",
+        "-m",
+        message,
+      );
+      if (r.status !== 0) throw new Error(`commit failed: ${r.stderr}`);
     },
 
     async recall(k) {
