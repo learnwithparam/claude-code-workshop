@@ -38,6 +38,11 @@ describe("approvalIn", () => {
       true,
     );
   });
+  it("with an allowlist, refuses another collaborator", () => {
+    const c = [{ body: line, authorAssociation: "COLLABORATOR", author: { login: "bot" } }];
+    expect(approvalIn(c, "spec", "abc", ["param"])).toBe(false);
+    expect(approvalIn(c, "spec", "abc", ["bot"])).toBe(true);
+  });
   it("refuses a stranger, a bot-free outsider, another digest or another stage", () => {
     const c = (authorAssociation: string, body = line) => [{ body, authorAssociation }];
     expect(approvalIn(c("NONE"), "spec", "abc")).toBe(false);
@@ -56,6 +61,20 @@ describe("realHost over a git repo", () => {
     expect(await host.list("specs/")).toEqual(["specs/1/spec.md"]);
     expect(await host.read("specs/1/spec.md")).toBe("s");
     expect(await host.read("nope")).toBeNull();
+  });
+  it("ignores recalled state an agent rewrote", async () => {
+    const { host, cwd } = repo();
+    await host.remember("lock", "abc");
+    expect(await host.recall("lock")).toBe("abc");
+    const f = join(cwd, "..", "state-forge");
+    mkdirSync(f, { recursive: true });
+    writeFileSync(join(f, "lock"), "forged");
+    expect(await realHost({ cwd, base: "HEAD", stateDir: f }).recall("lock")).toBeNull();
+  });
+  it("lists both sides of a rename and files with odd names", async () => {
+    const { host, cwd } = repo();
+    git(cwd, "mv", "a.txt", "b c.txt");
+    expect((await host.changedFiles()).sort()).toEqual(["a.txt", "b c.txt"]);
   });
   it("keeps recalled state outside the worktree", async () => {
     const { host } = repo();

@@ -1,4 +1,5 @@
 import { execFileSync, spawnSync } from "node:child_process";
+import { createHmac, randomBytes } from "node:crypto";
 import {
   cpSync,
   existsSync,
@@ -13,7 +14,7 @@ import { dirname, join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import type { Host } from "./types.ts";
 
-const AGENT_ENV = ["PATH", "HOME", "SHELL", "TERM", "LANG", "ANTHROPIC_API_KEY"];
+const AGENT_ENV = ["PATH", "SHELL", "TERM", "LANG", "ANTHROPIC_API_KEY"];
 const MODELS: Record<string, string> = {
   opus: "claude-opus-5-5",
   sonnet: "claude-sonnet-5-5",
@@ -31,18 +32,26 @@ export function parseAgent(text: string) {
   return { fm, body: (m?.[2] ?? text).trim() };
 }
 
-type Comment = { body: string; authorAssociation: string };
+type Comment = { body: string; authorAssociation: string; author?: { login: string } };
 // Only a person with write access counts. The agents hold no GitHub token, so they cannot approve.
-export function approvalIn(comments: Comment[], stage: string, digest: string): boolean {
+export function approvalIn(
+  comments: Comment[],
+  stage: string,
+  digest: string,
+  approvers?: string[],
+): boolean {
   const line = `approve ${stage} ${digest}`;
   return comments.some(
     (c) =>
       ["OWNER", "MEMBER", "COLLABORATOR"].includes(c.authorAssociation) &&
+      (!approvers || approvers.includes(c.author?.login ?? "")) &&
       c.body.split("\n").some((l) => l.trim() === line),
   );
 }
 
 export type RealHostOptions = {
+  // GitHub logins whose comments count as approval. The agents cannot comment as them.
+  approvers?: string[];
   cwd: string;
   base: string;
   stateDir?: string;
@@ -68,6 +77,9 @@ export function realHost(o: RealHostOptions): Host {
   const git = (...a: string[]) => execFileSync("git", a, { cwd: o.cwd, encoding: "utf8" });
   const tracked = () => git("ls-files", "-co", "--exclude-standard").split("\n").filter(Boolean);
   let phase: string | null = null;
+  // The key lives only in this process, so an agent that rewrites a state file cannot forge its tag.
+  const key = randomBytes(32);
+  const tag = (v: string) => createHmac("sha256", key).update(v).digest("hex");
 
   return {
     async agent(name, prompt, { stage }) {
@@ -94,6 +106,8 @@ export function realHost(o: RealHostOptions): Host {
               ...Object.fromEntries(
                 AGENT_ENV.flatMap((k) => (process.env[k] ? [[k, process.env[k]]] : [])),
               ),
+              HOME: home,
+              GIT_CONFIG_GLOBAL: "/dev/null",
               CLAUDE_CODE_DISABLE_AUTO_MEMORY: "1",
               FACTORY_STAGE: stage,
               ...(phase ? { FACTORY_PHASE: phase } : {}),
@@ -148,19 +162,28 @@ export function realHost(o: RealHostOptions): Host {
     },
     async changedFiles() {
       const diff = git("diff", "--name-only", `${o.base}...HEAD`).split("\n");
-      const dirty = git("status", "--porcelain", "-uall")
-        .split("\n")
-        .map((l) => l.slice(3));
+      // NUL-separated so odd file names cannot hide; a rename lists both its new and old path.
+      const parts = git("status", "--porcelain=v1", "-z", "-uall").split("\0");
+      const dirty: string[] = [];
+      for (let i = 0; i < parts.length; i++) {
+        const e = parts[i] ?? "";
+        if (e.length < 4) continue;
+        dirty.push(e.slice(3));
+        if (e[0] === "R" || e[0] === "C") dirty.push(parts[++i] ?? "");
+      }
       return [...new Set([...diff, ...dirty])].filter(Boolean);
     },
 
-    async recall(key) {
-      const f = join(state, key.replaceAll(/[^\w.-]/g, "_"));
-      return existsSync(f) ? readFileSync(f, "utf8") : null;
+    async recall(k) {
+      const f = join(state, k.replaceAll(/[^\w.-]/g, "_"));
+      if (!existsSync(f)) return null;
+      const [t, ...rest] = readFileSync(f, "utf8").split("\n");
+      const v = rest.join("\n");
+      return t === tag(v) ? v : null;
     },
-    async remember(key, value) {
+    async remember(k, value) {
       mkdirSync(state, { recursive: true });
-      writeFileSync(join(state, key.replaceAll(/[^\w.-]/g, "_")), value);
+      writeFileSync(join(state, k.replaceAll(/[^\w.-]/g, "_")), `${tag(value)}\n${value}`);
     },
     setPhase(p) {
       phase = p;
@@ -169,7 +192,7 @@ export function realHost(o: RealHostOptions): Host {
       // Runner-side call with the real environment: gh needs the person's login, the agents never see it.
       const r = sh("gh", ["issue", "view", String(n), "--json", "comments"], o.cwd, process.env);
       if (r.status !== 0) return false;
-      return approvalIn(JSON.parse(r.stdout).comments ?? [], stage, digest);
+      return approvalIn(JSON.parse(r.stdout).comments ?? [], stage, digest, o.approvers);
     },
   };
 }
