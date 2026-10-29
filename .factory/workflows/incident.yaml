@@ -1,0 +1,16 @@
+# Method: the incident record becomes an eval first, then a fix (Anthropic SDLC playbook: incidents become evals).
+name: incident
+method: incident to eval to fix
+source: Anthropic AI-native SDLC playbook
+for: incidents and band breaches
+steps:
+  - { stage: diagnose, agent: verifier }
+  - { stage: eval, agent: builder, checks: [red, lock], loop: { until: [red], max: 2 } }
+  - {
+      stage: fix,
+      agent: builder,
+      phase: fix,
+      checks: [green, lock, gate],
+      loop: { until: [green, lock, gate], max: 3 },
+    }
+  - { stage: review, agent: reviewer, checks: [plan-drift] }

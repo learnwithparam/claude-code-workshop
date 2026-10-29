@@ -3,6 +3,8 @@ import type { AgentResult, ExecResult, Host } from "./types.ts";
 export type FakeScript = {
   // One entry is consumed per agent call; the last repeats.
   agents?: Partial<AgentResult>[];
+  // Answers by agent name instead of by call order; wins over `agents` when it returns a value.
+  byAgent?: (name: string) => Partial<AgentResult> | undefined;
   // exec results by "cmd args" prefix and ref; first match wins.
   exec?: { match: string; ref?: "base" | "head"; result: ExecResult }[];
   files?: Record<string, string>;
@@ -12,12 +14,15 @@ export type FakeScript = {
 
 export function fakeHost(script: FakeScript = {}) {
   const files = new Map(Object.entries(script.files ?? {}));
+  const state = new Map<string, string>();
   const calls: string[] = [];
   const phases: (string | null)[] = [];
   let agentCalls = 0;
   const host: Host = {
     async agent(name, _prompt, o) {
       calls.push(`agent ${name} ${o.stage}`);
+      const named = script.byAgent?.(name);
+      if (named) return { text: "", costUsd: 0.01, ...named };
       const list = script.agents ?? [{}];
       const next = list[Math.min(agentCalls++, list.length - 1)] ?? {};
       return { text: "", costUsd: 0.01, ...next };
@@ -34,8 +39,12 @@ export function fakeHost(script: FakeScript = {}) {
     write: async (p, t) => void files.set(p, t),
     list: async (d) => [...files.keys()].filter((k) => k.startsWith(d)),
     changedFiles: async () => script.changed ?? [...files.keys()],
+    recall: async (k) => state.get(k) ?? null,
+    remember: async (k, v) => void state.set(k, v),
     setPhase: (p) => void phases.push(p),
-    approved: async (n, stage) => script.approvals?.includes(`${n}:${stage}`) ?? false,
+    approved: async (n, stage, digest) =>
+      script.approvals?.some((a) => a === `${n}:${stage}` || a === `${n}:${stage}:${digest}`) ??
+      false,
   };
   return { host, files, calls, phases };
 }

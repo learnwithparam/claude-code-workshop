@@ -1,0 +1,15 @@
+# Method: consumer-driven contract. The recorded contract test comes first, then both sides move to meet it.
+name: contract
+method: contract test first
+source: consumer-driven contracts
+for: api and web boundary
+steps:
+  - { stage: contract, agent: builder, checks: [red, lock], loop: { until: [red], max: 2 } }
+  - {
+      stage: sides,
+      agent: builder,
+      phase: fix,
+      checks: [contract, lock, gate],
+      loop: { until: [contract, lock, gate], max: 3 },
+    }
+  - { stage: review, agent: reviewer, checks: [plan-drift] }

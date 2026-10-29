@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type { Host } from "./types.ts";
 
 // What each stage commits for the next one to read. The commit chain is the audit trail.
@@ -31,4 +32,13 @@ export function planDrift(plan: string, changed: string[], n: number): string[] 
   const ownArtifacts = (f: string) => f.startsWith(`specs/${n}/`);
   if (changed.includes(artifactPath(n, "plan.md"))) return [];
   return changed.filter((f) => !ownArtifacts(f) && !plan.includes(f));
+}
+
+// The hash a human approval binds to: every spec artifact the gate puts in front of the reviewer.
+export async function artifactDigest(host: Host, n: number): Promise<string> {
+  const h = createHash("sha256");
+  for (const name of ["intent.md", "spec.md", "plan.md"] as const) {
+    h.update(`${name}\n${(await host.read(artifactPath(n, name))) ?? ""}\n`);
+  }
+  return h.digest("hex");
 }

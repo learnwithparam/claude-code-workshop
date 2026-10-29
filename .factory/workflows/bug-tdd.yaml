@@ -1,0 +1,17 @@
+# Method: TDD, red then green then refactor (Beck). Source: Anthropic best practices, "commit the tests, then write code without touching them".
+name: bug-tdd
+method: TDD with a locked test
+source: Anthropic Claude Code best practices
+for: bugs
+steps:
+  - { stage: reproduce, agent: builder, checks: [red, lock], loop: { until: [red], max: 2 } }
+  - {
+      stage: fix,
+      agent: builder,
+      phase: fix,
+      checks: [green, lock, gate],
+      loop: { until: [green, lock, gate], max: 3 },
+    }
+  - { stage: harden, agent: test-reviewer, checks: [mutation] }
+  - { stage: review, agent: reviewer, checks: [plan-drift] }
+  - { stage: ci, agent: builder, checks: [ci], loop: { until: [ci], max: 2 } }

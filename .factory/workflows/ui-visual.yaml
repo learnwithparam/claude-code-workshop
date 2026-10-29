@@ -1,0 +1,16 @@
+# Method: design contract, then visual iteration with screenshots (Anthropic best practices), then the design lens and human feedback.
+name: ui-visual
+method: screenshot loop with visual and a11y checks
+source: Anthropic Claude Code best practices
+for: UI
+steps:
+  - { stage: contract, agent: planner }
+  - {
+      stage: build,
+      agent: builder,
+      checks: [visual, gate],
+      loop: { until: [visual, gate], max: 4 },
+    }
+  - { stage: design-review, agent: design-reviewer }
+  - { stage: feedback, agent: planner, gate: human }
+  - { stage: review, agent: reviewer, checks: [plan-drift] }

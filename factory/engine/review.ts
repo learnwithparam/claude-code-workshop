@@ -15,6 +15,7 @@ export const reviewSchema = z.object({
   round: z.number().int().min(1),
   findings: z.array(findingSchema.extend({ votes: z.number().int() })),
   dropped: z.number().int(),
+  failed: z.boolean().default(false),
 });
 
 export const VOTERS = 3;
@@ -23,11 +24,12 @@ export const MAX_NITS = 3;
 export const MAX_ROUNDS = 3;
 const key = (f: Finding) => `${f.file}:${f.line}:${f.claim}`;
 
-function parseFindings(text: string): Finding[] {
+// A reply that is not a findings array is a failed review, never an empty one.
+function parseFindings(text: string): Finding[] | null {
   try {
     return z.array(findingSchema).parse(JSON.parse(text));
   } catch {
-    return [];
+    return null;
   }
 }
 
@@ -39,6 +41,7 @@ export async function reviewRound(
   round: number,
   lenses: string[],
   seen: Set<string> = new Set(),
+  carry: Finding[] = [],
 ) {
   const scope = round === 1 ? "the whole diff" : "only what changed since the last round";
   const hunts = await Promise.all(
@@ -48,9 +51,11 @@ export async function reviewRound(
       }),
     ),
   );
-  const fresh = new Map<string, Finding>();
-  for (const f of hunts.flatMap((h) => parseFindings(h.text)))
-    if (!seen.has(key(f))) fresh.set(key(f), f);
+  const parsed = hunts.map((h) => parseFindings(h.text));
+  const failed = parsed.some((p) => p === null);
+  // Important findings from the last round stay in the pool until the voters say they are gone.
+  const fresh = new Map<string, Finding>(carry.map((f) => [key(f), f]));
+  for (const f of parsed.flatMap((p) => p ?? [])) if (!seen.has(key(f))) fresh.set(key(f), f);
 
   const kept: (Finding & { votes: number })[] = [];
   let dropped = 0;
@@ -70,7 +75,7 @@ export async function reviewRound(
   const nits = kept.filter((f) => f.severity === "nit").slice(0, MAX_NITS);
   const findings = [...kept.filter((f) => f.severity !== "nit"), ...nits];
   for (const f of findings) seen.add(key(f));
-  const review = { round, findings, dropped };
+  const review = { round, findings, dropped, failed };
   await host.write(artifactPath(n, "review.json"), JSON.stringify(review, null, 2));
   return review;
 }
@@ -83,9 +88,12 @@ export async function reviewLoop(
   fixer: () => Promise<void>,
 ) {
   const seen = new Set<string>();
+  let carry: Finding[] = [];
   for (let round = 1; round <= MAX_ROUNDS; round++) {
-    const r = await reviewRound(host, n, round, lenses, seen);
-    if (!r.findings.some((f) => f.severity === "important")) return { clean: true, rounds: round };
+    const r = await reviewRound(host, n, round, lenses, seen, carry);
+    if (r.failed) return { clean: false, rounds: round };
+    carry = r.findings.filter((f) => f.severity === "important");
+    if (!carry.length) return { clean: true, rounds: round };
     if (round < MAX_ROUNDS) await fixer();
   }
   return { clean: false, rounds: MAX_ROUNDS };

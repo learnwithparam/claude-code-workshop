@@ -28,7 +28,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        level: [hand-built, boundary, context, skills, execution, verification, delivery, sharing]
+        level:
+          [
+            hand-built,
+            boundary,
+            context,
+            skills,
+            execution,
+            verification,
+            delivery,
+            sharing,
+            workflows,
+          ]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -1,0 +1,9 @@
+# Method: a dependency change is vetted, then proved by the whole gate, never by the bump alone.
+name: deps
+method: vet then gate
+source: Anthropic AI-native SDLC playbook
+for: dependency updates
+steps:
+  - { stage: vet, agent: security-reviewer }
+  - { stage: bump, agent: builder, checks: [gate], loop: { until: [gate], max: 3 } }
+  - { stage: review, agent: reviewer, checks: [plan-drift] }

@@ -1,4 +1,4 @@
-import { artifactPath, writeArtifact } from "./artifacts.ts";
+import { artifactDigest, artifactPath, writeArtifact } from "./artifacts.ts";
 import { CHECKS } from "./checks/index.ts";
 import type { CheckResult, Host } from "./types.ts";
 import type { Step, Workflow } from "./workflow.ts";
@@ -46,12 +46,24 @@ export async function runWorkflow(
   };
 
   for (const step of wf.steps) {
-    if (step.gate === "human" && !(await host.approved(n, step.stage))) {
-      res.log.push(`gate ${step.stage} awaiting approval`);
-      return finish("awaiting-approval", step.stage);
+    // A human gate approves what the stage produced, by hash. A stage whose artifacts were already
+    // approved is not run again, because regenerating them would change what the person signed.
+    if (
+      step.gate === "human" &&
+      (await host.approved(n, step.stage, await artifactDigest(host, n)))
+    ) {
+      res.log.push(`gate ${step.stage} already approved, skipped`);
+      continue;
     }
     const stopped = await runStep(host, step, n, ticket, res);
     if (stopped) return finish("needs-human", step.stage);
+    if (
+      step.gate === "human" &&
+      !(await host.approved(n, step.stage, await artifactDigest(host, n)))
+    ) {
+      res.log.push(`gate ${step.stage} awaiting approval`);
+      return finish("awaiting-approval", step.stage);
+    }
   }
   return finish("done");
 }

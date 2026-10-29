@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
-    "deny": ["Read(**/.env*)", "Edit(**/.env*)", "Bash(git push *)"]
+    "deny": ["Read(**/.env*)", "Edit(**/.env*)", "Read(.factory/holdout/**)", "Bash(git push *)"]
   },
   "sandbox": {
     "enabled": true,

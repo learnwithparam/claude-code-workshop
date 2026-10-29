@@ -1,0 +1,8 @@
+# Method: docs are checked like code: prose rules and links, in the same gate.
+name: docs
+method: prose check
+source: engineering standard
+for: documentation
+steps:
+  - { stage: write, agent: builder, checks: [prose, gate], loop: { until: [prose, gate], max: 3 } }
+  - { stage: review, agent: reviewer, checks: [plan-drift] }

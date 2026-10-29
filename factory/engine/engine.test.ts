@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { planDrift } from "./artifacts.ts";
+import { artifactDigest, planDrift } from "./artifacts.ts";
 import { lock } from "./checks/lock.ts";
 import { red } from "./checks/red.ts";
 import { fakeHost } from "./fake-host.ts";
@@ -45,13 +45,27 @@ describe("runWorkflow", () => {
     const r = await runWorkflow(host, loop, 1, "t");
     expect(r).toMatchObject({ outcome: "done", rounds: { fix: 1 } });
   });
-  it("stops at a human gate until approved", async () => {
+  it("stops after a human-gated stage until its artifacts are approved", async () => {
     const gated = wf("  - {stage: spec, agent: planner, gate: human}");
     const a = fakeHost();
     expect((await runWorkflow(a.host, gated, 2, "t")).outcome).toBe("awaiting-approval");
-    expect(a.calls).toHaveLength(0);
+    expect(a.calls).toHaveLength(1);
     const b = fakeHost({ approvals: ["2:spec"] });
-    expect((await runWorkflow(b.host, gated, 2, "t")).outcome).toBe("done");
+    const done = await runWorkflow(b.host, gated, 2, "t");
+    expect(done.outcome).toBe("done");
+    expect(b.calls).toHaveLength(0);
+  });
+  it("binds an approval to the artifact digest, so edited artifacts need a new one", async () => {
+    const gated = wf("  - {stage: spec, agent: planner, gate: human}");
+    const stale = fakeHost({
+      files: { "specs/3/spec.md": "v2" },
+      approvals: ["3:spec:not-this-hash"],
+    });
+    expect((await runWorkflow(stale.host, gated, 3, "t")).outcome).toBe("awaiting-approval");
+    const digest = await artifactDigest(stale.host, 3);
+    const ok = fakeHost({ files: { "specs/3/spec.md": "v2" }, approvals: [`3:spec:${digest}`] });
+    expect((await runWorkflow(ok.host, gated, 3, "t")).outcome).toBe("done");
+    expect(ok.calls).toHaveLength(0);
   });
   it("turns the test lock on for fix rounds and off after every agent call", async () => {
     const { host, phases } = fakeHost();
@@ -73,14 +87,18 @@ describe("checks", () => {
   });
   it("lock catches an edited test", async () => {
     const { host, files } = fakeHost({
-      files: { "specs/1/a.test.ts": "expect(1)" },
-      changed: ["specs/1/a.test.ts"],
+      files: { "specs/1/a.test.ts": "expect(1)", "api/old.test.ts": "x" },
     });
     expect((await lock.run({ host, n: 1 })).ok).toBe(true);
     files.set("specs/1/a.test.ts", "expect(2)");
     const r = await lock.run({ host, n: 1 });
     expect(r.ok).toBe(false);
     expect(r.evidence).toContain("a.test.ts");
+    // deleting the artifact copy does not reset the baseline, and an untouched old test is covered too
+    files.set("specs/1/a.test.ts", "expect(1)");
+    files.delete("specs/1/lock.json");
+    files.set("api/old.test.ts", "y");
+    expect((await lock.run({ host, n: 1 })).evidence).toContain("api/old.test.ts");
   });
   it("plan-drift fails on a stray file and passes when plan.md changes too", () => {
     expect(planDrift("touch a.ts", ["a.ts", "b.ts"], 1)).toEqual(["b.ts"]);

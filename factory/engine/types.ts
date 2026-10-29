@@ -11,10 +11,14 @@ export type Host = {
   write(path: string, text: string): Promise<void>;
   list(dir: string): Promise<string[]>;
   changedFiles(): Promise<string[]>;
+  // Runner-owned state that lives outside the worktree, so the agent cannot rewrite it (the lock baseline).
+  recall(key: string): Promise<string | null>;
+  remember(key: string, value: string): Promise<void>;
   // Sets FACTORY_PHASE for the agent's hooks. "fix" turns on the test lock.
   setPhase(phase: string | null): void;
-  // A human gate: true once a person has approved this stage for this ticket.
-  approved(n: number, stage: string): Promise<boolean>;
+  // A human gate: true once a person approved this stage's artifacts. `digest` is the hash of what they
+  // read, so an approval of one version never covers another.
+  approved(n: number, stage: string, digest: string): Promise<boolean>;
 };
 
 export type CheckResult = { ok: boolean; evidence: string };

@@ -1,19 +1,31 @@
+import { posix } from "node:path";
+
 export type Tier = "low" | "medium" | "high";
 
+// Anything that steers an agent or the pipeline is high, markdown included: CLAUDE.md, skills and agent
+// prompts are .md files, so a blanket "markdown is docs" rule would let a prompt change ship unreviewed.
 const HIGH = [
   /^\.github\//,
-  /^\.claude\/settings/,
-  /^\.claude\/hooks\//,
-  /^\.factory\/config/,
+  /^\.claude\//,
+  /^\.factory\//,
+  /^factory\//,
+  /^scripts\//,
+  /^(claude|agents|review)\.md$/,
+  /^makefile$/,
   /^package(-lock)?\.json$/,
   /(^|\/)migrations?\//,
 ];
-const LOW = [/^docs\//, /\.md$/, /^fixtures\//];
+const LOW = [/^docs\//, /^fixtures\//];
 
-// The tier comes from the paths in the diff, never from who wrote it. The worst path sets it.
+const norm = (f: string) =>
+  posix.normalize(f.replaceAll("\\", "/")).replace(/^\.\//, "").toLowerCase();
+
+// The tier comes from the paths in the diff, never from who wrote it. The worst path sets it, and
+// HIGH is checked before LOW. specs/<n>/ holds the run's own artifacts and says nothing about risk.
 export function classify(changed: string[]): Tier {
-  if (changed.some((f) => HIGH.some((r) => r.test(f)))) return "high";
-  if (changed.length > 0 && changed.every((f) => LOW.some((r) => r.test(f)))) return "low";
+  const files = changed.map(norm).filter((f) => !f.startsWith("specs/"));
+  if (files.some((f) => f.startsWith("../") || HIGH.some((r) => r.test(f)))) return "high";
+  if (files.every((f) => LOW.some((r) => r.test(f)))) return "low";
   return "medium";
 }
 

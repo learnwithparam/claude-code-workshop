@@ -36,13 +36,21 @@ describe("review", () => {
     });
     expect((await reviewRound(host, 1, 1, ["reviewer"])).findings).toHaveLength(0);
   });
-  it("stops at three rounds and hands the rest to a human", async () => {
+  it("keeps an unfixed important finding open until the cap, then hands it to a human", async () => {
     let fixed = 0;
-    const { host } = fakeHost({ agents: [{ text: JSON.stringify([finding]) }, { text: "yes" }] });
+    const { host } = fakeHost({
+      byAgent: (name) => ({ text: name === "verifier" ? "yes" : JSON.stringify([finding]) }),
+    });
     const r = await reviewLoop(host, 1, ["reviewer"], async () => void fixed++);
-    // the same finding is never repeated, so round 2 finds nothing new and the loop ends clean
-    expect(r.rounds).toBeLessThanOrEqual(3);
-    expect(fixed).toBeLessThanOrEqual(2);
+    expect(r).toEqual({ clean: false, rounds: 3 });
+    expect(fixed).toBe(2);
+  });
+  it("treats a reply that is not findings as a failed review, not a clean one", async () => {
+    const { host } = fakeHost({ agents: [{ text: "looks fine to me" }] });
+    expect(await reviewLoop(host, 1, ["reviewer"], async () => {})).toEqual({
+      clean: false,
+      rounds: 1,
+    });
   });
 });
 
@@ -50,7 +58,18 @@ describe("risk", () => {
   it("is high for a CI workflow and low for docs", () => {
     expect(classify([".github/workflows/ci.yml"])).toBe("high");
     expect(classify(["docs/a.md", "src/a.ts"])).toBe("medium");
-    expect(classify(["docs/a.md"])).toBe("low");
+    expect(classify(["docs/a.md", "specs/1/plan.md"])).toBe("low");
+  });
+  it("treats markdown that steers an agent as high, whatever the casing or dots", () => {
+    for (const f of [
+      "CLAUDE.md",
+      ".claude/agents/builder.md",
+      "./Claude.MD",
+      "docs/../.claude/skills/x/SKILL.md",
+      "Makefile",
+      "scripts/a.ts",
+    ])
+      expect(classify([f])).toBe("high");
   });
   it("never counts an agent, and voids approval after a new commit", () => {
     const a = [{ by: "bot", kind: "agent" as const, commit: "c1" }];

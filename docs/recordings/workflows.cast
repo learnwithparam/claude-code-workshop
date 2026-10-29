@@ -1,0 +1,4 @@
+{"version":3,"term":{"cols":80,"rows":24},"timestamp":1793282087,"command":"bash -c 'echo \"$ make prove LEVEL=workflows\"; make prove LEVEL=workflows 2>&1 | tail -16'","env":{"SHELL":"/bin/zsh"}}
+[0.012, "o", "$ make prove LEVEL=workflows\r\n"]
+[1.525, "o", "npm run prove -- workflows\r\n\r\n> claude-code-workshop@0.1.0 prove\r\n> tsx scripts/prove/run.ts workflows\r\n\r\nPASS workflows: every workflow dry-runs in order and every gate refuses what it should (every workflow runs; red, lock, plan-drift, voting, risk and bands bite)\r\n"]
+[0.000, "x", "0"]
