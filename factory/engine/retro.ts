@@ -5,8 +5,8 @@ import type { Host } from "./types.ts";
 // opens a header but never closes it counts as all header, so any edit to it is a change.
 const frontmatter = (text: string | null) => {
   const t = (text ?? "").replace(/^\uFEFF/, "").replaceAll("\r\n", "\n");
-  if (!t.startsWith("---\n")) return "";
-  return /^---\n[\s\S]*?\n---[ \t]*(\n|$)/.exec(t)?.[0] ?? t;
+  if (!/^---[ \t]*\n/.test(t)) return "";
+  return /^---[ \t]*\n[\s\S]*?\n---[ \t]*(\n|$)/.exec(t)?.[0] ?? t;
 };
 
 export type RetroOutcome =
