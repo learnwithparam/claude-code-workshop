@@ -95,6 +95,12 @@ describe("realHost over a git repo", () => {
     expect(git(cwd, "log", "-1", "--format=%s").trim()).toBe("#1");
     expect(existsSync(join(cwd, "..", "hook-ran"))).toBe(false);
   });
+  it("refuses to commit after an agent changed the repo git config", async () => {
+    const { host, cwd } = repo();
+    git(cwd, "config", "filter.x.clean", "touch ../filter-ran");
+    writeFileSync(join(cwd, "n.txt"), "x");
+    await expect(host.commit("#1")).rejects.toThrow(/git config changed/);
+  });
   it("keeps recalled state outside the worktree", async () => {
     const { host } = repo();
     await host.remember("lock:1", "h");

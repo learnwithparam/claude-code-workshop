@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from "node:child_process";
-import { createHmac, randomBytes } from "node:crypto";
+import { createHash, createHmac, randomBytes } from "node:crypto";
 import {
   cpSync,
   existsSync,
@@ -64,6 +64,7 @@ export function realHost(o: RealHostOptions): Host {
   const home = mkdtempSync(join(tmpdir(), "factory-home-"));
   process.once("exit", () => rmSync(home, { recursive: true, force: true }));
   const SAFE_ENV = {
+    GIT_CONFIG_NOSYSTEM: "1",
     ...Object.fromEntries(
       ["PATH", "SHELL", "TERM", "LANG"].flatMap((k) =>
         process.env[k] ? [[k, process.env[k]]] : [],
@@ -76,6 +77,12 @@ export function realHost(o: RealHostOptions): Host {
     spawnSync(cmd, args, { cwd, encoding: "utf8", maxBuffer: 64 << 20, env });
   const git = (...a: string[]) => execFileSync("git", a, { cwd: o.cwd, encoding: "utf8" });
   const tracked = () => git("ls-files", "-co", "--exclude-standard").split("\n").filter(Boolean);
+  // Repo config can name programs git runs (filters, gpg, fsmonitor). Pin it now; commit refuses if an agent changed it.
+  const gitConfig = () => {
+    const f = join(git("rev-parse", "--absolute-git-dir").trim(), "config");
+    return existsSync(f) ? createHash("sha256").update(readFileSync(f)).digest("hex") : "";
+  };
+  const pinnedConfig = gitConfig();
   let phase: string | null = null;
   // The key lives only in this process, so an agent that rewrites a state file cannot forge its tag.
   const key = randomBytes(32);
@@ -176,8 +183,20 @@ export function realHost(o: RealHostOptions): Host {
 
     async commit(message) {
       // No repo hooks or fsmonitor: the agent can write .git/hooks, and a commit must not run them.
+      if (gitConfig() !== pinnedConfig)
+        throw new Error("git config changed during the run; refusing to commit");
       const g = (...a: string[]) =>
-        sh("git", ["-c", "core.hooksPath=/dev/null", "-c", "core.fsmonitor=false", ...a]);
+        sh("git", [
+          "-c",
+          "core.hooksPath=/dev/null",
+          "-c",
+          "core.fsmonitor=false",
+          "-c",
+          "commit.gpgsign=false",
+          "-c",
+          "core.attributesFile=/dev/null",
+          ...a,
+        ]);
       g("add", "-A");
       const r = g(
         "-c",
