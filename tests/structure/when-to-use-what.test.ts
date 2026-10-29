@@ -14,3 +14,28 @@ describe("when to use what", () => {
     expect(existsSync(join(dirname(file), link))).toBe(true);
   });
 });
+
+// Every kind of .claude file the docs list has a row here, so a file type cannot be taught without a place to find it.
+describe("file types", () => {
+  const text = readFileSync(file, "utf8");
+  it.each([
+    "CLAUDE.local.md",
+    "output style",
+    "settings.json",
+    "managed settings",
+    ".mcp.json",
+    ".worktreeinclude",
+    "a command",
+    "agent memory",
+    "REVIEW.md",
+    "a mod",
+    "a skill",
+    "a hook",
+    "a subagent",
+    "a path-scoped rule",
+    "a workflow",
+    "a plugin",
+  ])("has a row for %s", (kind) => {
+    expect(text).toContain(kind);
+  });
+});

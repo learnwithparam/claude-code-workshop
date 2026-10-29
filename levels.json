@@ -18,6 +18,13 @@
     "api/.*",
     ".claude/settings.json",
     ".claude/hooks/pretooluse-secrets.mjs",
+    ".claude/hooks/userpromptsubmit-route.mjs",
+    ".claude/hooks/sessionstart-integrity.mjs",
+    ".claude/hooks/posttooluse-output-scan.mjs",
+    ".claude/hooks/posttooluse-length-warn.mjs",
+    ".claude/hooks/posttooluse-format.mjs",
+    "docs/managed-settings.example.json",
+    "tests/structure/hook-catalogue.test.ts",
     ".gitleaks.toml",
     "scripts/git/**",
     "scripts/prove/boundary.ts",
@@ -37,6 +44,10 @@
     "docs/electives/ide.md",
     ".claude/statusline.mjs",
     "tests/structure/status-line.test.ts",
+    ".claude/output-styles/**",
+    ".worktreeinclude",
+    "docs/examples/CLAUDE.local.md",
+    "tests/structure/claude-context-files.test.ts",
     "docs/recordings/context.cast",
     "docs/recordings/context.gif"
   ],
@@ -76,6 +87,9 @@
   ],
   "execution": [
     ".claude/agents/**",
+    ".claude/agent-memory/**",
+    ".mcp.json",
+    "tests/structure/agent-frontmatter.test.ts",
     ".factory/config.json",
     "factory/config.ts",
     "factory/tsconfig.json",
@@ -135,6 +149,9 @@
     ".claude/hooks/stop-gate.mjs",
     ".claude/hooks/pretooluse-file-guard.mjs",
     ".claude/hooks/posttooluse-session-log.mjs",
+    ".claude/hooks/pretooluse-test-lock.mjs",
+    "REVIEW.md",
+    "tests/structure/review-and-test-lock.test.ts",
     "repo.json",
     "scripts/impact.ts",
     "scripts/impact.test.ts",
@@ -166,6 +183,9 @@
     "docs/when-to-use-what.md",
     "tests/structure/when-to-use-what.test.ts",
     "docs/recordings/sharing.cast",
-    "docs/recordings/sharing.gif"
+    "docs/recordings/sharing.gif",
+    ".claude/commands/**",
+    "tests/structure/commands-and-mod.test.ts",
+    "plugins/factory-status/.claude-plugin/**"
   ]
 }

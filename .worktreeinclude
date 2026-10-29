@@ -1,0 +1,4 @@
+# Gitignored files a fresh worktree still needs. Claude Code copies matches in when it makes one.
+# Personal memory and local settings travel. A secrets file is never listed: the person sets the key.
+CLAUDE.local.md
+.claude/settings.local.json

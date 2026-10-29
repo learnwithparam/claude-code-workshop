@@ -1,0 +1,6 @@
+{
+  "name": "factory-status",
+  "version": "0.1.0",
+  "description": "Shows the factory's current run above the prompt: stage, spend and the last check.",
+  "types": "./types/index.d.ts"
+}

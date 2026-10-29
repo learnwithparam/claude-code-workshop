@@ -50,6 +50,10 @@ Track A: add a second secret to `api/src/env.ts` and prove the bundle stays clea
 - Start the same risky ask in `default`, `plan` and `acceptEdits` (`claude --permission-mode plan`) and note which tool calls each mode allowed without asking. The factory picks one per stage in `.factory/config.json`: `plan` for reading stages, `acceptEdits` for build.
 - A dev container keeps a mistake off your laptop. Open the repo in one and the sandbox plus the deny rules are a second wall around the same secret.
 
+## Go further: the hook catalogue
+
+Besides the secrets guard, five hooks each show one pattern: a prompt router that adds a hint, a session-start hash of the settings, an output scan for leaked keys, a warn-only length check and a fail-safe formatter. `hook-catalogue.test.ts` feeds each one bad input. `docs/managed-settings.example.json` shows the deny list an organisation would enforce above every repo.
+
 ## Discussion
 
 Where does a secret live in your stack today, and which processes can read it?

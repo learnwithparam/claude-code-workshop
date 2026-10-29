@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "allowManagedHooksOnly": false,
+  "permissions": {
+    "deny": [
+      "Read(**/.env*)",
+      "Edit(**/.env*)",
+      "Bash(git push --force *)",
+      "Bash(git push * main)",
+      "Bash(rm -rf *)",
+      "Bash(curl * | sh)",
+      "Bash(npm publish *)"
+    ],
+    "disableBypassPermissionsMode": "disable"
+  },
+  "env": {
+    "DISABLE_TELEMETRY": "1"
+  }
+}

@@ -50,6 +50,10 @@ When you bump `version` and push, `claude plugin update` brings the change to ev
 
 Track A: install the kit into a fresh empty repo and run `/factory-kit:issue-triage` on an issue. Track B: move one more skill into the kit, add it to `KIT` in `scripts/plugin.ts`, bump the version, add an eval case for it, and pass `claude plugin validate --strict`.
 
+## Go further: a command and a mod
+
+`.claude/commands/gate.md` is one file that runs by name. A skill is a folder Claude chooses to open; a command is a prompt you type. `plugins/factory-status` is a mod that draws the newest factory run above the prompt. Check it with `claude plugin validate plugins/factory-status` and `claude plugin test plugins/factory-status`.
+
 ## Discussion
 
 A plugin's hooks run with your rights, outside the sandbox. Who reviews a marketplace before your team adds it, and what stops a later commit from changing what a hook does?

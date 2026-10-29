@@ -52,6 +52,10 @@ Track A: add a stage budget and see the worst case change. Track B: write a new 
 | A fixed order of stages with caps   | the factory runner or `.claude/workflows/factory.js` |
 | Many independent runs of one prompt | `claude -p` in a loop                                |
 
+## Go further: what an agent file can set
+
+The `verifier` runs in plan mode, the `builder` accepts edits inside its own worktree, and the `reviewer` keeps notes in `.claude/agent-memory/reviewer/`. `.mcp.json` names a GitHub server whose token comes from the environment, so it holds no secret. A project server still asks for approval before it connects.
+
 ## Discussion
 
 What does one runaway stage cost you today?
