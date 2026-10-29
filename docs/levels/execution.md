@@ -38,6 +38,18 @@ Run `make factory ISSUE=1 FLAGS=--dry-run`. It prints each stage with its limits
 
 Track A: add a stage budget and see the worst case change. Track B: write a new agent for accessibility review.
 
+## Go further: effort, parallel sessions and orchestration
+
+- Models are routed per stage in `.factory/config.json`. Read `cost.json` from a run to see what each stage spent, and lower the effort on the stages that spent most for the least gain.
+- Two terminals, each on its own worktree (`git worktree add`), run two sessions at once without overwriting each other. The builder agent uses `isolation: worktree` for the same reason.
+- Pick the orchestration by what you need back:
+
+| Need                                | Use                                                  |
+| ----------------------------------- | ---------------------------------------------------- |
+| A result from one focused read      | a subagent                                           |
+| A fixed order of stages with caps   | the factory runner or `.claude/workflows/factory.js` |
+| Many independent runs of one prompt | `claude -p` in a loop                                |
+
 ## Discussion
 
 What does one runaway stage cost you today?

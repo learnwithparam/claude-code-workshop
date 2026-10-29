@@ -41,6 +41,12 @@ The same ticket now moves through named stages, and a person decides twice: the 
 
 Track A: file a bug ticket for the Kindergarten parser and run it through the dry run. Track B: add a retro stage that proposes one change to `.claude/` and must keep the eval score.
 
+## Go further: headless and bounded
+
+- `claude -p "classify this issue" --output-format json` runs one turn without a screen and prints JSON you can pipe to `jq`.
+- Every factory stage has `maxTurns` and `maxBudgetUsd` in `.factory/config.json`. Lower one to a value too small, run the stage, and read the stop reason. A run that ends at its budget is a feature, not a failure.
+- `.github/workflows/review.yml` runs a review on a pull request with a model and a turn cap set in the workflow.
+
 ## Discussion
 
 Which step in your delivery should never be automated, and who owns it?

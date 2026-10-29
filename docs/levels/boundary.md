@@ -42,6 +42,12 @@ Repeat the "debug the env" prompt. The hook blocks the command and tells Claude 
 
 Track A: add a second secret to `api/src/env.ts` and prove the bundle stays clean. Track B: write a hook case for a command that reads the file through `base64`.
 
+## Go further: modes and scopes
+
+- Settings merge from user, project, local and managed scopes, and a deny rule in any scope wins. `.claude/settings.json` is the project scope and is committed. Put personal changes in `.claude/settings.local.json`, which stays out of git.
+- Start the same risky ask in `default`, `plan` and `acceptEdits` (`claude --permission-mode plan`) and note which tool calls each mode allowed without asking. The factory picks one per stage in `.factory/config.json`: `plan` for reading stages, `acceptEdits` for build.
+- A dev container keeps a mistake off your laptop. Open the repo in one and the sandbox plus the deny rules are a second wall around the same secret.
+
 ## Discussion
 
 Where does a secret live in your stack today, and which processes can read it?

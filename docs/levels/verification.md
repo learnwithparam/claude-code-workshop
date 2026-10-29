@@ -40,6 +40,10 @@ The layout test reads the page source. A browser replay with Playwright and axe 
 
 Track A: add a fourth bug and its biting test. Track B: replace the layout test with a Playwright check at 375 px.
 
+## Go further: let a tool look
+
+A hook that fails the turn is a check you cannot forget. The `design-reviewer` agent adds eyes: it builds the app, opens it at 375 and 1280 px and reports sideways scroll, low contrast and print clipping. Run it after changing a font size and compare its verdict with `tests/e2e/layout.e2e.ts`, which asserts no sideways scroll, no serious accessibility violation and no clipped print page.
+
 ## Discussion
 
 How many of your bug fixes would still pass their test with the fix removed?

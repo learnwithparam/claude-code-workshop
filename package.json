@@ -9,7 +9,7 @@
     "api"
   ],
   "scripts": {
-    "typecheck": "npm run typecheck --workspaces --if-present && (test ! -d factory || tsc --noEmit -p factory)",
+    "typecheck": "npm run typecheck --workspaces --if-present && (test ! -d factory || tsc --noEmit -p factory) && (test ! -d lab || tsc --noEmit -p lab)",
     "test": "vitest run",
     "lint": "biome ci .",
     "e2e": "test ! -f playwright.config.ts || playwright test",

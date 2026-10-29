@@ -1,6 +1,6 @@
 # Workshop map
 
-Seven levels, one app. Each level adds one layer of the software factory and ends with a proof you can run.
+Levels, one app. Each level adds one layer of the software factory and ends with a proof you can run.
 
 | Level                                  | Layer              | Stage   | Proof                           |
 | -------------------------------------- | ------------------ | ------- | ------------------------------- |
@@ -11,6 +11,7 @@ Seven levels, one app. Each level adds one layer of the software factory and end
 | [execution](levels/execution.md)       | execution          | build   | `make prove LEVEL=execution`    |
 | [verification](levels/verification.md) | verification       | deploy  | `make prove LEVEL=verification` |
 | [delivery](levels/delivery.md)         | delivery           | improve | `make prove LEVEL=delivery`     |
+| [sharing](levels/sharing.md)           | sharing            | iterate | `make prove LEVEL=sharing`      |
 
 Take the levels in order. Each doc follows the same steps: the problem, the run without the config, the config, the run with it, a proof, an exercise.
 

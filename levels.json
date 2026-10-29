@@ -7,7 +7,8 @@
     "scripts/prove/hand-built.ts",
     "biome.json",
     "tsconfig.base.json",
-    "docs/levels/hand-built.md"
+    "docs/levels/hand-built.md",
+    "docs/electives/built-in-help.md"
   ],
   "boundary": [
     "api/**",
@@ -26,14 +27,21 @@
     "scripts/check-conventions.ts",
     "scripts/prove/context.ts",
     "tests/structure/conventions.test.ts",
-    "docs/levels/context.md"
+    "docs/levels/context.md",
+    "docs/electives/status-line.md",
+    "docs/electives/ide.md",
+    ".claude/statusline.mjs",
+    "tests/structure/status-line.test.ts"
   ],
   "skills": [
     ".claude/skills/**",
     "skills.lock",
     "fixtures/eval.json",
     "scripts/prove/skills.ts",
-    "docs/levels/skills.md"
+    "docs/levels/skills.md",
+    "docs/agent/one-call.md",
+    "docs/agent/manual-loop.md",
+    "docs/agent/tool-runner.md"
   ],
   "trunk": [
     "Makefile",
@@ -57,7 +65,15 @@
     "factory/config.ts",
     "factory/tsconfig.json",
     "scripts/prove/execution.ts",
-    "docs/levels/execution.md"
+    "lab/**",
+    "docs/agent/mini-claude.md",
+    "docs/agent/agent-sdk.md",
+    "docs/levels/execution.md",
+    ".claude/teams.json",
+    ".claude/hooks/teammateidle-log.mjs",
+    "tests/structure/teams.test.ts",
+    "docs/electives/agent-teams.md",
+    "docs/electives/fast-mode.md"
   ],
   "delivery": [
     "tests/structure/dependabot.test.ts",
@@ -90,7 +106,8 @@
     "docs/levels/delivery.md",
     ".claude/workflows/**",
     "tests/structure/factory-workflow.test.ts",
-    "tests/structure/workflows.test.ts"
+    "tests/structure/workflows.test.ts",
+    "docs/electives/loop-and-routines.md"
   ],
   "verification": [
     ".claude/hooks/posttooluse-typecheck.mjs",
@@ -110,6 +127,17 @@
     "tests/e2e/layout.e2e.ts",
     "tests/take-home/multipage.test.ts",
     "fixtures/take-home/pack.json",
-    "docs/levels/verification.md"
+    "docs/levels/verification.md",
+    "docs/electives/chrome.md",
+    "docs/electives/screenshots.md"
+  ],
+  "sharing": [
+    "scripts/plugin.ts",
+    "plugins/**",
+    "plugins/factory-kit/.claude-plugin/**",
+    ".claude-plugin/**",
+    "tests/structure/plugin.test.ts",
+    "scripts/prove/sharing.ts",
+    "docs/levels/sharing.md"
   ]
 }
