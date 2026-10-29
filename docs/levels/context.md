@@ -50,6 +50,10 @@ Track A: add a rule for `tests/`. Track B: add a convention to `check-convention
 
 Type `/context` before step 1 and after step 3 to see what each step cost in window. Then `/compact` and compare. `/memory` shows which instruction files loaded, so you can confirm `AGENTS.md` came in through `CLAUDE.md`.
 
+## Go further: your own files
+
+Two files here are not shared. Copy `docs/examples/CLAUDE.local.md` to `CLAUDE.local.md` for notes only you need; git ignores it. Pick the `Teaching` output style with `/output-style` to change how replies read without touching any rule. `.worktreeinclude` lists the ignored files a new worktree should receive, and a test keeps secrets off that list.
+
 ## Discussion
 
 Which of your team's unwritten rules would Claude break today?

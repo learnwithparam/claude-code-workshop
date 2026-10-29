@@ -46,6 +46,10 @@ Track A: add a fourth bug and its biting test. Track B: replace the layout test 
 
 A hook that fails the turn is a check you cannot forget. The `design-reviewer` agent adds eyes: it builds the app, opens it at 375 and 1280 px and reports sideways scroll, low contrast and print clipping. Run it after changing a font size and compare its verdict with `tests/e2e/layout.e2e.ts`, which asserts no sideways scroll, no serious accessibility violation and no clipped print page.
 
+## Go further: review rules and a test lock
+
+`REVIEW.md` tells the reviewer what failure looks like here: the count first, `file:line` evidence, at most three nits. The `pretooluse-test-lock.mjs` hook blocks edits to test files while `FACTORY_PHASE=fix`, so a fix cannot pass by changing the test. Set the variable in a shell and try to edit a test to see it refuse.
+
 ## Discussion
 
 How many of your bug fixes would still pass their test with the fix removed?
