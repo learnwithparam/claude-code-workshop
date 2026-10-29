@@ -1,7 +1,13 @@
 import { type Proposal, parseProposal } from "../retro.ts";
 import type { Host } from "./types.ts";
 
-const frontmatter = (text: string | null) => /^---\n[\s\S]*?\n---/.exec(text ?? "")?.[0] ?? "";
+// Everything up to the first whole-line closing `---`, line endings and BOM normalised. A file that
+// opens a header but never closes it counts as all header, so any edit to it is a change.
+const frontmatter = (text: string | null) => {
+  const t = (text ?? "").replace(/^\uFEFF/, "").replaceAll("\r\n", "\n");
+  if (!t.startsWith("---\n")) return "";
+  return /^---\n[\s\S]*?\n---[ \t]*(\n|$)/.exec(t)?.[0] ?? t;
+};
 
 export type RetroOutcome =
   | { kind: "none" }

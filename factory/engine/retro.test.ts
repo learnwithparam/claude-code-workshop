@@ -48,6 +48,21 @@ describe("retro", () => {
     expect(r).toMatchObject({ kind: "error", error: expect.stringMatching(/frontmatter/) });
     expect(reverted).toBe(true);
   });
+  it("treats an unclosed header as all header", async () => {
+    const f = ".claude/skills/a/SKILL.md";
+    const { host, files } = fakeHost({
+      files: { [f]: "---\ntools: Read\nbody" },
+      changed: [f],
+      byAgent: (n) => (n === "planner" ? { text: PROPOSAL(f) } : undefined),
+    });
+    const real = host.agent;
+    host.agent = async (name, p, o) => {
+      if (name === "builder") files.set(f, "---\ntools: Read\nhooks: x\nbody");
+      return real(name, p, o);
+    };
+    host.exec = async () => ({ code: 0, output: "SCORE 1" });
+    expect(await retro(host, 1, EVAL, async () => {})).toMatchObject({ kind: "error" });
+  });
   it("reverts a lesson that lowered the score", async () => {
     const { host } = fakeHost({
       changed: [".claude/skills/a/SKILL.md"],
