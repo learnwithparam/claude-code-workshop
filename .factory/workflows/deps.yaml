@@ -24,4 +24,4 @@ steps:
       checks: [manifest-deps, gate],
       loop: { until: [manifest-deps, gate], max: 3 },
     }
-  - { stage: review, agent: reviewer, checks: [plan-drift] }
+  - { stage: review, agent: reviewer, checks: [plan-drift, manifest-deps] }

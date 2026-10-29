@@ -93,9 +93,13 @@ describe("read-only planner stages", () => {
 });
 
 describe("every step knows its job", () => {
-  it.each(files)("%s gives each step a brief unless it only reviews the plan", (file) => {
+  // A final review step has no work to brief: it only re-runs checks that hold the diff to the plan.
+  const REVIEW_ONLY = ["plan-drift", "manifest-deps"];
+  it.each(files)("%s gives each step a brief unless it only re-checks the plan", (file) => {
     const wf = loadWorkflow(readFileSync(`${dir}/${file}`, "utf8"));
-    for (const s of wf.steps.filter((x) => !x.brief))
-      expect(s.checks, `${file} ${s.stage}`).toEqual(["plan-drift"]);
+    for (const s of wf.steps.filter((x) => !x.brief)) {
+      expect(s.checks[0], `${file} ${s.stage}`).toBe("plan-drift");
+      for (const c of s.checks) expect(REVIEW_ONLY, `${file} ${s.stage}`).toContain(c);
+    }
   });
 });
