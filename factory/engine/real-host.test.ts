@@ -101,6 +101,13 @@ describe("realHost over a git repo", () => {
     writeFileSync(join(cwd, "n.txt"), "x");
     await expect(host.commit("#1")).rejects.toThrow(/git config changed/);
   });
+  it("sees a config change made through an included file", async () => {
+    const { host, cwd } = repo();
+    writeFileSync(join(cwd, "extra.cfg"), "[core]\n\tfsmonitor = true\n");
+    git(cwd, "config", "include.path", join(cwd, "extra.cfg"));
+    writeFileSync(join(cwd, "n.txt"), "x");
+    await expect(host.commit("#1")).rejects.toThrow(/git config changed/);
+  });
   it("keeps recalled state outside the worktree", async () => {
     const { host } = repo();
     await host.remember("lock:1", "h");

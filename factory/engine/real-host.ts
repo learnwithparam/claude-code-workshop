@@ -79,8 +79,10 @@ export function realHost(o: RealHostOptions): Host {
   const tracked = () => git("ls-files", "-co", "--exclude-standard").split("\n").filter(Boolean);
   // Repo config can name programs git runs (filters, gpg, fsmonitor). Pin it now; commit refuses if an agent changed it.
   const gitConfig = () => {
-    const f = join(git("rev-parse", "--absolute-git-dir").trim(), "config");
-    return existsSync(f) ? createHash("sha256").update(readFileSync(f)).digest("hex") : "";
+    // The effective local config (common dir, config.worktree and anything they include), not one file.
+    const out = git("config", "--local", "--list", "--includes", "--show-origin");
+    if (!out.trim()) throw new Error("cannot read the repo git config");
+    return createHash("sha256").update(out).digest("hex");
   };
   const pinnedConfig = gitConfig();
   let phase: string | null = null;
