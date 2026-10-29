@@ -45,7 +45,7 @@ export const dropSpecLines = (plan: string, n: number) =>
 
 // A visual change regenerates the golden snapshots, and the gate owns that folder so a plan cannot list it.
 // The feedback gate shows a human the changed files, so the snapshots are reviewed there, not by the plan.
-const SNAPSHOT = /^specs\/[^/]+\/golden\/__snapshots__\//;
+const SNAPSHOT = /^specs\/\d+\/golden\/__snapshots__\/[A-Za-z0-9_-]+\.(html|snap)$/;
 
 export function planDrift(plan: string, changed: string[], n: number): string[] {
   const listed = new Set(planLines(plan));
