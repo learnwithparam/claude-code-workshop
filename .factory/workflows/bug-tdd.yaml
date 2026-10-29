@@ -10,14 +10,26 @@ steps:
       agent: planner,
       brief: "Reply with the plan and nothing else: one repo path per line for every file you will create or change. The runner saves your reply as specs/<issue>/plan.md, and later stages may touch only the files listed.",
     }
-  - { stage: reproduce, agent: builder, checks: [red, lock], loop: { until: [red], max: 2 } }
+  - {
+      stage: reproduce,
+      agent: builder,
+      brief: "Do not fix the bug. Write one vitest test in specs/<issue>/golden that fails on the base commit because of the bug in the ticket, and fails for that reason only.",
+      checks: [red, lock],
+      loop: { until: [red], max: 2 },
+    }
   - {
       stage: fix,
       agent: builder,
+      brief: "Fix the bug with the smallest change that makes the locked test pass. Never edit the test.",
       phase: fix,
       checks: [green, lock, gate],
       loop: { until: [green, lock, gate], max: 3 },
     }
-  - { stage: harden, agent: test-reviewer, checks: [mutation] }
+  - {
+      stage: harden,
+      agent: test-reviewer,
+      brief: "Strengthen the tests so mutants in the files this run changed are killed. Add tests under specs/<issue>/golden; never change source.",
+      checks: [mutation],
+    }
   - { stage: review, agent: reviewer, checks: [plan-drift] }
   - { stage: ci, agent: builder, checks: [ci], loop: { until: [ci], max: 2 } }
