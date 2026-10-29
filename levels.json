@@ -58,6 +58,7 @@
     "factory/config.ts",
     "factory/tsconfig.json",
     "scripts/prove/execution.ts",
+    "lab/**",
     "docs/levels/execution.md"
   ],
   "delivery": [
