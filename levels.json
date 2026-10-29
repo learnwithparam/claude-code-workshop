@@ -33,7 +33,8 @@
     "skills.lock",
     "fixtures/eval.json",
     "scripts/prove/skills.ts",
-    "docs/levels/skills.md"
+    "docs/levels/skills.md",
+    "docs/agent/**"
   ],
   "trunk": [
     "Makefile",
