@@ -160,6 +160,11 @@ describe("realHost isolation", () => {
 });
 
 describe("realHost home", () => {
+  it("lets checks find the installed browser despite the throwaway HOME", async () => {
+    const { host } = repo();
+    const r = await host.exec("sh", ["-c", 'echo "$PLAYWRIGHT_BROWSERS_PATH"']);
+    expect(r.output.trim()).toMatch(/ms-playwright$/);
+  });
   it("gives checks a throwaway HOME, not the person's", async () => {
     const { host } = repo();
     const r = await host.exec("sh", ["-c", 'echo "$HOME"']);
