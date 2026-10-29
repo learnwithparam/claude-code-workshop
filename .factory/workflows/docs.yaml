@@ -10,5 +10,11 @@ steps:
       agent: planner,
       brief: "Reply with the plan and nothing else: one repo path per line for every file you will create or change. The runner saves your reply as specs/<issue>/plan.md, and later stages may touch only the files listed.",
     }
-  - { stage: write, agent: builder, checks: [prose, gate], loop: { until: [prose, gate], max: 3 } }
+  - {
+      stage: write,
+      agent: builder,
+      brief: "Fix the drift the ticket names in the docs the plan lists. Prefer regenerating a generated file with its script over editing it by hand. No em dashes, no filler.",
+      checks: [prose, gate],
+      loop: { until: [prose, gate], max: 3 },
+    }
   - { stage: review, agent: reviewer, checks: [plan-drift] }

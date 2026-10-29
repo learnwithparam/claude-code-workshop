@@ -87,3 +87,11 @@ describe("read-only planner stages", () => {
       expect(s.writes, `${file} ${s.stage}`).toBe(`${s.stage}.md`);
   });
 });
+
+describe("every step knows its job", () => {
+  it.each(files)("%s gives each step a brief unless it only reviews the plan", (file) => {
+    const wf = loadWorkflow(readFileSync(`${dir}/${file}`, "utf8"));
+    for (const s of wf.steps.filter((x) => !x.brief))
+      expect(s.checks, `${file} ${s.stage}`).toEqual(["plan-drift"]);
+  });
+});

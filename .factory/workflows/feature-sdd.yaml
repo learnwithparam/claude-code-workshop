@@ -4,22 +4,53 @@ method: SDD with phase gates and properties
 source: Spec Kit and Kiro
 for: large features and epics
 steps:
-  - { stage: intent, agent: planner, writes: intent.md }
-  - { stage: spec, agent: planner, writes: spec.md, gate: human }
-  - { stage: plan, agent: planner, writes: plan.md, gate: human, checks: [plan-drift] }
+  - {
+      stage: intent,
+      agent: planner,
+      writes: intent.md,
+      brief: "State the outcome the epic must reach and how we will know, in a few lines. Reply with the intent only.",
+    }
+  - {
+      stage: spec,
+      agent: planner,
+      writes: spec.md,
+      gate: human,
+      brief: "Write EARS requirements, one per line as 'When <trigger>, the system shall <response>', each with a numbered id. Reply with the requirements only.",
+    }
+  - {
+      stage: plan,
+      agent: planner,
+      writes: plan.md,
+      gate: human,
+      brief: "Reply with the plan and nothing else: one repo path per line for every file you will create or change. The runner saves your reply as specs/<issue>/plan.md, and later stages may touch only the files listed.",
+      checks: [plan-drift],
+    }
   - {
       stage: tests,
       agent: builder,
+      brief: "Write a vitest test or fast-check property for each requirement in specs/<issue>/golden. They fail on the base commit. Write no source.",
       checks: [red, properties, lock],
       loop: { until: [red], max: 2 },
     }
   - {
       stage: build,
       agent: builder,
+      brief: "Make the locked tests and properties pass with the smallest change in the files the plan lists. Never edit the tests.",
       phase: fix,
       checks: [acceptance, properties, lock],
       loop: { until: [acceptance, properties, lock], max: 5 },
     }
-  - { stage: harden, agent: test-reviewer, checks: [mutation] }
+  - {
+      stage: harden,
+      agent: test-reviewer,
+      brief: "Strengthen the tests so mutants in the files this run changed are killed. Add tests under specs/<issue>/golden; never change source.",
+      checks: [mutation],
+    }
   - { stage: review, agent: reviewer, checks: [plan-drift] }
-  - { stage: release, agent: builder, checks: [ci], loop: { until: [ci], max: 2 } }
+  - {
+      stage: release,
+      agent: builder,
+      brief: "Read the failing CI job log and fix what it names. Never edit the locked tests.",
+      checks: [ci],
+      loop: { until: [ci], max: 2 },
+    }
