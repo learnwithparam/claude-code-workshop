@@ -1,0 +1,4 @@
+# 1 sigma logs, 2 sigma asks a read-only agent to diagnose, 3 sigma writes an intent.md for a new run.
+ci-failure-rate: { direction: up-is-bad, window: 14 }
+pr-cycle-time-hours: { direction: up-is-bad, window: 14 }
+eval-pass-rate: { direction: down-is-bad, window: 14 }

@@ -1,0 +1,16 @@
+# Method: STRIDE threat check, a failing exploit test kept private, and a PR that names the class of bug, not the exploit.
+name: security
+method: STRIDE then red test then fix
+source: Anthropic AI-native SDLC playbook
+for: security fixes
+steps:
+  - { stage: threat, agent: security-reviewer }
+  - { stage: reproduce, agent: builder, checks: [red, lock], loop: { until: [red], max: 2 } }
+  - {
+      stage: fix,
+      agent: builder,
+      phase: fix,
+      checks: [green, lock, gate],
+      loop: { until: [green, lock, gate], max: 3 },
+    }
+  - { stage: review, agent: security-reviewer, checks: [plan-drift] }

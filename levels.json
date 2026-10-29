@@ -187,5 +187,14 @@
     ".claude/commands/**",
     "tests/structure/commands-and-mod.test.ts",
     "plugins/factory-status/.claude-plugin/**"
+  ],
+  "workflows": [
+    "factory/engine/**",
+    ".factory/workflows/**",
+    ".factory/bands.yaml",
+    "scripts/prove/workflows.ts",
+    "docs/levels/workflows.md",
+    "docs/recordings/workflows.cast",
+    "docs/recordings/workflows.gif"
   ]
 }

@@ -1,0 +1,25 @@
+# Method: spec-driven development, constitution then specify then plan then tasks then analyze (GitHub Spec Kit; Kiro EARS requirements with approval between phases).
+name: feature-sdd
+method: SDD with phase gates and properties
+source: Spec Kit and Kiro
+for: large features and epics
+steps:
+  - { stage: intent, agent: planner }
+  - { stage: spec, agent: planner, gate: human }
+  - { stage: plan, agent: planner, gate: human, checks: [plan-drift] }
+  - {
+      stage: tests,
+      agent: builder,
+      checks: [red, properties, lock],
+      loop: { until: [red], max: 2 },
+    }
+  - {
+      stage: build,
+      agent: builder,
+      phase: fix,
+      checks: [acceptance, properties, lock],
+      loop: { until: [acceptance, properties, lock], max: 5 },
+    }
+  - { stage: harden, agent: test-reviewer, checks: [mutation] }
+  - { stage: review, agent: reviewer, checks: [plan-drift] }
+  - { stage: release, agent: builder, checks: [ci], loop: { until: [ci], max: 2 } }

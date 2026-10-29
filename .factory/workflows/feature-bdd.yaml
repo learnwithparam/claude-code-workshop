@@ -1,0 +1,18 @@
+# Method: behaviour-driven development, Gherkin scenarios agreed by product, dev and test (North, three amigos). Source: Cucumber docs.
+name: feature-bdd
+method: BDD with .feature files
+source: Cucumber and the three amigos
+for: user-facing behaviour
+steps:
+  - { stage: scenarios, agent: planner }
+  - { stage: amigos, agent: test-reviewer, gate: human }
+  - { stage: red, agent: builder, checks: [red, lock], loop: { until: [red], max: 2 } }
+  - {
+      stage: build,
+      agent: builder,
+      phase: fix,
+      checks: [acceptance, holdout, lock],
+      loop: { until: [acceptance, holdout, lock], max: 4 },
+    }
+  - { stage: review, agent: reviewer, checks: [plan-drift] }
+  - { stage: ci, agent: builder, checks: [ci], loop: { until: [ci], max: 2 } }

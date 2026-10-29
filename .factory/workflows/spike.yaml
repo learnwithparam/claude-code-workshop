@@ -1,0 +1,8 @@
+# Method: a time-boxed spike. The output is a decision record, not code.
+name: spike
+method: ADR within a budget
+source: Architecture decision records
+for: open questions
+steps:
+  - { stage: explore, agent: planner }
+  - { stage: decide, agent: planner, gate: human }
