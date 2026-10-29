@@ -10,7 +10,8 @@ const isManifest = (f: string) => /(^|\/)package\.json$/.test(f);
 const isLockfile = (f: string) => /(^|\/)package-lock\.json$/.test(f);
 // A plain version or range. This refuses file:, link:, git, URL and npm: alias specs, which can pull code from anywhere.
 const VERSION = /^[~^]?\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/;
-const REGISTRY = "https://registry.npmjs.org/";
+// Other files that decide what npm, yarn or pnpm install. None of them is checked, so none may change.
+const INSTALL_CONFIG = /(^|\/)(npm-shrinkwrap\.json|\.npmrc|yarn\.lock|pnpm-lock\.yaml)$/;
 
 type Json = Record<string, unknown>;
 
@@ -35,12 +36,35 @@ function dependencyProblems(base: Json, head: Json): string[] {
   return problems;
 }
 
-const resolvedUrls = (lock: Json): Set<string> =>
-  new Set(
-    Object.values((lock.packages ?? {}) as Record<string, { resolved?: string }>)
-      .map((p) => p.resolved)
-      .filter((r): r is string => typeof r === "string"),
-  );
+type LockEntry = { name?: string; version?: string; resolved?: string; link?: boolean };
+
+// The only URL an entry may resolve to: the registry's tarball for exactly that package and version.
+function registryUrl(key: string, entry: LockEntry): string {
+  const name = entry.name ?? key.split("node_modules/").pop() ?? "";
+  const file = name.split("/").pop();
+  return `https://registry.npmjs.org/${name}/-/${file}-${entry.version}.tgz`;
+}
+
+// Entries whose resolution is new in the head lockfile and is not the registry tarball for their version.
+function lockfileProblems(base: Json, head: Json): string[] {
+  if (head.lockfileVersion !== 2 && head.lockfileVersion !== 3)
+    return ["lockfileVersion is not 2 or 3"];
+  const before = (base.packages ?? {}) as Record<string, LockEntry>;
+  const problems: string[] = [];
+  for (const [key, entry] of Object.entries((head.packages ?? {}) as Record<string, LockEntry>)) {
+    const known = before[key];
+    if (entry.link && !known?.link) problems.push(`${key} is a new link`);
+    if (
+      entry.resolved &&
+      entry.resolved !== known?.resolved &&
+      entry.resolved !== registryUrl(key, entry)
+    )
+      problems.push(
+        `${key} resolves to ${entry.resolved}, not the registry tarball for ${entry.version}`,
+      );
+  }
+  return problems;
+}
 
 async function baseJson(host: Host, file: string): Promise<Json | null> {
   const r = await host.exec("git", ["show", `HEAD:${file}`], { ref: "base" });
@@ -66,7 +90,10 @@ export const manifestDeps: Check = {
   size: "small",
   async run({ host }) {
     const problems: string[] = [];
-    for (const file of (await host.changedFiles()).filter((f) => isManifest(f) || isLockfile(f))) {
+    const changed = await host.changedFiles();
+    for (const file of changed.filter((f) => INSTALL_CONFIG.test(f)))
+      problems.push(`${file} is an install file this check does not cover`);
+    for (const file of changed.filter((f) => isManifest(f) || isLockfile(f))) {
       const base = await baseJson(host, file);
       const head = await headJson(host, file);
       if (!base || !head) {
@@ -76,10 +103,7 @@ export const manifestDeps: Check = {
           problems.push(`${file} changed more than dependency versions`);
         problems.push(...dependencyProblems(base, head).map((p) => `${file}: ${p}`));
       } else {
-        const known = resolvedUrls(base);
-        for (const url of resolvedUrls(head))
-          if (!known.has(url) && !url.startsWith(REGISTRY))
-            problems.push(`${file}: ${url} does not come from the npm registry`);
+        problems.push(...lockfileProblems(base, head).map((l) => `${file}: ${l}`));
       }
     }
     return problems.length

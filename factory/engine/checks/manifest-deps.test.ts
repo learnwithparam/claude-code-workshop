@@ -4,13 +4,13 @@ import { manifestDeps } from "./manifest-deps.ts";
 
 const pkg = (script: string, deps: Record<string, string>) =>
   JSON.stringify({ scripts: { test: script }, dependencies: deps });
-const lock = (...resolved: string[]) =>
-  JSON.stringify({
-    packages: Object.fromEntries(resolved.map((r, i) => [`node_modules/p${i}`, { resolved: r }])),
-  });
+const tarball = (name: string, version: string) =>
+  `https://registry.npmjs.org/${name}/-/${name}-${version}.tgz`;
+const lock = (version: string, resolved = tarball("zod", version), lockfileVersion = 3) =>
+  JSON.stringify({ lockfileVersion, packages: { "node_modules/zod": { version, resolved } } });
 
 const BASE = pkg("vitest run", { zod: "^4.0.0" });
-const OLD_LOCK = lock("https://registry.npmjs.org/zod/-/zod-4.0.0.tgz");
+const OLD_LOCK = lock("4.0.0");
 
 // Runs the check over the files an agent changed, each compared with its base copy.
 const run = (head: Record<string, string>, base: Record<string, string>) => {
@@ -54,12 +54,28 @@ describe("manifest-deps on a manifest", () => {
 });
 
 describe("manifest-deps on a lockfile", () => {
-  it("passes a new resolution from the registry", async () => {
-    expect((await lockfile(lock("https://registry.npmjs.org/zod/-/zod-4.1.0.tgz"))).ok).toBe(true);
+  it("passes the registry tarball for the new version", async () => {
+    expect((await lockfile(lock("4.1.0"))).ok).toBe(true);
   });
   it("fails a resolution from anywhere else", async () => {
-    const r = await lockfile(lock("https://evil.example/zod.tgz"));
+    const r = await lockfile(lock("4.1.0", "https://evil.example/zod.tgz"));
     expect(r.ok).toBe(false);
-    expect(r.evidence).toContain("does not come from the npm registry");
+    expect(r.evidence).toContain("not the registry tarball");
   });
+  it("fails the registry host with another package's tarball", async () => {
+    expect((await lockfile(lock("4.1.0", tarball("evil", "9.9.9")))).ok).toBe(false);
+  });
+  it("fails a lockfile version it does not understand", async () => {
+    expect((await lockfile(lock("4.1.0", undefined, 1))).ok).toBe(false);
+  });
+});
+
+describe("manifest-deps on other install files", () => {
+  it.each(["yarn.lock", ".npmrc", "npm-shrinkwrap.json", "pnpm-lock.yaml"])(
+    "fails a change to %s",
+    async (file) => {
+      const { host } = fakeHost({ changed: [file], files: { [file]: "x" } });
+      expect((await manifestDeps.run({ host, n: 1 })).ok).toBe(false);
+    },
+  );
 });
