@@ -87,7 +87,10 @@
     "factory/retro.test.ts",
     ".github/**",
     "scripts/prove/delivery.ts",
-    "docs/levels/delivery.md"
+    "docs/levels/delivery.md",
+    ".claude/workflows/**",
+    "tests/structure/factory-workflow.test.ts",
+    "tests/structure/workflows.test.ts"
   ],
   "verification": [
     ".claude/hooks/posttooluse-typecheck.mjs",

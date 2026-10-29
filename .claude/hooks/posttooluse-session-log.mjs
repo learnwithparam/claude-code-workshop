@@ -21,7 +21,7 @@ function appendLine(file, line) {
     0o600,
   );
   try {
-    writeSync(fd, line + "\n");
+    writeSync(fd, `${line}\n`);
   } finally {
     closeSync(fd);
   }

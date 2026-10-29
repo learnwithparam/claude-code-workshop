@@ -7,9 +7,12 @@
       "!**/node_modules",
       "!fixtures",
       "!supplied",
+      "!test-results",
+      "!playwright-report",
       "!.workshop-home",
       "!web/.astro",
-      "!**/*.astro"
+      "!**/*.astro",
+      "!.claude/workflows"
     ]
   },
   "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
