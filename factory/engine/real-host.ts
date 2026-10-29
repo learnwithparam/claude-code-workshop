@@ -85,7 +85,9 @@ export function realHost(o: RealHostOptions): Host {
     const out = r.stdout ?? "";
     if (r.status !== 0 || !out.trim()) throw new Error("cannot read the repo git config");
     // Config can name programs that git runs while staging or committing; none is allowed.
-    const names = sh("git", ["config", "--list", "--includes", "--name-only", "-z"]).stdout ?? "";
+    const n = sh("git", ["config", "--list", "--includes", "--name-only", "-z"]);
+    if (n.status !== 0) throw new Error("cannot read the repo git config");
+    const names = n.stdout ?? "";
     if (
       names.split("\0").some((k) => /^(filter\..+|diff\..+\.textconv|merge\..+\.driver)$/i.test(k))
     )
