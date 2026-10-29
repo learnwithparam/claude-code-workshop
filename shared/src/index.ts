@@ -1,3 +1,5 @@
+export * from "./art/icon-ids";
+export * from "./art/icon-registry";
 export * from "./band-theme";
 export * from "./bands";
 export * from "./check";

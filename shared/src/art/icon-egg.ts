@@ -1,0 +1,1 @@
+export const EGG_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="egg" focusable="false"><title>egg</title><path d="M32 6C18 6 10 30 10 40a22 18 0 0 0 44 0C54 30 46 6 32 6z" fill="#fde68a"/><ellipse cx="32" cy="34" rx="8" ry="10" fill="#facc15"/></svg>`;

@@ -1,0 +1,1 @@
+export const PENCIL_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="pencil" focusable="false"><title>pencil</title><path d="M44 6l14 14L24 54l-16 4 4-16z" fill="#facc15"/><path d="M44 6l14 14-6 6-14-14z" fill="#ec4899"/><path d="M12 42l10 10-14 6z" fill="#fde68a"/><path d="M8 58l2-8 6 6z" fill="#1f2937"/></svg>`;
