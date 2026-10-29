@@ -1,4 +1,4 @@
-import { artifactDigest, artifactPath, writeArtifact } from "./artifacts.ts";
+import { artifactDigest, artifactPath, badPlanLines, writeArtifact } from "./artifacts.ts";
 import { CHECKS } from "./checks/index.ts";
 import type { CheckResult, Host } from "./types.ts";
 import type { Step, Workflow } from "./workflow.ts";
@@ -86,8 +86,13 @@ async function runStep(
       stage: step.stage,
     });
     res.costUsd += out.costUsd;
-    if (step.writes && !out.failed && out.text.trim())
-      await writeArtifact(host, n, step.writes, `${out.text.trim()}\n`);
+    let refused = "";
+    if (step.writes && !out.failed && out.text.trim()) {
+      const odd = step.writes === "plan.md" ? badPlanLines(out.text) : [];
+      if (odd.length)
+        refused = `plan.md refused, these lines are not ordinary repo paths: ${odd.slice(0, 5).join(" | ")}`;
+      else await writeArtifact(host, n, step.writes, `${out.text.trim()}\n`);
+    }
     res.log.push(
       `${step.stage} round ${round} $${out.costUsd.toFixed(4)}${out.failed ? ` FAILED ${out.failed}` : ""}`,
     );
@@ -97,8 +102,9 @@ async function runStep(
       res.log.push(`  check ${name} ${r.ok ? "ok" : "FAIL"}: ${r.evidence.split("\n")[0]}`);
     const until = new Set<string>(step.loop?.until ?? step.checks);
     const bad = failing(results).filter(([name]) => until.has(name));
-    if (!bad.length && !out.failed) return false;
-    feedback = `Checks failed in ${artifactPath(n, "run.log")}:\n${bad.map(([k, v]) => `${k}: ${v.evidence}`).join("\n")}`;
+    if (refused) res.log.push(`  ${refused}`);
+    if (!bad.length && !out.failed && !refused) return false;
+    feedback = `${refused}\nChecks failed in ${artifactPath(n, "run.log")}:\n${bad.map(([k, v]) => `${k}: ${v.evidence}`).join("\n")}`;
   }
   return true;
 }

@@ -42,6 +42,22 @@ describe("runWorkflow", () => {
     await runWorkflow(bad.host, plan, 3, "t");
     expect(bad.files.has("specs/3/plan.md")).toBe(false);
   });
+  it("refuses a plan that is prose or names gate-owned or parent paths, and saves none of it", async () => {
+    const plan = wf("  - {stage: plan, agent: planner, writes: plan.md}");
+    for (const text of [
+      "I will edit shared/src/a.ts",
+      ".github/workflows/check.yml",
+      ".claude/settings.json",
+      "../outside.ts",
+      "/etc/passwd",
+      "shared/**",
+    ]) {
+      const { host, files } = fakeHost({ agents: [{ text }] });
+      const r = await runWorkflow(host, plan, 3, "t");
+      expect(files.has("specs/3/plan.md"), text).toBe(false);
+      expect(r.outcome).toBe("needs-human");
+    }
+  });
   it("stops at the cap and writes run.log", async () => {
     const { host, files } = fakeHost({
       exec: [{ match: "npx vitest", result: { code: 1, output: "x" } }],

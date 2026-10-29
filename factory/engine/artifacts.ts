@@ -11,6 +11,7 @@ export const ARTIFACTS = [
   "incident.md",
   "lock.json",
 ] as const;
+export const AGENT_ARTIFACTS = ["intent.md", "spec.md", "plan.md"] as const;
 export type ArtifactName = (typeof ARTIFACTS)[number];
 
 export const artifactPath = (n: number, name: ArtifactName) => `specs/${n}/${name}`;
@@ -29,9 +30,25 @@ export async function readArtifact(host: Host, n: number, name: ArtifactName): P
 // A diff may touch only files the plan lists, one path per line (a bullet or backticks are fine), plus
 // anything under specs/<n>/. Growing the plan means adding the path to plan.md. Editing plan.md is not
 // itself a pass: it is part of every run's diff, so treating it as one would make this check vacuous.
+export const planLines = (plan: string) =>
+  plan
+    .split("\n")
+    .map((l) => l.replace(/^\s*(?:[-*]\s+)?`?|`?\s*$/g, ""))
+    .filter(Boolean);
+
 export function planDrift(plan: string, changed: string[], n: number): string[] {
-  const listed = new Set(plan.split("\n").map((l) => l.replace(/^\s*(?:[-*]\s+)?`?|`?\s*$/g, "")));
+  const listed = new Set(planLines(plan));
   return changed.filter((f) => !f.startsWith(`specs/${n}/`) && !listed.has(f));
+}
+
+// The plan is the allowlist, and a model writes it, so it may name only ordinary repo files: no prose, globs,
+// absolute or parent paths, and nothing the gate itself is made of.
+const PLAN_PATH = /^[A-Za-z0-9_][A-Za-z0-9_.@/-]*$/;
+const GATE_OWNED = /^(\.github|\.claude|\.factory)\//;
+export function badPlanLines(plan: string): string[] {
+  return planLines(plan).filter(
+    (l) => !PLAN_PATH.test(l) || l.split("/").includes("..") || GATE_OWNED.test(l),
+  );
 }
 
 // The hash a human approval binds to: the stage, the spec artifacts and every other file the stage
