@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -84,6 +84,29 @@ describe("realHost over a git repo", () => {
     git(cwd, "reset", "-q");
     git(cwd, "add", "-N", "r.txt");
     expect(await host.changedFiles()).toEqual(expect.arrayContaining(["a.txt", "r.txt"]));
+  });
+  it("commits without running a hook the agent planted", async () => {
+    const { host, cwd } = repo();
+    const hook = join(cwd, ".git", "hooks", "pre-commit");
+    mkdirSync(join(cwd, ".git", "hooks"), { recursive: true });
+    writeFileSync(hook, "#!/bin/sh\ntouch ../hook-ran\nexit 1\n", { mode: 0o755 });
+    writeFileSync(join(cwd, "new.txt"), "x");
+    await host.commit("#1");
+    expect(git(cwd, "log", "-1", "--format=%s").trim()).toBe("#1");
+    expect(existsSync(join(cwd, "..", "hook-ran"))).toBe(false);
+  });
+  it("refuses to commit after an agent changed the repo git config", async () => {
+    const { host, cwd } = repo();
+    git(cwd, "config", "filter.x.clean", "touch ../filter-ran");
+    writeFileSync(join(cwd, "n.txt"), "x");
+    await expect(host.commit("#1")).rejects.toThrow(/git config changed/);
+  });
+  it("sees a config change made through an included file", async () => {
+    const { host, cwd } = repo();
+    writeFileSync(join(cwd, "extra.cfg"), "[core]\n\tfsmonitor = true\n");
+    git(cwd, "config", "include.path", join(cwd, "extra.cfg"));
+    writeFileSync(join(cwd, "n.txt"), "x");
+    await expect(host.commit("#1")).rejects.toThrow(/git config changed/);
   });
   it("keeps recalled state outside the worktree", async () => {
     const { host } = repo();
