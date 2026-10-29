@@ -55,6 +55,14 @@ describe("runWorkflow", () => {
     expect(done.outcome).toBe("done");
     expect(b.calls).toHaveLength(0);
   });
+  it("digest tells a missing file from an empty one and a moved boundary from the same text", async () => {
+    const d = (files: Record<string, string>) =>
+      artifactDigest(fakeHost({ files }).host, 5, "spec");
+    expect(await d({ "specs/5/spec.md": "" })).not.toBe(await d({}));
+    expect(await d({ a: "b\nc", "specs/5/spec.md": "x" })).not.toBe(
+      await d({ "a\nb": "c", "specs/5/spec.md": "x" }),
+    );
+  });
   it("binds an approval to the artifact digest, so edited artifacts need a new one", async () => {
     const gated = wf("  - {stage: spec, agent: planner, gate: human}");
     const stale = fakeHost({
