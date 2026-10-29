@@ -31,4 +31,3 @@ jobs:
             shared/src/render.ts, also use the design-reviewer agent. Post one comment
             with the blocking findings and a final VERDICT line.
           claude_args: --model claude-sonnet-5-5 --max-turns 15
-          show_full_output: true
