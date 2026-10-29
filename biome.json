@@ -12,7 +12,9 @@
       "!.workshop-home",
       "!web/.astro",
       "!**/*.astro",
-      "!.claude/workflows"
+      "!.claude/workflows",
+      "!**/.cc-writes",
+      "!**/.factory/runs"
     ]
   },
   "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },

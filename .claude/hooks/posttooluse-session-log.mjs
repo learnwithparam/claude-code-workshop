@@ -1,7 +1,7 @@
 // One JSON line per tool call, so the retro stage can read what a session did.
 // Tool name and file path only: no command text and no output, which can hold secrets.
 import { closeSync, constants, mkdirSync, openSync, readFileSync, writeSync } from "node:fs";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 
 export function logLine(input, now = new Date()) {
   return JSON.stringify({
@@ -28,6 +28,8 @@ function appendLine(file, line) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const file = process.env.FACTORY_RUN_LOG || ".factory/runs/session.jsonl";
+  const file =
+    process.env.FACTORY_RUN_LOG ||
+    join(process.env.CLAUDE_PROJECT_DIR || ".", ".factory/runs/session.jsonl");
   appendLine(file, logLine(JSON.parse(readFileSync(0, "utf8"))));
 }
