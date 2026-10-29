@@ -108,6 +108,14 @@ describe("realHost over a git repo", () => {
     await expect(host.commit("#1")).rejects.toThrow(/filter, textconv or merge driver/);
     expect(existsSync(join(cwd, "..", "filter-ran"))).toBe(false);
   });
+  it("finds a filter key even when its config file path has spaces", async () => {
+    const { host, cwd } = repo();
+    mkdirSync(join(cwd, "a b"));
+    writeFileSync(join(cwd, "a b", "x.cfg"), '[filter "x"]\n\tclean = touch ../filter-ran\n');
+    git(cwd, "config", "include.path", join(cwd, "a b", "x.cfg"));
+    writeFileSync(join(cwd, "n.txt"), "x");
+    await expect(host.commit("#1")).rejects.toThrow(/filter, textconv or merge driver/);
+  });
   it("sees a config change made through an included file", async () => {
     const { host, cwd } = repo();
     writeFileSync(join(cwd, "extra.cfg"), "[core]\n\tfsmonitor = true\n");

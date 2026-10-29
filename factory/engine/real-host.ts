@@ -85,7 +85,10 @@ export function realHost(o: RealHostOptions): Host {
     const out = r.stdout ?? "";
     if (r.status !== 0 || !out.trim()) throw new Error("cannot read the repo git config");
     // Config can name programs that git runs while staging or committing; none is allowed.
-    if (/^\S+\s+(filter\..+|diff\..+\.textconv|merge\..+\.driver)=/im.test(out))
+    const names = sh("git", ["config", "--list", "--includes", "--name-only", "-z"]).stdout ?? "";
+    if (
+      names.split("\0").some((k) => /^(filter\..+|diff\..+\.textconv|merge\..+\.driver)$/i.test(k))
+    )
       throw new Error("git config names a filter, textconv or merge driver; refusing to commit");
     return createHash("sha256").update(out).digest("hex");
   };
