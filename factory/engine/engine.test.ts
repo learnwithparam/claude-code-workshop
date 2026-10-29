@@ -180,6 +180,14 @@ describe("checks", () => {
     // A path that only appears inside a longer one is not listed.
     expect(planDrift("src/a.ts.bak", ["a.ts"], 1)).toEqual(["a.ts"]);
   });
+  it("plan-drift lets regenerated golden snapshots through, since a human reviews them at the feedback gate", () => {
+    // Run 29 changed icons, the goldens were regenerated, and the plan could not list them: the gate owns that folder.
+    const snap = "specs/25/golden/__snapshots__/early-reader.html";
+    expect(planDrift("a.ts", ["a.ts", snap], 29)).toEqual([]);
+    expect(planDrift("a.ts", ["specs/25/golden/other.test.ts"], 29)).toEqual([
+      "specs/25/golden/other.test.ts",
+    ]);
+  });
 });
 
 describe("badPlanLines for a dependency update", () => {
