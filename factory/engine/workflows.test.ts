@@ -23,6 +23,11 @@ describe.each(files)("workflow %s", (file) => {
     const guarded = wf.steps.some((s) => s.checks.includes("manifest-deps"));
     expect(wf.manifests ? guarded : true).toBe(true);
   });
+  it("tells the planner that files under specs/<issue>/ are not listed", () => {
+    // Run 31 listed its golden test and the plan was refused; the runner already allows specs/<issue>/.
+    const plan = wf.steps.find((s) => s.stage === "plan");
+    if (plan) expect(plan.brief).toContain("Do not list files under specs/<issue>/");
+  });
   it("uses only agents that exist in .claude/agents", () => {
     for (const s of wf.steps) expect(agents.has(s.agent), `${s.stage}: ${s.agent}`).toBe(true);
   });
