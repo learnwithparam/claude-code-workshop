@@ -18,5 +18,11 @@ steps:
       checks: [behaviour-unchanged, lock, gate],
       loop: { until: [behaviour-unchanged, lock, gate], max: 4 },
     }
-  - { stage: harden, agent: test-reviewer, checks: [mutation] }
+  - {
+      stage: harden,
+      agent: test-reviewer,
+      brief: "Strengthen the tests so mutants in the files this run changed are killed. Add tests under specs/<issue>/golden; never change source.",
+      checks: [mutation],
+      loop: { until: [mutation], max: 3 },
+    }
   - { stage: review, agent: reviewer, checks: [plan-drift] }
