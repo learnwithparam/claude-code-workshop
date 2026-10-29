@@ -76,6 +76,13 @@ export function realHost(o: RealHostOptions): Host {
     ),
     HOME: home,
     GIT_CONFIG_GLOBAL: "/dev/null",
+    // The throwaway HOME hides the browser the e2e checks launch, so point at the real, read-only cache.
+    PLAYWRIGHT_BROWSERS_PATH:
+      process.env.PLAYWRIGHT_BROWSERS_PATH ??
+      join(
+        homedir(),
+        process.platform === "darwin" ? "Library/Caches/ms-playwright" : ".cache/ms-playwright",
+      ),
   };
   const sh = (cmd: string, args: string[], cwd = o.cwd, env: NodeJS.ProcessEnv = SAFE_ENV) =>
     spawnSync(cmd, args, { cwd, encoding: "utf8", maxBuffer: 64 << 20, env });
