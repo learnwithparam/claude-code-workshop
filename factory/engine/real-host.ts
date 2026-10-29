@@ -59,7 +59,11 @@ export type RealHostOptions = {
 };
 
 export function realHost(o: RealHostOptions): Host {
-  const state = o.stateDir ?? join(homedir(), ".factory", "state");
+  // One folder per process: a file left by an earlier run was signed with another key and must never be read.
+  const state =
+    o.stateDir ??
+    join(homedir(), ".factory", "state", `${process.pid}-${randomBytes(4).toString("hex")}`);
+  if (!o.stateDir) process.once("exit", () => rmSync(state, { recursive: true, force: true }));
   // Checks run code the agent wrote: no API key, no GitHub token, a throwaway HOME and no global git config.
   const home = mkdtempSync(join(tmpdir(), "factory-home-"));
   process.once("exit", () => rmSync(home, { recursive: true, force: true }));

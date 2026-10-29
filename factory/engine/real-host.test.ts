@@ -123,6 +123,15 @@ describe("realHost over a git repo", () => {
     writeFileSync(join(cwd, "n.txt"), "x");
     await expect(host.commit("#1")).rejects.toThrow(/git config changed/);
   });
+  it("does not read state left by an earlier process", async () => {
+    // No stateDir: the default folder is per process, so a stale, differently signed file is never opened.
+    const { cwd } = repo();
+    const base = git(cwd, "rev-parse", "HEAD").trim();
+    const a = realHost({ cwd, base });
+    await a.remember("lock:1", "abc");
+    const b = realHost({ cwd, base });
+    expect(await b.recall("lock:1")).toBeNull();
+  });
   it("keeps recalled state outside the worktree", async () => {
     const { host } = repo();
     await host.remember("lock:1", "h");
