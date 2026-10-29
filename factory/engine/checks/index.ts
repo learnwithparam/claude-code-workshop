@@ -1,5 +1,6 @@
 import type { Check } from "../types.ts";
 import { commandCheck } from "./exec-check.ts";
+import { holdout } from "./holdout.ts";
 import { lock } from "./lock.ts";
 import { manifestDeps } from "./manifest-deps.ts";
 import { mutation } from "./mutation.ts";
@@ -24,11 +25,7 @@ export const CHECKS: Record<string, Check> = {
     vitestFor((n) => `specs/${n}`),
   ),
   // Holdout cases live where the builder's tools cannot read them; the runner alone executes them.
-  holdout: commandCheck(
-    "medium",
-    "npx",
-    vitestFor((n) => `.factory/holdout/${n}`),
-  ),
+  holdout,
   properties: commandCheck(
     "medium",
     "npx",

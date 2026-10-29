@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { ActivityKind } from "./activity-kinds";
+import type { BandTheme } from "./band-theme";
 
 export const bandIdSchema = z.enum([
   "early-reader",
@@ -22,6 +23,7 @@ export type Band = {
   maxWordsPerItem: number;
   pictureBoxes: boolean;
   kinds: ActivityKind[];
+  theme: BandTheme;
 };
 
 // Truth outside the model: the band table decides layout and limits, the model only fills content.
@@ -45,6 +47,15 @@ export const BANDS: Record<BandId, Band> = {
     maxWordsPerItem: 6,
     pictureBoxes: true,
     kinds: ["count", "circle", "trace", "match"],
+    theme: {
+      paper: "#fffaf0",
+      ink: "#1f1a14",
+      muted: "#5c4a1a",
+      accent: "#ffd166",
+      accentInk: "#1f1a14",
+      rule: "#d9a62e",
+      art: "balloons",
+    },
   },
   kindergarten: {
     id: "kindergarten",
@@ -56,6 +67,15 @@ export const BANDS: Record<BandId, Band> = {
     maxWordsPerItem: 8,
     pictureBoxes: true,
     kinds: ["count", "circle", "ten-frame", "trace", "match"],
+    theme: {
+      paper: "#fff7f9",
+      ink: "#2a1520",
+      muted: "#7a2e4d",
+      accent: "#ff9fb8",
+      accentInk: "#2a1520",
+      rule: "#d9738f",
+      art: "blocks",
+    },
   },
   "grade-1-2": {
     id: "grade-1-2",
@@ -76,6 +96,15 @@ export const BANDS: Record<BandId, Band> = {
     maxWordsPerItem: 14,
     pictureBoxes: true,
     kinds: ["count", "match", "fill-blank", "number-line", "ten-frame", "short", "steps"],
+    theme: {
+      paper: "#f4fbf6",
+      ink: "#12261a",
+      muted: "#2f5f42",
+      accent: "#8fd9a8",
+      accentInk: "#12261a",
+      rule: "#4fa36f",
+      art: "leaves",
+    },
   },
   "grade-3-5": {
     id: "grade-3-5",
@@ -87,6 +116,15 @@ export const BANDS: Record<BandId, Band> = {
     maxWordsPerItem: 24,
     pictureBoxes: false,
     kinds: ["fill-blank", "number-line", "fraction-bar", "steps", "short", "table", "match"],
+    theme: {
+      paper: "#f5f9ff",
+      ink: "#111c33",
+      muted: "#3a527a",
+      accent: "#2a63cf",
+      accentInk: "#ffffff",
+      rule: "#7fa3e6",
+      art: "waves",
+    },
   },
   "grade-6-8": {
     id: "grade-6-8",
@@ -106,6 +144,15 @@ export const BANDS: Record<BandId, Band> = {
     maxWordsPerItem: 36,
     pictureBoxes: false,
     kinds: ["fill-blank", "fraction-bar", "table", "steps", "short"],
+    theme: {
+      paper: "#faf7ff",
+      ink: "#1c1433",
+      muted: "#5a4a8a",
+      accent: "#6a45c9",
+      accentInk: "#ffffff",
+      rule: "#a894e0",
+      art: "hexagons",
+    },
   },
   "grade-9-12": {
     id: "grade-9-12",
@@ -117,6 +164,15 @@ export const BANDS: Record<BandId, Band> = {
     maxWordsPerItem: 50,
     pictureBoxes: false,
     kinds: ["fill-blank", "table", "steps", "short"],
+    theme: {
+      paper: "#f7f8f8",
+      ink: "#14202b",
+      muted: "#4a5a68",
+      accent: "#0f766e",
+      accentInk: "#ffffff",
+      rule: "#7fb5af",
+      art: "grid",
+    },
   },
   university: {
     id: "university",
@@ -128,6 +184,15 @@ export const BANDS: Record<BandId, Band> = {
     maxWordsPerItem: 80,
     pictureBoxes: false,
     kinds: ["fill-blank", "table", "steps", "short"],
+    theme: {
+      paper: "#fbf8f3",
+      ink: "#1b1b1b",
+      muted: "#5a5247",
+      accent: "#7a1f2b",
+      accentInk: "#ffffff",
+      rule: "#b58a8f",
+      art: "arches",
+    },
   },
 };
 
