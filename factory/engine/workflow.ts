@@ -23,6 +23,8 @@ export const CHECK_NAMES = [
 const stepSchema = z.object({
   stage: z.string(),
   agent: z.string(),
+  // What the agent is asked to do in this stage. Without it the agent only sees the ticket and guesses.
+  brief: z.string().optional(),
   checks: z.array(z.enum(CHECK_NAMES)).default([]),
   // Repeat the agent until every check in `until` passes, at most `max` times.
   loop: z

@@ -4,10 +4,16 @@ method: characterization then behaviour-unchanged
 source: Working Effectively with Legacy Code
 for: refactors
 steps:
-  - { stage: characterize, agent: builder, checks: [behaviour-unchanged, lock] }
+  - {
+      stage: characterize,
+      agent: builder,
+      brief: "Do not change source. Write vitest golden tests in specs/<issue>/golden that record the current output of the code named in the ticket, so they pass on the base commit.",
+      checks: [behaviour-unchanged, lock],
+    }
   - {
       stage: refactor,
       agent: builder,
+      brief: "Make the structural change the ticket asks for. Never edit the golden tests; they must keep passing.",
       phase: fix,
       checks: [behaviour-unchanged, lock, gate],
       loop: { until: [behaviour-unchanged, lock, gate], max: 4 },

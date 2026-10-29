@@ -80,8 +80,16 @@ export function realHost(o: RealHostOptions): Host {
   // Repo config can name programs git runs (filters, gpg, fsmonitor). Pin it now; commit refuses if an agent changed it.
   const gitConfig = () => {
     // The effective config of every scope git reads (system, global, repo, worktree, includes), not one file.
-    const out = git("config", "--list", "--includes", "--show-origin");
-    if (!out.trim()) throw new Error("cannot read the repo git config");
+    // Read it with the same environment the commit runs in, so the pin is what the commit will see.
+    const r = sh("git", ["config", "--list", "--includes", "--show-origin"]);
+    const out = r.stdout ?? "";
+    if (r.status !== 0 || !out.trim()) throw new Error("cannot read the repo git config");
+    // Config can name programs that git runs while staging or committing; none is allowed.
+    const names = sh("git", ["config", "--list", "--includes", "--name-only", "-z"]).stdout ?? "";
+    if (
+      names.split("\0").some((k) => /^(filter\..+|diff\..+\.textconv|merge\..+\.driver)$/i.test(k))
+    )
+      throw new Error("git config names a filter, textconv or merge driver; refusing to commit");
     return createHash("sha256").update(out).digest("hex");
   };
   const pinnedConfig = gitConfig();

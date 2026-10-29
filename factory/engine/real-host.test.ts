@@ -97,9 +97,24 @@ describe("realHost over a git repo", () => {
   });
   it("refuses to commit after an agent changed the repo git config", async () => {
     const { host, cwd } = repo();
-    git(cwd, "config", "filter.x.clean", "touch ../filter-ran");
+    git(cwd, "config", "core.autocrlf", "true");
     writeFileSync(join(cwd, "n.txt"), "x");
     await expect(host.commit("#1")).rejects.toThrow(/git config changed/);
+  });
+  it("refuses to commit when the config names a filter program", async () => {
+    const { host, cwd } = repo();
+    git(cwd, "config", "filter.x.clean", "touch ../filter-ran");
+    writeFileSync(join(cwd, "n.txt"), "x");
+    await expect(host.commit("#1")).rejects.toThrow(/filter, textconv or merge driver/);
+    expect(existsSync(join(cwd, "..", "filter-ran"))).toBe(false);
+  });
+  it("finds a filter key even when its config file path has spaces", async () => {
+    const { host, cwd } = repo();
+    mkdirSync(join(cwd, "a b"));
+    writeFileSync(join(cwd, "a b", "x.cfg"), '[filter "x"]\n\tclean = touch ../filter-ran\n');
+    git(cwd, "config", "include.path", join(cwd, "a b", "x.cfg"));
+    writeFileSync(join(cwd, "n.txt"), "x");
+    await expect(host.commit("#1")).rejects.toThrow(/filter, textconv or merge driver/);
   });
   it("sees a config change made through an included file", async () => {
     const { host, cwd } = repo();
