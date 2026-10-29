@@ -1,0 +1,10 @@
+shared/src/band-theme.ts
+shared/src/band-theme.test.ts
+shared/src/render-header-art.ts
+shared/src/render-header-art.test.ts
+shared/src/bands.ts
+shared/src/bands.test.ts
+shared/src/render.ts
+shared/src/render.test.ts
+shared/src/index.ts
+specs/27/intent.md
