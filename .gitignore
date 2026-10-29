@@ -12,3 +12,4 @@ dist/
 supplied/
 test-results/
 playwright-report/
+.factory-base/
