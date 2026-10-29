@@ -117,5 +117,14 @@
     "tests/take-home/multipage.test.ts",
     "fixtures/take-home/pack.json",
     "docs/levels/verification.md"
+  ],
+  "sharing": [
+    "scripts/plugin.ts",
+    "plugins/**",
+    "plugins/factory-kit/.claude-plugin/**",
+    ".claude-plugin/**",
+    "tests/structure/plugin.test.ts",
+    "scripts/prove/sharing.ts",
+    "docs/levels/sharing.md"
   ]
 }

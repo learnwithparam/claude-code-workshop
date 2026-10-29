@@ -16,5 +16,13 @@ make prove LEVEL=boundary
 | `skills`     | skills             | skills are pinned and intact; the agent hits every band under the token budget |
 | `execution`  | execution          | every agent and stage has a model, turn cap, tools and budget                  |
 | `delivery`   | delivery           | tickets flow triage to verify, the review loop is capped, a human merges       |
+| `sharing`    | sharing            | the factory installs from a marketplace as one plugin built from `.claude/`    |
+
+Install the factory in your own repo:
+
+```
+claude plugin marketplace add learnwithparam/claude-code-workshop
+claude plugin install factory-kit@claude-code-workshop --scope project
+```
 
 Start at [docs/README.md](docs/README.md). Levels are listed in `levels.json`. Fix things on `main`; `make levels` derives each level's copy from it.

@@ -1,0 +1,12 @@
+{
+  "name": "claude-code-workshop",
+  "description": "Plugins from the Claude Code workshop: the factory you build, packaged for any repo.",
+  "owner": { "name": "learnwithparam" },
+  "plugins": [
+    {
+      "name": "factory-kit",
+      "source": "./plugins/factory-kit",
+      "description": "The workshop factory as a plugin: agents, skills and a secrets guard."
+    }
+  ]
+}

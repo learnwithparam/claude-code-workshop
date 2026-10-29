@@ -12,6 +12,7 @@ export const LEVEL_ORDER = [
   "execution",
   "verification",
   "delivery",
+  "sharing",
 ] as const;
 export type LevelName = (typeof LEVEL_ORDER)[number];
 
