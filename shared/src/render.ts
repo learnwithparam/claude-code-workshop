@@ -1,5 +1,6 @@
 import { BANDS } from "./bands";
 import { escapeHtml } from "./escape-html";
+import { GEIST_FONT_FACE } from "./geist-font-face";
 import { renderAnswerKey } from "./render-answer-key";
 import { renderSection } from "./render-section";
 import type { Worksheet } from "./schema";
@@ -13,7 +14,8 @@ export function renderWorksheet(sheet: Worksheet): string {
 <meta charset="utf-8">
 <title>${escapeHtml(sheet.title)}</title>
 <style>
-  #worksheet { width: 816px; height: 1056px; box-sizing: border-box; padding: 56px 64px; background: #fff; color: #171717; font-family: "${band.font}", sans-serif; font-size: ${band.fontPx}px; line-height: 1.45; overflow: hidden; }
+  ${GEIST_FONT_FACE}
+  #worksheet { width: 816px; height: 1056px; box-sizing: border-box; padding: 56px 64px; background: #fff; color: #171717; font-family: "Geist", "${band.font}", sans-serif; font-size: ${band.fontPx}px; line-height: 1.45; overflow: hidden; }
   #worksheet h1 { font-size: ${Math.round(band.fontPx * 1.6)}px; margin: 0 0 4px; }
   #worksheet .meta { color: #5c5c5c; font-size: ${Math.max(12, Math.round(band.fontPx * 0.6))}px; margin: 0 0 20px; }
   #worksheet h2 { font-size: ${Math.round(band.fontPx * 1.15)}px; margin: 18px 0 4px; }
