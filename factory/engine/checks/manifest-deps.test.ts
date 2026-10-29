@@ -65,17 +65,58 @@ describe("manifest-deps on a lockfile", () => {
   it("fails the registry host with another package's tarball", async () => {
     expect((await lockfile(lock("4.1.0", tarball("evil", "9.9.9")))).ok).toBe(false);
   });
+  it("fails an aliased entry and an entry with no resolution", async () => {
+    const alias = JSON.stringify({
+      lockfileVersion: 3,
+      packages: {
+        "node_modules/zod": { name: "evil", version: "4.1.0", resolved: tarball("evil", "4.1.0") },
+      },
+    });
+    const bare = JSON.stringify({
+      lockfileVersion: 3,
+      packages: { "node_modules/zod": { version: "4.1.0" } },
+    });
+    expect((await lockfile(alias)).evidence).toContain("alias of evil");
+    expect((await lockfile(bare)).evidence).toContain("resolves to nothing");
+  });
+  it("leaves workspace entries and unchanged entries alone", async () => {
+    const same = JSON.stringify({
+      lockfileVersion: 3,
+      packages: {
+        "": { name: "root" },
+        web: { version: "1.0.0" },
+        "node_modules/zod": { version: "4.0.0", resolved: tarball("zod", "4.0.0") },
+      },
+    });
+    const { host } = fakeHost({
+      changed: ["package-lock.json"],
+      files: { "package-lock.json": same },
+      exec: [
+        {
+          match: "git show HEAD:package-lock.json",
+          ref: "base",
+          result: { code: 0, output: same.replace('"root"', '"old"') },
+        },
+      ],
+    });
+    expect((await manifestDeps.run({ host, n: 1 })).ok).toBe(true);
+  });
   it("fails a lockfile version it does not understand", async () => {
     expect((await lockfile(lock("4.1.0", undefined, 1))).ok).toBe(false);
   });
 });
 
 describe("manifest-deps on other install files", () => {
-  it.each(["yarn.lock", ".npmrc", "npm-shrinkwrap.json", "pnpm-lock.yaml"])(
-    "fails a change to %s",
-    async (file) => {
-      const { host } = fakeHost({ changed: [file], files: { [file]: "x" } });
-      expect((await manifestDeps.run({ host, n: 1 })).ok).toBe(false);
-    },
-  );
+  it.each([
+    "yarn.lock",
+    ".npmrc",
+    "npm-shrinkwrap.json",
+    "pnpm-lock.yaml",
+    ".yarnrc.yml",
+    "bun.lock",
+    ".yarn/releases/y.cjs",
+  ])("fails a change to %s", async (file) => {
+    const { host } = fakeHost({ changed: [file], files: { [file]: "x" } });
+    expect((await manifestDeps.run({ host, n: 1 })).ok).toBe(false);
+  });
 });
