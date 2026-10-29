@@ -137,7 +137,8 @@
     "fixtures/take-home/pack.json",
     "docs/levels/verification.md",
     "docs/electives/chrome.md",
-    "docs/electives/screenshots.md"
+    "docs/electives/screenshots.md",
+    "tests/e2e/gallery.e2e.ts"
   ],
   "sharing": [
     "scripts/plugin.ts",
