@@ -34,11 +34,13 @@ export function planDrift(plan: string, changed: string[], n: number): string[] 
   return changed.filter((f) => !ownArtifacts(f) && !plan.includes(f));
 }
 
-// The hash a human approval binds to: every spec artifact the gate puts in front of the reviewer.
-export async function artifactDigest(host: Host, n: number): Promise<string> {
+// The hash a human approval binds to: the stage, the spec artifacts and every other file the stage
+// changed, so the reviewer's approval covers all they were shown.
+export async function artifactDigest(host: Host, n: number, stage: string): Promise<string> {
   const h = createHash("sha256");
-  for (const name of ["intent.md", "spec.md", "plan.md"] as const) {
-    h.update(`${name}\n${(await host.read(artifactPath(n, name))) ?? ""}\n`);
-  }
+  h.update(`stage ${stage}\n`);
+  const names = new Set<string>(["intent.md", "spec.md", "plan.md"].map((a) => `specs/${n}/${a}`));
+  for (const f of await host.changedFiles()) names.add(f);
+  for (const f of [...names].sort()) h.update(`${f}\n${(await host.read(f)) ?? ""}\n`);
   return h.digest("hex");
 }

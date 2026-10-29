@@ -6,7 +6,7 @@
   "sandbox": {
     "enabled": true,
     "filesystem": {
-      "denyRead": ["**/.env*"]
+      "denyRead": ["**/.env*", ".factory/holdout/**"]
     }
   },
   "hooks": {

@@ -50,7 +50,7 @@ export async function runWorkflow(
     // approved is not run again, because regenerating them would change what the person signed.
     if (
       step.gate === "human" &&
-      (await host.approved(n, step.stage, await artifactDigest(host, n)))
+      (await host.approved(n, step.stage, await artifactDigest(host, n, step.stage)))
     ) {
       res.log.push(`gate ${step.stage} already approved, skipped`);
       continue;
@@ -59,7 +59,7 @@ export async function runWorkflow(
     if (stopped) return finish("needs-human", step.stage);
     if (
       step.gate === "human" &&
-      !(await host.approved(n, step.stage, await artifactDigest(host, n)))
+      !(await host.approved(n, step.stage, await artifactDigest(host, n, step.stage)))
     ) {
       res.log.push(`gate ${step.stage} awaiting approval`);
       return finish("awaiting-approval", step.stage);

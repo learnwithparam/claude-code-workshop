@@ -62,7 +62,11 @@ describe("runWorkflow", () => {
       approvals: ["3:spec:not-this-hash"],
     });
     expect((await runWorkflow(stale.host, gated, 3, "t")).outcome).toBe("awaiting-approval");
-    const digest = await artifactDigest(stale.host, 3);
+    const digest = await artifactDigest(
+      fakeHost({ files: { "specs/3/spec.md": "v2" } }).host,
+      3,
+      "spec",
+    );
     const ok = fakeHost({ files: { "specs/3/spec.md": "v2" }, approvals: [`3:spec:${digest}`] });
     expect((await runWorkflow(ok.host, gated, 3, "t")).outcome).toBe("done");
     expect(ok.calls).toHaveLength(0);

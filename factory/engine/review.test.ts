@@ -107,3 +107,11 @@ describe("bands", () => {
     expect(actionFor(detect("ci-failure-rate", hist, 10, "up-is-bad"))).toBe("none");
   });
 });
+
+describe("risk: specs/ is exempt only for the run's own artifacts", () => {
+  it("classifies a script hidden under specs/ and never returns low for an empty diff", () => {
+    expect(classify(["specs/4/evil.sh"])).toBe("medium");
+    expect(classify(["specs/4/plan.md"])).toBe("medium");
+    expect(classify(["specs/4/plan.md", "docs/a.md"])).toBe("low");
+  });
+});

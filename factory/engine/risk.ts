@@ -20,10 +20,15 @@ const LOW = [/^docs\//, /^fixtures\//];
 const norm = (f: string) =>
   posix.normalize(f.replaceAll("\\", "/")).replace(/^\.\//, "").toLowerCase();
 
+const RUN_ARTIFACT =
+  /^specs\/\d+\/(intent\.md|spec\.md|plan\.md|run\.log|review\.json|lock\.json|incident\.md)$/;
+
 // The tier comes from the paths in the diff, never from who wrote it. The worst path sets it, and
 // HIGH is checked before LOW. specs/<n>/ holds the run's own artifacts and says nothing about risk.
 export function classify(changed: string[]): Tier {
-  const files = changed.map(norm).filter((f) => !f.startsWith("specs/"));
+  // Only the run's own artifact files are exempt; any other file under specs/ is classified.
+  const files = changed.map(norm).filter((f) => !RUN_ARTIFACT.test(f));
+  if (!files.length) return "medium";
   if (files.some((f) => f.startsWith("../") || HIGH.some((r) => r.test(f)))) return "high";
   if (files.every((f) => LOW.some((r) => r.test(f)))) return "low";
   return "medium";
