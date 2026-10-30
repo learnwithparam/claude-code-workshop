@@ -10,11 +10,11 @@ Let a builder change code with the smallest reach. The plan lists the files, the
 
 The order comes from Anthropic's Claude Code best practices: explore first, plan second, code third, then commit. The factory splits those into agents with different powers.
 
-| agent | tools (from `.claude/agents/`) | job |
-| --- | --- | --- |
-| `planner` | `Read, Grep, Glob` | read the repo and the ticket, reply with the plan |
-| `builder` | `Read, Edit, Write, Bash, Grep, Glob`, `isolation: worktree`, `permissionMode: acceptEdits` | change the files the plan lists |
-| `verifier` | `Read, Grep, Glob, Bash`, `permissionMode: plan` | run the gate, change nothing |
+| agent      | tools (from `.claude/agents/`)                                                              | job                                               |
+| ---------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `planner`  | `Read, Grep, Glob`                                                                          | read the repo and the ticket, reply with the plan |
+| `builder`  | `Read, Edit, Write, Bash, Grep, Glob`, `isolation: worktree`, `permissionMode: acceptEdits` | change the files the plan lists                   |
+| `verifier` | `Read, Grep, Glob, Bash`, `permissionMode: plan`                                            | run the gate, change nothing                      |
 
 The planner cannot write. In the workflow the `plan` step has `writes: plan.md`, and the runner saves the reply as `specs/<n>/plan.md`. A reply that is prose instead of paths is refused with the reason and the planner tries again.
 
@@ -53,14 +53,14 @@ Two kinds, both real.
 
 The builder is limited by files the runner does not let it edit.
 
-| fence | where | what it stops |
-| --- | --- | --- |
+| fence               | where                                    | what it stops                                                                                |
+| ------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------- |
 | `FACTORY_PHASE=fix` | `.claude/hooks/pretooluse-test-lock.mjs` | an edit to any test file (`.test.ts`, `.e2e.ts`, `.feature`, `tests/`) in a fix step; exit 2 |
-| `lock` check | `factory/engine/checks/lock.ts` | a test edited by another route, such as `Bash` |
-| deny rules | `.claude/settings.json` | reading `.env*` and `.factory/holdout/**`, and `git push *` |
-| sandbox | `.claude/settings.json` | `denyRead` on the same two paths |
-| plan | `plan-drift` | any file outside the plan |
-| per-stage config | `.factory/config.json` | `maxTurns` and `maxBudgetUsd` for the `build` stage |
+| `lock` check        | `factory/engine/checks/lock.ts`          | a test edited by another route, such as `Bash`                                               |
+| deny rules          | `.claude/settings.json`                  | reading `.env*` and `.factory/holdout/**`, and `git push *`                                  |
+| sandbox             | `.claude/settings.json`                  | `denyRead` on the same two paths                                                             |
+| plan                | `plan-drift`                             | any file outside the plan                                                                    |
+| per-stage config    | `.factory/config.json`                   | `maxTurns` and `maxBudgetUsd` for the `build` stage                                          |
 
 A step with `phase: fix` runs with the test lock on from round one. Any retry of a step runs with it on too (`interpret.ts`).
 

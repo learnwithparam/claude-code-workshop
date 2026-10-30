@@ -48,11 +48,11 @@ In the engine the spec is a file, `specs/<n>/spec.md`, saved by the runner. The 
 
 3. Pick by the ticket, not by taste.
 
-   | method | write it when | what grades it later |
-   | --- | --- | --- |
-   | Examples | a small feature, one person can hold it in their head | one vitest test per example, assertion matches the `Then` |
-   | Gherkin | user-facing behaviour that product, dev and test must agree on | one vitest test per scenario; the `amigos` step reads it as three roles |
-   | EARS | a large feature where a rule holds for all inputs | a test or a fast-check property per requirement |
+   | method   | write it when                                                  | what grades it later                                                    |
+   | -------- | -------------------------------------------------------------- | ----------------------------------------------------------------------- |
+   | Examples | a small feature, one person can hold it in their head          | one vitest test per example, assertion matches the `Then`               |
+   | Gherkin  | user-facing behaviour that product, dev and test must agree on | one vitest test per scenario; the `amigos` step reads it as three roles |
+   | EARS     | a large feature where a rule holds for all inputs              | a test or a fast-check property per requirement                         |
 
 4. Run the dry run of every workflow and read the order of stages.
 
@@ -75,14 +75,14 @@ A gate stops the run with the outcome `awaiting-approval` until a person approve
 
 `feature-sdd.yaml` names both as its source. What the file actually contains:
 
-| idea | Spec Kit | Kiro | here |
-| --- | --- | --- | --- |
-| Requirements notation | free prose spec | EARS, "when X the system shall Y" | EARS, `startsWith: "R1."` |
-| Approval between phases | per command | per phase | `gate: human` on `spec` and `plan` |
-| Plan stays bounded | `plan` and `tasks` | design and tasks | `plan.md` is an allowlist; `plan-drift` fails a stray file (F3) |
-| Properties from requirements | not part of it | "for any ... shall" | the `properties` check runs `specs/<n>/properties` (F4) |
-| Project constitution | `constitution` | steering files | `AGENTS.md` and `.claude/rules/`, no workflow stage |
-| `clarify` and `analyze` | yes | no | no stage; a reviewer reads the spec by hand |
+| idea                         | Spec Kit           | Kiro                              | here                                                            |
+| ---------------------------- | ------------------ | --------------------------------- | --------------------------------------------------------------- |
+| Requirements notation        | free prose spec    | EARS, "when X the system shall Y" | EARS, `startsWith: "R1."`                                       |
+| Approval between phases      | per command        | per phase                         | `gate: human` on `spec` and `plan`                              |
+| Plan stays bounded           | `plan` and `tasks` | design and tasks                  | `plan.md` is an allowlist; `plan-drift` fails a stray file (F3) |
+| Properties from requirements | not part of it     | "for any ... shall"               | the `properties` check runs `specs/<n>/properties` (F4)         |
+| Project constitution         | `constitution`     | steering files                    | `AGENTS.md` and `.claude/rules/`, no workflow stage             |
+| `clarify` and `analyze`      | yes                | no                                | no stage; a reviewer reads the spec by hand                     |
 
 The last row is a gap, not a claim. `feature-sdd.yaml` has no `clarify`, `tasks` or `analyze` stage, so nothing checks that every requirement maps to a test. You close that gap in the exercise.
 

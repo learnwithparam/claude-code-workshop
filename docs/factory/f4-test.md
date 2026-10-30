@@ -10,22 +10,22 @@ Know which check proves which claim, run it at the right size, and see it fail o
 
 Every check lives in `factory/engine/checks/index.ts` and declares a size. The engine runs them from the `checks` and `loop.until` lists of a workflow step.
 
-| check | size | claim it proves | what it runs |
-| --- | --- | --- | --- |
-| `red` | small | the new test fails on the base commit | `vitest run specs/<n>` at the base worktree |
-| `lock` | small | no test moved since it was recorded | hashes every test file |
-| `plan-drift` | small | the diff stays in `plan.md` | reads the plan and the changed files |
-| `green` | small | the locked test passes | `vitest run specs/<n>` |
-| `acceptance` | medium | the examples or scenarios pass | `vitest run specs/<n>` |
-| `holdout` | medium | cases the builder never saw pass | `vitest run .factory/holdout/<n>` |
-| `properties` | medium | a rule holds for generated inputs | `vitest run specs/<n>/properties` |
-| `behaviour-unchanged` | medium | recorded output is byte-for-byte the same | `vitest run specs/<n>/golden` |
-| `contract` | medium | both sides agree on the wire | `vitest run tests/contract` |
-| `mutation` | large | the tests notice a changed line | Stryker on the changed source files |
-| `visual` | large | layout, overflow and accessibility hold | `playwright test tests/e2e` |
-| `eval` | large | model behaviour and its token cost hold | `tsx scripts/eval.ts` |
-| `gate` | large | the whole repo is green | `make check` |
-| `ci` | large | the pull request is green | `gh pr checks --watch` |
+| check                 | size   | claim it proves                           | what it runs                                |
+| --------------------- | ------ | ----------------------------------------- | ------------------------------------------- |
+| `red`                 | small  | the new test fails on the base commit     | `vitest run specs/<n>` at the base worktree |
+| `lock`                | small  | no test moved since it was recorded       | hashes every test file                      |
+| `plan-drift`          | small  | the diff stays in `plan.md`               | reads the plan and the changed files        |
+| `green`               | small  | the locked test passes                    | `vitest run specs/<n>`                      |
+| `acceptance`          | medium | the examples or scenarios pass            | `vitest run specs/<n>`                      |
+| `holdout`             | medium | cases the builder never saw pass          | `vitest run .factory/holdout/<n>`           |
+| `properties`          | medium | a rule holds for generated inputs         | `vitest run specs/<n>/properties`           |
+| `behaviour-unchanged` | medium | recorded output is byte-for-byte the same | `vitest run specs/<n>/golden`               |
+| `contract`            | medium | both sides agree on the wire              | `vitest run tests/contract`                 |
+| `mutation`            | large  | the tests notice a changed line           | Stryker on the changed source files         |
+| `visual`              | large  | layout, overflow and accessibility hold   | `playwright test tests/e2e`                 |
+| `eval`                | large  | model behaviour and its token cost hold   | `tsx scripts/eval.ts`                       |
+| `gate`                | large  | the whole repo is green                   | `make check`                                |
+| `ci`                  | large  | the pull request is green                 | `gh pr checks --watch`                      |
 
 Sizes follow the Google idea of small, medium and large. A small check is fast and hermetic. The size is a field on every check.
 
@@ -81,6 +81,7 @@ A prompt change is code, so it needs a test with a token ceiling. `api/src/agent
    ```
    npx vitest run specs/25 specs/31 specs/34/properties
    ```
+
    The workbook PDF property lives in `shared/src/workbook-pdf.test.ts` and needs Playwright Chromium installed.
 4. Run the structural check on the lock hook: `npx vitest run tests/structure/review-and-test-lock.test.ts`.
 
