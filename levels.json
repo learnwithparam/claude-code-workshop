@@ -210,6 +210,29 @@
     "docs/recordings/workflows.gif",
     "stryker.config.json",
     "stryker.vitest.config.ts",
-    "docs/factory/**"
+    "docs/factory/f0-1-anatomy.md",
+    "docs/factory/f0-overview.md",
+    "docs/factory/f1-plan.md",
+    "docs/factory/f10-assignments.md",
+    "docs/factory/f11-cloud-sessions.md",
+    "docs/factory/f12-model-routing.md",
+    "docs/factory/f13-spend-and-safety.md",
+    "docs/factory/f2-design.md",
+    "docs/factory/f3-build.md",
+    "docs/factory/f4-test.md",
+    "docs/factory/f5-review.md",
+    "docs/factory/f6-deploy.md",
+    "docs/factory/f7-maintain.md",
+    "docs/factory/f8-workflows.md",
+    "docs/factory/faq.md"
+  ],
+  "capstone": [
+    "scripts/prove/capstone.ts",
+    "docs/levels/capstone.md",
+    "docs/factory/f9-capstone.md",
+    "docs/recordings/capstone.cast",
+    "docs/recordings/capstone.gif",
+    "scripts/capstone-strip.ts",
+    "scripts/capstone-strip.test.ts"
   ]
 }
