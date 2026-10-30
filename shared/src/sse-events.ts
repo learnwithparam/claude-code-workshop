@@ -13,7 +13,7 @@ export const usageSchema = z.object({
 // at the client boundary instead of reaching the page half-formed.
 export const eventSchemas = {
   question: z.object({ text: z.string() }),
-  worksheet: z.object({ sheet: worksheetSchema, html: z.string() }),
+  worksheet: z.object({ sheet: worksheetSchema, html: z.string(), sheetId: z.string().optional() }),
   usage: usageSchema,
   error: z.object({ message: z.string() }),
 } as const;

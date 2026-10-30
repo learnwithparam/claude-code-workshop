@@ -1,18 +1,33 @@
 import { writeFileSync } from "node:fs";
+
 import Anthropic from "@anthropic-ai/sdk";
 import { checkBand, parseBand } from "@workshop/shared";
 import fixtures from "../../fixtures/worksheets.json" with { type: "json" };
 import { runAgent } from "./agent/agent.ts";
+import { fillSlots } from "./agent/fill-template.ts";
+import { LIVE_CAP_USD, withinLiveCap } from "./agent/live-cap.ts";
 import { costUsd } from "./agent/model.ts";
 import { parseEnv } from "./env.ts";
+import { distillTemplate } from "./templates/distill-template.ts";
 
 // Live eval: runs every fixture prompt through the agent and records the result for offline replay.
 process.loadEnvFile(new URL("../.env", import.meta.url));
-const client = new Anthropic({ apiKey: parseEnv().ANTHROPIC_API_KEY });
+const env = parseEnv();
+const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
+
+// Generous per-call ceiling (max_tokens 2000 on Haiku), so the cap is never crossed by a call in flight.
+const CALL_CEILING_USD = 0.02;
+let spent = env.LIVE_SPENT_USD;
+const canSpend = () => withinLiveCap(spent, CALL_CEILING_USD, LIVE_CAP_USD);
 
 const rows = [];
 for (const { prompt } of fixtures) {
+  if (!canSpend()) {
+    console.log("live-run cap reached, stopping before the next call");
+    break;
+  }
   const result = await runAgent(client, [{ role: "user", content: prompt }]);
+  spent += costUsd(result.usage);
   const compliant = result.kind === "worksheet" && checkBand(result.sheet).ok;
   const bandMatches = result.kind === "worksheet" && result.sheet.band === parseBand(prompt);
   rows.push({
@@ -25,4 +40,25 @@ for (const { prompt } of fixtures) {
   });
   console.log(prompt.slice(0, 40), result.kind, compliant, result.usage.output);
 }
+// Acceptance: a template fill spends fewer output tokens than a full generation of the same prompt.
+const probe = "Grade 2 addition worksheet, 5 items";
+const full = canSpend() ? await runAgent(client, [{ role: "user", content: probe }]) : null;
+if (full) spent += costUsd(full.usage);
+if (full?.kind === "worksheet" && canSpend()) {
+  const distilled = distillTemplate(full.sheet, probe);
+  if (distilled.ok) {
+    const runTemplateFill = await fillSlots(client, {
+      slots: distilled.template.slots,
+      prompt: probe,
+    });
+    spent += costUsd(runTemplateFill.usage);
+    console.log(
+      "output tokens without template:",
+      full.usage.output,
+      "with template:",
+      runTemplateFill.usage.output,
+    );
+  }
+}
+
 writeFileSync("fixtures/eval.json", `${JSON.stringify(rows, null, 2)}\n`);

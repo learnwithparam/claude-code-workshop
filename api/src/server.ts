@@ -1,12 +1,25 @@
+import { createHash } from "node:crypto";
 import type Anthropic from "@anthropic-ai/sdk";
-import { renderWorksheet } from "@workshop/shared";
+import {
+  checkBand,
+  fillSlotsSchema,
+  fillTemplate,
+  parseBand,
+  renderWorksheet,
+  type Worksheet,
+} from "@workshop/shared";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { streamSSE } from "hono/streaming";
 import { z } from "zod";
 import { type AgentResult, runAgent } from "./agent/agent.ts";
-import { costUsd } from "./agent/model.ts";
+import { type FillResult, fillSlots } from "./agent/fill-template.ts";
+import { LIVE_CAP_USD } from "./agent/live-cap.ts";
+import { costUsd, type Usage } from "./agent/model.ts";
+import { createPromptCache, normalisePrompt } from "./cache/prompt-cache.ts";
 import type { Env } from "./env.ts";
+import { distillTemplate } from "./templates/distill-template.ts";
+import { createTemplateStore } from "./templates/template-store.ts";
 
 const bodySchema = z.object({
   messages: z
@@ -18,16 +31,47 @@ const bodySchema = z.object({
 const MAX_BODY_BYTES = 16_000;
 const RATE_PER_MINUTE = 10;
 
-type Deps = { env: Env; client: Anthropic; run?: typeof runAgent };
+const goodSchema = z.object({ sheetId: z.string().min(1).max(100) });
+const MAX_SHEETS = 500;
+const NO_USAGE: Usage = { input: 0, cacheRead: 0, cacheWrite: 0, output: 0 };
 
-export function createApp({ env, client, run = runAgent }: Deps) {
+type Deps = {
+  env: Env;
+  client: Anthropic;
+  run?: typeof runAgent;
+  fill?: (client: Anthropic, args: { slots: string[]; prompt: string }) => Promise<FillResult>;
+};
+
+export function createApp({ env, client, run = runAgent, fill = fillSlots }: Deps) {
   const app = new Hono();
+  const cache = createPromptCache();
+  const templates = createTemplateStore();
+  // Every sheet the api sent, so "mark good" can name one by id without trusting a client copy.
+  const sheets = new Map<string, { sheet: Worksheet; prompt: string }>();
+  const remember = (sheet: Worksheet, prompt: string) => {
+    const id = createHash("sha256").update(JSON.stringify(sheet)).digest("hex").slice(0, 16);
+    sheets.set(id, { sheet, prompt });
+    const oldest = sheets.keys().next().value;
+    if (sheets.size > MAX_SHEETS && oldest !== undefined) sheets.delete(oldest);
+    return id;
+  };
   const hits = new Map<string, number[]>();
   let spentUsd = 0;
   let day = new Date().toDateString();
 
   app.use("*", cors({ origin: env.ALLOWED_ORIGIN, allowMethods: ["POST", "GET"] }));
   app.get("/health", (c) => c.json({ ok: true }));
+
+  app.post("/templates/good", async (c) => {
+    const body = goodSchema.safeParse(await c.req.json().catch(() => null));
+    if (!body.success) return c.json({ error: "Bad request" }, 400);
+    const known = sheets.get(body.data.sheetId);
+    if (!known) return c.json({ error: "Unknown sheet" }, 404);
+    const result = distillTemplate(known.sheet, known.prompt);
+    if (!result.ok) return c.json({ error: "Sheet does not meet its band" }, 422);
+    templates.add(result.template);
+    return c.json({ ok: true });
+  });
 
   app.post("/chat", async (c) => {
     const now = Date.now();
@@ -57,12 +101,57 @@ export function createApp({ env, client, run = runAgent }: Deps) {
       const send = (event: string, data: unknown) =>
         stream.writeSSE({ event, data: JSON.stringify(data) });
       try {
-        const result: AgentResult = await run(client, body.data.messages);
+        const { messages } = body.data;
+        const last = messages[messages.length - 1];
+        // Only a lone request is a stable key; a reply to a question depends on the turns before it.
+        const prompt = messages.length === 1 && last?.role === "user" ? last.content : null;
+        const band = prompt ? parseBand(prompt) : null;
+        const sendSheet = async (sheet: Worksheet, usage: Usage) => {
+          const cost = costUsd(usage);
+          spentUsd += cost;
+          await send("worksheet", {
+            sheet,
+            html: renderWorksheet(sheet),
+            sheetId: remember(sheet, prompt ?? ""),
+          });
+          await send("usage", { ...usage, costUsd: cost });
+        };
+
+        // Cache hits return before this, so a repeat never spends the shared live-run cap.
+        const capped = () => env.LIVE_SPENT_USD + spentUsd >= LIVE_CAP_USD;
+        const refuse = () => send("error", { message: "Could not make a worksheet. Try again." });
+
+        if (prompt && band) {
+          const hit = cache.get(prompt, band);
+          if (hit && checkBand(hit).ok) return await sendSheet(hit, NO_USAGE);
+          if (hit) cache.delete(prompt, band);
+
+          const template = templates.find(band, normalisePrompt(prompt).split(" "));
+          if (template) {
+            if (capped()) return await refuse();
+            const filled = await fill(client, { slots: template.slots, prompt });
+            spentUsd += costUsd(filled.usage);
+            const values =
+              filled.kind === "slots" ? fillSlotsSchema(template).safeParse(filled) : null;
+            const sheet = values?.success ? fillTemplate(template, values.data.values) : null;
+            if (!sheet || !checkBand(sheet).ok) {
+              await send("error", { message: "Could not make a worksheet. Try again." });
+              return;
+            }
+            cache.set(prompt, band, sheet);
+            return await sendSheet(sheet, { ...filled.usage });
+          }
+        }
+
+        if (capped()) return await refuse();
+        const result: AgentResult = await run(client, messages);
+        if (result.kind === "worksheet") {
+          if (prompt && band) cache.set(prompt, band, result.sheet);
+          return await sendSheet(result.sheet, result.usage);
+        }
         const cost = costUsd(result.usage);
         spentUsd += cost;
         if (result.kind === "question") await send("question", { text: result.text });
-        else if (result.kind === "worksheet")
-          await send("worksheet", { sheet: result.sheet, html: renderWorksheet(result.sheet) });
         else await send("error", { message: "Could not make a worksheet. Try again." });
         await send("usage", { ...result.usage, costUsd: cost });
       } catch {
