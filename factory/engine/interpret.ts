@@ -6,6 +6,8 @@ import {
   writeArtifact,
 } from "./artifacts.ts";
 import { CHECKS } from "./checks/index.ts";
+import { reviewLoop } from "./review.ts";
+import { APPROVALS, classify } from "./risk.ts";
 import type { CheckResult, Host } from "./types.ts";
 import type { Step, Workflow } from "./workflow.ts";
 
@@ -34,6 +36,16 @@ async function runChecks(
 
 const failing = (r: Record<string, CheckResult>) => Object.entries(r).filter(([, v]) => !v.ok);
 
+// The tier comes from the paths changed so far, and the tier sets how many people must approve.
+async function gateMet(host: Host, n: number, step: Step, log?: string[]): Promise<boolean> {
+  const tier = classify(await host.changedFiles());
+  const need = APPROVALS[tier];
+  if (log)
+    log.push(`gate ${step.stage} tier ${tier} needs ${need} approval${need === 1 ? "" : "s"}`);
+  if (need === 0) return true;
+  return host.approved(n, step.stage, await artifactDigest(host, n, step.stage), need);
+}
+
 // Runs a workflow's steps in order. A step repeats its agent while its loop checks fail, up to the cap;
 // the evidence of the failing checks is the next round's prompt, so the loop learns from the check, not the model.
 export async function runWorkflow(
@@ -55,10 +67,7 @@ export async function runWorkflow(
   // not run again, because regenerating its artifacts would change what the person signed.
   let resumeAt = 0;
   for (const [i, step] of wf.steps.entries()) {
-    if (
-      step.gate === "human" &&
-      (await host.approved(n, step.stage, await artifactDigest(host, n, step.stage)))
-    ) {
+    if (step.gate === "human" && (await gateMet(host, n, step))) {
       res.log.push(`gate ${step.stage} already approved, skipped`);
       resumeAt = i + 1;
     }
@@ -67,10 +76,7 @@ export async function runWorkflow(
   for (const step of wf.steps.slice(resumeAt)) {
     const stopped = await runStep(host, step, n, ticket, res, wf.manifests);
     if (stopped) return finish("needs-human", step.stage);
-    if (
-      step.gate === "human" &&
-      !(await host.approved(n, step.stage, await artifactDigest(host, n, step.stage)))
-    ) {
+    if (step.gate === "human" && !(await gateMet(host, n, step, res.log))) {
       res.log.push(`gate ${step.stage} awaiting approval`);
       return finish("awaiting-approval", step.stage);
     }
@@ -88,6 +94,7 @@ async function runStep(
   manifests = false,
 ): Promise<boolean> {
   // A reply the runner refuses (chat instead of the artifact) gets the reason and two more tries.
+  if (step.review) return runReview(host, step, n, res);
   const max = step.loop?.max ?? (step.writes ? 3 : 1);
   let feedback = "";
   const where = step.writes
@@ -125,4 +132,32 @@ async function runStep(
     feedback = `${refused}\nChecks failed in ${artifactPath(n, "run.log")}:\n${bad.map(([k, v]) => `${k}: ${v.evidence}`).join("\n")}`;
   }
   return true;
+}
+
+// Lenses hunt in parallel, three verifiers vote, and a builder fixes what survives, up to the round cap.
+// Returns true when an Important finding is left or a lens reply was not findings; the checks still run.
+async function runReview(host: Host, step: Step, n: number, res: Result): Promise<boolean> {
+  const lenses = step.review?.lenses ?? [];
+  let fixed = false;
+  const fixer = async () => {
+    fixed = true;
+    const findings = (await host.read(artifactPath(n, "review.json"))) ?? "";
+    host.setPhase("fix");
+    const out = await host.agent(
+      "builder",
+      `Fix these verified review findings. Never edit the locked tests.\n${findings}`,
+      { stage: "review-fix" },
+    );
+    host.setPhase(null);
+    res.costUsd += out.costUsd;
+  };
+  const r = await reviewLoop(host, n, lenses, fixer);
+  res.rounds[step.stage] = r.rounds;
+  res.log.push(`${step.stage} ${r.clean ? "clean" : "NOT clean"} after ${r.rounds} round(s)`);
+  // A fixer writes code after the build's checks passed, so the gate runs again on what it left.
+  const names = [...new Set([...(step.checks ?? []), ...(fixed ? ["gate"] : [])])];
+  const results = await runChecks(host, n, names);
+  for (const [name, c] of Object.entries(results))
+    res.log.push(`  check ${name} ${c.ok ? "ok" : "FAIL"}: ${c.evidence.split("\n")[0]}`);
+  return !r.clean || failing(results).length > 0;
 }
