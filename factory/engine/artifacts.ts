@@ -73,7 +73,7 @@ const PLAN_PATH = /^[A-Za-z0-9_][A-Za-z0-9_.@/-]*$/;
 // lock check already fails any later edit to it. Snapshots and other golden files stay gate-owned.
 // levels.json is not here: a new source file needs an owner entry there, so a plan must be able to list it.
 const GATE_OWNED =
-  /^((\.github|\.claude|\.factory|factory|scripts)\/|specs\/[^/]+\/golden\/(?![^/]+\.test\.ts$))|(^|\/)(makefile|package(-lock)?\.json|biome\.json|\.npmrc|stryker[^/]*|vitest[^/]*|tsconfig[^/]*|playwright\.config[^/]*)$/i;
+  /^((\.github|\.claude|\.factory|factory|scripts)\/|specs\/[^/]+\/golden\/(?![^/]+\.test\.ts$))|^api\/src\/eval\.ts$|(^|\/)(makefile|package(-lock)?\.json|biome\.json|\.npmrc|stryker[^/]*|vitest[^/]*|tsconfig[^/]*|playwright\.config[^/]*)$/i;
 const MANIFEST = /(^|\/)package(-lock)?\.json$/;
 // A dependency update must edit the manifests, so that workflow alone may list them; the manifest-deps
 // check then holds the edit to dependency fields.

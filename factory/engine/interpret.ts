@@ -46,10 +46,10 @@ const failing = (r: Record<string, CheckResult>) => Object.entries(r).filter(([,
 // The tier comes from the paths changed so far, and the tier sets how many people must approve.
 async function gateMet(host: Host, n: number, step: Step, log?: string[]): Promise<boolean> {
   const tier = classify(await host.changedFiles());
-  const need = APPROVALS[tier];
+  // A step that says gate: human always needs a person; the tier only raises the count.
+  const need = Math.max(1, APPROVALS[tier]);
   if (log)
     log.push(`gate ${step.stage} tier ${tier} needs ${need} approval${need === 1 ? "" : "s"}`);
-  if (need === 0) return true;
   return host.approved(n, step.stage, await artifactDigest(host, n, step.stage), need);
 }
 
