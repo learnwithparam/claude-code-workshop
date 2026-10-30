@@ -4,6 +4,7 @@ import { GEIST_FONT_FACE } from "./geist-font-face";
 import { ACTIVITY_CSS } from "./render-activity";
 import { renderAnswerKey } from "./render-answer-key";
 import { ART_HEIGHT, renderHeaderArt } from "./render-header-art";
+import { layoutCss } from "./render-layout-css";
 import { renderSection } from "./render-section";
 import type { Worksheet } from "./schema";
 
@@ -18,7 +19,7 @@ export function renderWorksheet(sheet: Worksheet): string {
 <title>${escapeHtml(sheet.title)}</title>
 <style>
   ${GEIST_FONT_FACE}
-  #worksheet { width: 816px; height: 1056px; box-sizing: border-box; padding: 40px 64px 56px; background: ${theme.paper}; color: ${theme.ink}; font-family: "Geist", "${band.font}", sans-serif; font-size: ${band.fontPx}px; line-height: 1.45; overflow: hidden; }
+  #worksheet { width: 816px; box-sizing: border-box; padding: 40px 64px 56px; background: ${theme.paper}; color: ${theme.ink}; font-family: "Geist", "${band.font}", sans-serif; font-size: ${band.fontPx}px; line-height: 1.45; }
   #worksheet .art { display: block; width: 100%; height: ${ART_HEIGHT}px; margin: 0 0 12px; overflow: hidden; border-bottom: 2px solid ${theme.rule}; }
   #worksheet h1 { overflow-wrap: anywhere; border-left: 8px solid ${theme.accent}; padding-left: 12px; font-size: ${Math.round(band.fontPx * 1.6)}px; margin: 0 0 4px; }
   #worksheet .meta { color: ${theme.muted}; font-size: ${Math.max(12, Math.round(band.fontPx * 0.6))}px; margin: 0 0 20px; }
@@ -32,7 +33,8 @@ export function renderWorksheet(sheet: Worksheet): string {
   #worksheet .line { display: inline-block; min-width: 4em; border-bottom: 2px solid ${theme.ink}; margin-left: 0.6em; }
   #worksheet .key { margin-top: 16px; border-top: 1px solid ${theme.rule}; font-size: ${Math.min(band.fontPx, 16)}px; }
   #worksheet .key h2 { font-size: ${Math.min(band.fontPx, 16)}px; margin: 8px 0 2px; }
-  #worksheet .key li { margin-bottom: 0.15em; }${sheet.sections.some((section) => section.activity) ? ACTIVITY_CSS : ""}
+  #worksheet .key li { margin-bottom: 0.15em; }
+  ${layoutCss(band)}${sheet.sections.some((section) => section.activity) ? ACTIVITY_CSS : ""}
 </style>
 </head>
 <body>
@@ -40,7 +42,7 @@ export function renderWorksheet(sheet: Worksheet): string {
 ${renderHeaderArt(theme)}
 <h1>${escapeHtml(sheet.title)}</h1>
 <p class="meta">${escapeHtml(band.label)} &middot; ${escapeHtml(sheet.subject)} &middot; Name: ____________</p>
-${sheet.sections.map((section) => renderSection(section, band.pictureBoxes, band.fontPx)).join("\n")}
+${sheet.sections.map((section) => renderSection(section, band)).join("\n")}
 ${renderAnswerKey(sheet)}
 </div>
 </body>
