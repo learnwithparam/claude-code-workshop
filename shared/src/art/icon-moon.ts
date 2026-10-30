@@ -1,0 +1,1 @@
+export const MOON_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="moon" focusable="false"><title>moon</title><path d="M42 8A24 24 0 1 0 56 42A20 20 0 0 1 42 8z" fill="#fcd34d"/><circle cx="50" cy="14" r="2" fill="#fde68a"/><circle cx="56" cy="26" r="1.5" fill="#fde68a"/></svg>`;

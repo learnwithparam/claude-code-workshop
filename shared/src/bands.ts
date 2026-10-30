@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { ActivityKind } from "./activity-kinds";
 import type { BandTheme } from "./band-theme";
 
 export const bandIdSchema = z.enum([
@@ -21,6 +22,7 @@ export type Band = {
   maxItems: number;
   maxWordsPerItem: number;
   pictureBoxes: boolean;
+  kinds: ActivityKind[];
   theme: BandTheme;
 };
 
@@ -44,6 +46,7 @@ export const BANDS: Record<BandId, Band> = {
     maxItems: 6,
     maxWordsPerItem: 6,
     pictureBoxes: true,
+    kinds: ["count", "circle", "trace", "match"],
     theme: {
       paper: "#fffaf0",
       ink: "#1f1a14",
@@ -63,6 +66,7 @@ export const BANDS: Record<BandId, Band> = {
     maxItems: 8,
     maxWordsPerItem: 8,
     pictureBoxes: true,
+    kinds: ["count", "circle", "ten-frame", "trace", "match"],
     theme: {
       paper: "#fff7f9",
       ink: "#2a1520",
@@ -91,6 +95,7 @@ export const BANDS: Record<BandId, Band> = {
     maxItems: 10,
     maxWordsPerItem: 14,
     pictureBoxes: true,
+    kinds: ["count", "match", "fill-blank", "number-line", "ten-frame", "short", "steps"],
     theme: {
       paper: "#f4fbf6",
       ink: "#12261a",
@@ -110,6 +115,7 @@ export const BANDS: Record<BandId, Band> = {
     maxItems: 12,
     maxWordsPerItem: 24,
     pictureBoxes: false,
+    kinds: ["fill-blank", "number-line", "fraction-bar", "steps", "short", "table", "match"],
     theme: {
       paper: "#f5f9ff",
       ink: "#111c33",
@@ -137,6 +143,7 @@ export const BANDS: Record<BandId, Band> = {
     maxItems: 14,
     maxWordsPerItem: 36,
     pictureBoxes: false,
+    kinds: ["fill-blank", "fraction-bar", "table", "steps", "short"],
     theme: {
       paper: "#faf7ff",
       ink: "#1c1433",
@@ -156,6 +163,7 @@ export const BANDS: Record<BandId, Band> = {
     maxItems: 16,
     maxWordsPerItem: 50,
     pictureBoxes: false,
+    kinds: ["fill-blank", "table", "steps", "short"],
     theme: {
       paper: "#f7f8f8",
       ink: "#14202b",
@@ -175,6 +183,7 @@ export const BANDS: Record<BandId, Band> = {
     maxItems: 20,
     maxWordsPerItem: 80,
     pictureBoxes: false,
+    kinds: ["fill-blank", "table", "steps", "short"],
     theme: {
       paper: "#fbf8f3",
       ink: "#1b1b1b",

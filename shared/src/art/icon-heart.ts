@@ -1,0 +1,1 @@
+export const HEART_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="heart" focusable="false"><title>heart</title><path d="M32 56C6 36 8 14 22 12c6 0 9 4 10 8 1-4 4-8 10-8 14 2 16 24-10 44z" fill="#e11d48"/></svg>`;
