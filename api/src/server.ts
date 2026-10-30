@@ -1,11 +1,12 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import { renderWorksheet } from "@workshop/shared";
-import { Hono } from "hono";
+import { renderWorkbook, renderWorksheet, worksheetSchema } from "@workshop/shared";
+import { type Context, Hono } from "hono";
 import { cors } from "hono/cors";
 import { streamSSE } from "hono/streaming";
 import { z } from "zod";
 import { type AgentResult, runAgent } from "./agent/agent.ts";
 import { costUsd } from "./agent/model.ts";
+import { runWorkbookAgent } from "./agent/workbook-agent.ts";
 import type { Env } from "./env.ts";
 
 const bodySchema = z.object({
@@ -15,12 +16,19 @@ const bodySchema = z.object({
     .max(20),
 });
 
+const workbookBodySchema = z.object({ sheet: worksheetSchema });
+
 const MAX_BODY_BYTES = 16_000;
 const RATE_PER_MINUTE = 10;
 
-type Deps = { env: Env; client: Anthropic; run?: typeof runAgent };
+type Deps = {
+  env: Env;
+  client: Anthropic;
+  run?: typeof runAgent;
+  runWorkbook?: typeof runWorkbookAgent;
+};
 
-export function createApp({ env, client, run = runAgent }: Deps) {
+export function createApp({ env, client, run = runAgent, runWorkbook = runWorkbookAgent }: Deps) {
   const app = new Hono();
   const hits = new Map<string, number[]>();
   let spentUsd = 0;
@@ -29,7 +37,8 @@ export function createApp({ env, client, run = runAgent }: Deps) {
   app.use("*", cors({ origin: env.ALLOWED_ORIGIN, allowMethods: ["POST", "GET"] }));
   app.get("/health", (c) => c.json({ ok: true }));
 
-  app.post("/chat", async (c) => {
+  // Rate limit, daily budget and body size are shared by every route that spends tokens.
+  async function admit(c: Context): Promise<{ json: unknown } | Response> {
     const now = Date.now();
     const ip = c.req.header("x-forwarded-for") ?? "local";
     const recent = (hits.get(ip) ?? []).filter((t) => now - t < 60_000);
@@ -50,7 +59,13 @@ export function createApp({ env, client, run = runAgent }: Deps) {
     } catch {
       return c.json({ error: "Bad request" }, 400);
     }
-    const body = bodySchema.safeParse(json);
+    return { json };
+  }
+
+  app.post("/chat", async (c) => {
+    const admitted = await admit(c);
+    if (admitted instanceof Response) return admitted;
+    const body = bodySchema.safeParse(admitted.json);
     if (!body.success) return c.json({ error: "Bad request" }, 400);
 
     return streamSSE(c, async (stream) => {
@@ -67,6 +82,32 @@ export function createApp({ env, client, run = runAgent }: Deps) {
         await send("usage", { ...result.usage, costUsd: cost });
       } catch {
         // Generic body: no model name, token detail or stack ever reaches a customer.
+        await send("error", { message: "Something went wrong. Try again." });
+      }
+    });
+  });
+
+  app.post("/workbook", async (c) => {
+    const admitted = await admit(c);
+    if (admitted instanceof Response) return admitted;
+    const body = workbookBodySchema.safeParse(admitted.json);
+    if (!body.success) return c.json({ error: "Bad request" }, 400);
+
+    return streamSSE(c, async (stream) => {
+      const send = (event: string, data: unknown) =>
+        stream.writeSSE({ event, data: JSON.stringify(data) });
+      try {
+        const result = await runWorkbook(client, body.data.sheet);
+        const cost = costUsd(result.usage);
+        spentUsd += cost;
+        if (result.kind === "workbook")
+          await send("workbook", {
+            workbook: result.workbook,
+            html: renderWorkbook(result.workbook),
+          });
+        else await send("error", { message: "Could not make a workbook. Try again." });
+        await send("usage", { ...result.usage, costUsd: cost });
+      } catch {
         await send("error", { message: "Something went wrong. Try again." });
       }
     });

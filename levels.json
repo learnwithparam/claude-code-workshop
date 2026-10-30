@@ -26,6 +26,7 @@
     ".claude/hooks/posttooluse-format.mjs",
     "docs/managed-settings.example.json",
     "tests/structure/hook-catalogue.test.ts",
+    "tests/structure/workbook-boundaries.test.ts",
     ".gitleaks.toml",
     "scripts/git/**",
     "scripts/prove/boundary.ts",
