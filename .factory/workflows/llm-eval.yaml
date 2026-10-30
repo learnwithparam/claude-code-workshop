@@ -25,4 +25,9 @@ steps:
       checks: [eval, lock],
       loop: { until: [eval, lock], max: 4 },
     }
-  - { stage: review, agent: reviewer, checks: [plan-drift] }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }

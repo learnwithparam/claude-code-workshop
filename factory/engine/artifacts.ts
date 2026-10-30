@@ -10,8 +10,20 @@ export const ARTIFACTS = [
   "run.log",
   "incident.md",
   "lock.json",
+  "constitution.md",
+  "clarify.md",
+  "tasks.md",
+  "analyze.md",
 ] as const;
-export const AGENT_ARTIFACTS = ["intent.md", "spec.md", "plan.md"] as const;
+export const AGENT_ARTIFACTS = [
+  "intent.md",
+  "spec.md",
+  "plan.md",
+  "constitution.md",
+  "clarify.md",
+  "tasks.md",
+  "analyze.md",
+] as const;
 export type ArtifactName = (typeof ARTIFACTS)[number];
 
 export const artifactPath = (n: number, name: ArtifactName) => `specs/${n}/${name}`;
@@ -82,6 +94,9 @@ export async function artifactDigest(host: Host, n: number, stage: string): Prom
       ? ["intent.md", "spec.md"]
       : ["intent.md", "spec.md", "plan.md"];
   const names = new Set<string>(docs.map((a) => `specs/${n}/${a}`));
+  // Spec Kit documents join the hash only when a run wrote them, so earlier approvals keep their digest.
+  for (const extra of ["constitution.md", "clarify.md", "tasks.md", "analyze.md"])
+    if ((await host.read(`specs/${n}/${extra}`)) !== null) names.add(`specs/${n}/${extra}`);
   if (stage !== "spec" && stage !== "decide" && stage !== "plan")
     for (const f of await host.changedFiles()) names.add(f);
   // One hash per file, joined as JSON, so no path or content can shift a boundary; a missing file is null, not "".

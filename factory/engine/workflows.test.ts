@@ -7,7 +7,15 @@ import { loadWorkflow } from "./workflow.ts";
 const dir = ".factory/workflows";
 const files = readdirSync(dir).filter((f) => f.endsWith(".yaml"));
 // The planner has no Write tool, so these stages only produce an artifact if the runner saves the reply.
-const ARTIFACT_STAGES = new Set(["intent", "spec", "plan"]);
+const ARTIFACT_STAGES = new Set([
+  "intent",
+  "spec",
+  "plan",
+  "constitution",
+  "clarify",
+  "tasks",
+  "analyze",
+]);
 const agents = new Set(readdirSync(".claude/agents").map((f) => f.replace(/\.md$/, "")));
 
 describe.each(files)("workflow %s", (file) => {
@@ -52,6 +60,8 @@ describe.each(files)("workflow %s", (file) => {
         "specs/1/a.test.ts": "t",
         ...(wf.manifests ? { "package.json": bumped } : {}),
       },
+      // Lenses find nothing, so the review step is clean.
+      byAgent: (name) => (name.endsWith("reviewer") ? { text: "[]" } : undefined),
       changed: ["specs/1/plan.md", "specs/1/a.test.ts", ...(wf.manifests ? ["package.json"] : [])],
       exec: [
         { match: "npx vitest", ref: "base", result: { code: 1, output: "red" } },

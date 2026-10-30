@@ -34,4 +34,9 @@ steps:
       brief: "Summarise what changed for the human who approves, in plain words.",
       gate: human,
     }
-  - { stage: review, agent: reviewer, checks: [plan-drift] }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }
