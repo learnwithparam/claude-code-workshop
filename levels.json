@@ -203,6 +203,7 @@
     "docs/recordings/workflows.cast",
     "docs/recordings/workflows.gif",
     "stryker.config.json",
-    "stryker.vitest.config.ts"
+    "stryker.vitest.config.ts",
+    "docs/factory/**"
   ]
 }
