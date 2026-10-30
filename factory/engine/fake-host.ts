@@ -16,10 +16,12 @@ export function fakeHost(script: FakeScript = {}) {
   const files = new Map(Object.entries(script.files ?? {}));
   const state = new Map<string, string>();
   const calls: string[] = [];
+  const prompts: string[] = [];
   const phases: (string | null)[] = [];
   let agentCalls = 0;
   const host: Host = {
-    async agent(name, _prompt, o) {
+    async agent(name, prompt, o) {
+      prompts.push(prompt);
       calls.push(`agent ${name} ${o.stage}`);
       const named = script.byAgent?.(name);
       if (named) return { text: "", costUsd: 0.01, ...named };
@@ -47,5 +49,5 @@ export function fakeHost(script: FakeScript = {}) {
       script.approvals?.some((a) => a === `${n}:${stage}` || a === `${n}:${stage}:${digest}`) ??
       false,
   };
-  return { host, files, calls, phases };
+  return { host, files, calls, phases, prompts };
 }
