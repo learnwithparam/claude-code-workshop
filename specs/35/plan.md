@@ -13,5 +13,4 @@ shared/src/index.ts
 shared/src/sse-events.ts
 shared/src/template.ts
 shared/src/template.test.ts
-specs/31/golden/sse-contract.golden.test.ts
 levels.json

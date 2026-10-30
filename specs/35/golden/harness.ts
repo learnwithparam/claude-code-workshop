@@ -3,7 +3,7 @@ import type { AgentResult } from "../../../api/src/agent/agent.ts";
 import { parseEnv } from "../../../api/src/env.ts";
 import { createApp } from "../../../api/src/server.ts";
 import fixtures from "../../../fixtures/worksheets.json" with { type: "json" };
-import type { Worksheet } from "../../../shared/src/index.ts";
+import { BANDS, type Worksheet } from "../../../shared/src/index.ts";
 
 // One test per scenario in specs/35/spec.md. Each fails on the base commit because no cache or template code exists.
 // Contract the build must meet (see specs/35/contract.md): createApp builds its own cache and template store;
@@ -25,18 +25,23 @@ export const sheetWith = (band: Worksheet["band"], n: number): Worksheet => ({
       items: Array.from({ length: n }, (_, i) => ({
         prompt: `${i} + 1`,
         answer: `${i + 1}`,
-        picture: "ball" as const,
+        ...(BANDS[band].pictureBoxes ? { picture: "ball" as const } : {}),
       })),
     },
   ],
 });
 
+// The spec speaks of grades; the prompt carries the grade the way a customer would type it.
+export const ask = (text: string, grade: number) => `${text} for grade ${grade}`;
+export const GRADE3_SHEET = (): AgentResult => ({
+  kind: "worksheet",
+  sheet: sheetWith("grade-3-5", 5),
+  usage,
+});
+
 export function harness(
-  make: (call: number) => AgentResult = () => ({
-    kind: "worksheet",
-    sheet: sheetWith("grade-1-2", 5),
-    usage,
-  }),
+  make: (call: number) => AgentResult = GRADE3_SHEET,
+  fillValues: (slots: string[]) => string[] = (slots) => slots.map((s) => `v-${s}`),
 ) {
   let calls = 0;
   const run = async (): Promise<AgentResult> => make(calls++);
@@ -47,7 +52,7 @@ export function harness(
     filled.push(args);
     return {
       kind: "slots",
-      values: args.slots.map((s) => `v-${s}`),
+      values: fillValues(args.slots),
       usage: { ...usage, output: 10 },
     };
   };

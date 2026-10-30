@@ -1,8 +1,8 @@
 # Interfaces the golden tests assume (specs/35/golden)
 
 - `createApp({ env, client, run, fill })` builds its own prompt cache and template store. `fill(client, { slots }) -> { kind: "slots", values: string[], usage } | { kind: "failed", usage }`.
-- Cache key: normalised (trim, collapse whitespace, lowercase) last user prompt + band from `parseBand`. Only worksheets are cached; entries failing `checkBand` are dropped.
-- The `worksheet` SSE event gains `sheetId`. `POST /templates/good` takes `{ sheetId }`: 400 bad body, 422 failing `checkBand`, 200 stored, idempotent.
+- Cache key: normalised (trim, collapse whitespace, lowercase) last user prompt with the grade phrase that `parseBand` matched removed, + band. So "x for grade 3" and "x for grade 4" share an entry; the prompt without the grade phrase is the text half of the key. Only worksheets are cached; entries failing `checkBand` are dropped.
+- The `worksheet` SSE event gains `sheetId`. `POST /templates/good` takes `{ sheetId }`: 400 bad body, 404 unknown sheet id, 422 failing `checkBand`, 200 stored, idempotent.
 - `api/src/templates/distill-template.ts`: `distillTemplate(sheet) -> { ok: true, template } | { ok: false, problems }`; template has `band`, `slots` (one per item), `sections` (heading/instruction kept).
 - `api/src/templates/template-store.ts`: `createTemplateStore()` with `add`, `size`.
 - `shared/src/template.ts`: `fillSlotsSchema(template)` (`{ values: string[] }`, length = slots), `fillTemplate(template, values) -> Worksheet`, throws on length mismatch.

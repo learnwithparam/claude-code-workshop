@@ -12,3 +12,7 @@ Not mine: `factory/engine/real-host.test.ts` EPERM (sandbox), `specs/35/lock.jso
 ## Update
 
 The picture-box and `sheetId` blockers listed above no longer reproduce: all of `specs/35/golden` and `specs/31/golden` pass. The one real failure was "Live calls stop at the cap". `/chat` never read `LIVE_SPENT_USD`. `server.ts` now refuses before the template fill and before `run` when `LIVE_SPENT_USD + spent >= 60`, with a generic `error` event. Cache hits return before the check. I did not run the full `make check`, which spends no tokens but includes the EPERM-blocked tests above.
+
+## Update 2
+
+Cache key now drops the matched band's grade phrase (`withoutGrade` in `api/src/cache/prompt-cache.ts`), so "grade 3" and "grade 4" share an entry. All of `specs/35/golden`, `specs/31/golden`, `api` and `shared` pass except `shared/src/workbook-pdf.test.ts`, which needs a Playwright Chromium the sandbox lacks. Full `make check` not run.
