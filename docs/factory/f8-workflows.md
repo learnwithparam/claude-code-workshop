@@ -63,21 +63,21 @@ The plan brief repeats three sentences in every workflow. Each is pinned by a te
 
 One workflow per kind of task. The test "covers every task type the plan names" fails if one is deleted.
 
-| task | workflow | what it refuses to skip |
-|---|---|---|
-| a bug | `bug-tdd` | `red` on the base commit, then `lock`, then `mutation` |
-| a small feature with examples | `feature-atdd` | one test per Given/when/then example, then `holdout` |
-| user-facing behaviour | `feature-bdd` | Gherkin scenarios, a human gate after the `amigos` review |
-| a large feature or epic | `feature-sdd` | phase artifacts with human gates |
-| a refactor | `refactor` | characterization tests first, then `behaviour-unchanged` |
-| a UI change | `ui-visual` | a design contract, `visual`, the design lens |
-| a prompt, model or `.claude` change | `llm-eval` | `eval` red on main, a loop to the pass rate |
-| the api and web boundary | `contract` | the contract test first, both sides move |
-| a dependency bump | `deps` | `manifest-deps` and the whole gate, never the bump alone |
-| a security fix | `security` | a failing exploit test and a PR naming the class of bug |
-| an open question | `spike` | the output is a decision record behind a human gate |
-| documentation | `docs` | `prose` and `gate` |
-| an incident or band breach | `incident` | the incident becomes an eval before the fix |
+| task                                | workflow       | what it refuses to skip                                   |
+| ----------------------------------- | -------------- | --------------------------------------------------------- |
+| a bug                               | `bug-tdd`      | `red` on the base commit, then `lock`, then `mutation`    |
+| a small feature with examples       | `feature-atdd` | one test per Given/when/then example, then `holdout`      |
+| user-facing behaviour               | `feature-bdd`  | Gherkin scenarios, a human gate after the `amigos` review |
+| a large feature or epic             | `feature-sdd`  | phase artifacts with human gates                          |
+| a refactor                          | `refactor`     | characterization tests first, then `behaviour-unchanged`  |
+| a UI change                         | `ui-visual`    | a design contract, `visual`, the design lens              |
+| a prompt, model or `.claude` change | `llm-eval`     | `eval` red on main, a loop to the pass rate               |
+| the api and web boundary            | `contract`     | the contract test first, both sides move                  |
+| a dependency bump                   | `deps`         | `manifest-deps` and the whole gate, never the bump alone  |
+| a security fix                      | `security`     | a failing exploit test and a PR naming the class of bug   |
+| an open question                    | `spike`        | the output is a decision record behind a human gate       |
+| documentation                       | `docs`         | `prose` and `gate`                                        |
+| an incident or band breach          | `incident`     | the incident becomes an eval before the fix               |
 
 ## Choosing one
 
