@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { loadConfig } from "../config.ts";
 import { runWorkflow } from "./interpret.ts";
 import { type Metrics, metricsFor, metricsSchema, rollup } from "./metrics.ts";
+import { pinPortable } from "./portable.ts";
 import { realHost } from "./real-host.ts";
 import { loadWorkflow } from "./workflow.ts";
 
@@ -12,6 +13,7 @@ const gh = (...a: string[]) => execFileSync("gh", a, { encoding: "utf8" });
 
 // Runs one issue through a named workflow on the current checkout and saves metrics.json.
 export async function runIssue(n: number, name: string) {
+  pinPortable();
   const wf = loadWorkflow(readFileSync(`.factory/workflows/${name}.yaml`, "utf8"));
   const issue = JSON.parse(gh("issue", "view", String(n), "--json", "title,body"));
   const base = execFileSync("git", ["merge-base", "HEAD", "origin/main"], {
