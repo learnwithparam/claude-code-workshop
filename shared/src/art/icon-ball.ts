@@ -1,0 +1,1 @@
+export const BALL_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ball" focusable="false"><title>ball</title><circle cx="32" cy="32" r="24" fill="#ef4444"/><path d="M8 32h48" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="32" r="8" fill="#ffffff"/></svg>`;

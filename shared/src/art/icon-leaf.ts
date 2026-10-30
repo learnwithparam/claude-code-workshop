@@ -1,0 +1,1 @@
+export const LEAF_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="leaf" focusable="false"><title>leaf</title><path d="M10 54C6 22 26 6 56 8c2 28-12 48-40 46z" fill="#22c55e"/><path d="M10 54L40 24" fill="none" stroke="#166534" stroke-width="3" stroke-linecap="round"/></svg>`;

@@ -1,0 +1,1 @@
+export const STAR_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="star" focusable="false"><title>star</title><path d="M32 6l7.6 16.4 17.9 2.1-13.3 12.2 3.6 17.7L32 45l-15.8 9.4 3.6-17.7L6.5 24.5l17.9-2.1z" fill="#facc15"/></svg>`;

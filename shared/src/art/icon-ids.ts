@@ -1,0 +1,48 @@
+import { z } from "zod";
+
+// The only picture vocabulary the model has. Adding an id here forces a matching SVG in the registry.
+export const ICON_IDS = [
+  "ball",
+  "bear",
+  "cat",
+  "dog",
+  "bus",
+  "car",
+  "apple",
+  "banana",
+  "sun",
+  "moon",
+  "star",
+  "tree",
+  "flower",
+  "fish",
+  "bird",
+  "house",
+  "book",
+  "pencil",
+  "cloud",
+  "rain",
+  "heart",
+  "boat",
+  "train",
+  "plane",
+  "cake",
+  "milk",
+  "egg",
+  "hat",
+  "shoe",
+  "clock",
+  "key",
+  "cup",
+  "leaf",
+  "rabbit",
+  "frog",
+  "butterfly",
+  "rocket",
+  "umbrella",
+  "drum",
+  "kite",
+] as const;
+
+export const iconIdSchema = z.enum(ICON_IDS);
+export type IconId = z.infer<typeof iconIdSchema>;

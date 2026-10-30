@@ -1,11 +1,13 @@
 import { z } from "zod";
 import { activitySchema } from "./activity-kinds";
+import { iconIdSchema } from "./art/icon-ids";
 import { bandIdSchema } from "./bands";
 
 export const itemSchema = z.object({
   prompt: z.string().min(1),
   answer: z.string().min(1),
-  picture: z.string().optional(),
+  // An id from the fixed icon set. Never free text or markup, so the renderer only injects registry SVG.
+  picture: iconIdSchema.optional(),
 });
 
 // A section is either plain prompt/answer items or one drawn activity, never both.

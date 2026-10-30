@@ -1,0 +1,1 @@
+export const KITE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="kite" focusable="false"><title>kite</title><path d="M32 4l20 22-20 28L12 26z" fill="#38bdf8"/><path d="M32 4l20 22H12z" fill="#f97316"/><path d="M32 54c-6 4 6 6 0 10" fill="none" stroke="#78350f" stroke-width="2" stroke-linecap="round"/></svg>`;

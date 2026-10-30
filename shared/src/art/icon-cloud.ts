@@ -1,0 +1,1 @@
+export const CLOUD_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="cloud" focusable="false"><title>cloud</title><circle cx="22" cy="36" r="12" fill="#94a3b8"/><circle cx="36" cy="28" r="16" fill="#94a3b8"/><circle cx="48" cy="38" r="10" fill="#94a3b8"/><rect x="14" y="36" width="42" height="12" rx="6" fill="#94a3b8"/></svg>`;
