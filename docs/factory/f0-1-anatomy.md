@@ -8,25 +8,25 @@ Know what each file in `.claude/`, `.factory/` and the repo root does, which one
 
 ## The `.claude` files in this repo
 
-| File or folder | Does | Look at |
-| --- | --- | --- |
-| `AGENTS.md`, loaded by `CLAUDE.md` | facts every session needs: commands, map, standards, done | `CLAUDE.md` is `@AGENTS.md` plus a compaction line |
-| `.claude/rules/*.md` | a rule that loads only when a file matching its `paths` is touched | `.claude/rules/api.md` has `paths: api/**` |
-| `.claude/settings.json` | permissions, sandbox, hooks, shared with the team | denies reading `.env` files and `.factory/holdout/**`, and `git push` |
-| `.claude/settings.local.json` | your own overrides, gitignored | listed in `.gitignore` and `.worktreeinclude` |
-| `CLAUDE.local.md` | your own notes, gitignored | example in `docs/examples/CLAUDE.local.md` |
-| `.claude/skills/<name>/SKILL.md` | a procedure Claude chooses to run, from its description | `issue-triage`, `test-driven-development`, `factory-retro` |
-| `.claude/commands/*.md` | a prompt you run by name, one file | `/gate` runs `make check` |
-| `.claude/agents/*.md` | a worker with its own tools and cap | see the frontmatter below |
-| `.claude/agent-memory/<agent>/MEMORY.md` | notes an agent keeps between sessions | `reviewer/MEMORY.md` |
-| `.claude/output-styles/*.md` | how replies read | `teaching.md` |
-| `.claude/workflows/factory.js` | a scripted order of stages inside a session | pinned by `tests/structure/factory-workflow.test.ts` |
-| `.claude/hooks/*.mjs` | code the harness runs on an event | registered in `settings.json` |
-| `.claude/teams.json` | agent-team settings and the `TeammateIdle` hook | `teammateMode: in-process` |
-| `.mcp.json` | an MCP server; here GitHub, with the token read from `GITHUB_MCP_TOKEN` | no secret in the file |
-| `.worktreeinclude` | gitignored files a new worktree still gets | `CLAUDE.local.md`, `.claude/settings.local.json` |
-| `REVIEW.md` | what a failure looks like here, read by the reviewer first | nit cap, `file:line` evidence, round rules |
-| `docs/managed-settings.example.json` | rules nobody on the team can override | an example, not installed by this repo |
+| File or folder                           | Does                                                                    | Look at                                                               |
+| ---------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `AGENTS.md`, loaded by `CLAUDE.md`       | facts every session needs: commands, map, standards, done               | `CLAUDE.md` is `@AGENTS.md` plus a compaction line                    |
+| `.claude/rules/*.md`                     | a rule that loads only when a file matching its `paths` is touched      | `.claude/rules/api.md` has `paths: api/**`                            |
+| `.claude/settings.json`                  | permissions, sandbox, hooks, shared with the team                       | denies reading `.env` files and `.factory/holdout/**`, and `git push` |
+| `.claude/settings.local.json`            | your own overrides, gitignored                                          | listed in `.gitignore` and `.worktreeinclude`                         |
+| `CLAUDE.local.md`                        | your own notes, gitignored                                              | example in `docs/examples/CLAUDE.local.md`                            |
+| `.claude/skills/<name>/SKILL.md`         | a procedure Claude chooses to run, from its description                 | `issue-triage`, `test-driven-development`, `factory-retro`            |
+| `.claude/commands/*.md`                  | a prompt you run by name, one file                                      | `/gate` runs `make check`                                             |
+| `.claude/agents/*.md`                    | a worker with its own tools and cap                                     | see the frontmatter below                                             |
+| `.claude/agent-memory/<agent>/MEMORY.md` | notes an agent keeps between sessions                                   | `reviewer/MEMORY.md`                                                  |
+| `.claude/output-styles/*.md`             | how replies read                                                        | `teaching.md`                                                         |
+| `.claude/workflows/factory.js`           | a scripted order of stages inside a session                             | pinned by `tests/structure/factory-workflow.test.ts`                  |
+| `.claude/hooks/*.mjs`                    | code the harness runs on an event                                       | registered in `settings.json`                                         |
+| `.claude/teams.json`                     | agent-team settings and the `TeammateIdle` hook                         | `teammateMode: in-process`                                            |
+| `.mcp.json`                              | an MCP server; here GitHub, with the token read from `GITHUB_MCP_TOKEN` | no secret in the file                                                 |
+| `.worktreeinclude`                       | gitignored files a new worktree still gets                              | `CLAUDE.local.md`, `.claude/settings.local.json`                      |
+| `REVIEW.md`                              | what a failure looks like here, read by the reviewer first              | nit cap, `file:line` evidence, round rules                            |
+| `docs/managed-settings.example.json`     | rules nobody on the team can override                                   | an example, not installed by this repo                                |
 
 `docs/when-to-use-what.md` is the same table by job, and `tests/structure/when-to-use-what.test.ts` keeps it honest.
 
@@ -55,16 +55,16 @@ When two settings files disagree, Claude Code's documentation orders them: manag
 
 Each hook in `.claude/hooks/` is one pattern, and `tests/structure/hooks.test.ts` and `hook-catalogue.test.ts` feed each one bad input.
 
-| Pattern | Hook | Behaviour |
-| --- | --- | --- |
-| Block before the tool runs | `pretooluse-secrets.mjs`, `pretooluse-file-guard.mjs` | refuses the call, with a reason |
-| Block tests during a fix | `pretooluse-test-lock.mjs` | active only when `FACTORY_PHASE=fix` |
-| Gate the finish | `stop-gate.mjs` | blocks stopping while the gate fails; lets the second stop through so it cannot loop |
-| Warn only | `posttooluse-length-warn.mjs`, `posttooluse-output-scan.mjs` | tells the model, never blocks |
-| Fail safe | `posttooluse-format.mjs` | a missing formatter does not fail the edit |
-| Integrity hash | `sessionstart-integrity.mjs` | names a hook or settings file whose hash moved since last session |
-| Route a prompt | `userpromptsubmit-route.mjs` | adds a skill hint, never blocks |
-| Log | `posttooluse-session-log.mjs`, `teammateidle-log.mjs` | records, changes nothing |
+| Pattern                    | Hook                                                         | Behaviour                                                                            |
+| -------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| Block before the tool runs | `pretooluse-secrets.mjs`, `pretooluse-file-guard.mjs`        | refuses the call, with a reason                                                      |
+| Block tests during a fix   | `pretooluse-test-lock.mjs`                                   | active only when `FACTORY_PHASE=fix`                                                 |
+| Gate the finish            | `stop-gate.mjs`                                              | blocks stopping while the gate fails; lets the second stop through so it cannot loop |
+| Warn only                  | `posttooluse-length-warn.mjs`, `posttooluse-output-scan.mjs` | tells the model, never blocks                                                        |
+| Fail safe                  | `posttooluse-format.mjs`                                     | a missing formatter does not fail the edit                                           |
+| Integrity hash             | `sessionstart-integrity.mjs`                                 | names a hook or settings file whose hash moved since last session                    |
+| Route a prompt             | `userpromptsubmit-route.mjs`                                 | adds a skill hint, never blocks                                                      |
+| Log                        | `posttooluse-session-log.mjs`, `teammateidle-log.mjs`        | records, changes nothing                                                             |
 
 Hooks are code the harness runs, so they enforce what a line in `AGENTS.md` can only ask for.
 
