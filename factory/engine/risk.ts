@@ -21,7 +21,7 @@ const norm = (f: string) =>
   posix.normalize(f.replaceAll("\\", "/")).replace(/^\.\//, "").toLowerCase();
 
 const RUN_ARTIFACT =
-  /^specs\/\d+\/(intent\.md|spec\.md|plan\.md|run\.log|review\.json|lock\.json|incident\.md)$/;
+  /^specs\/\d+\/(intent\.md|spec\.md|plan\.md|constitution\.md|clarify\.md|tasks\.md|analyze\.md|run\.log|review\.json|lock\.json|incident\.md)$/;
 
 // The tier comes from the paths in the diff, never from who wrote it. The worst path sets it, and
 // HIGH is checked before LOW. specs/<n>/ holds the run's own artifacts and says nothing about risk.

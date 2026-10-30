@@ -19,4 +19,9 @@ steps:
       checks: [manifest-deps, gate],
       loop: { until: [manifest-deps, gate], max: 3 },
     }
-  - { stage: review, agent: reviewer, checks: [plan-drift, manifest-deps] }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift, manifest-deps],
+    }

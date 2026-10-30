@@ -26,4 +26,9 @@ steps:
       checks: [green, lock, gate],
       loop: { until: [green, lock, gate], max: 3 },
     }
-  - { stage: review, agent: reviewer, checks: [plan-drift] }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }

@@ -25,7 +25,8 @@ export type Host = {
   setPhase(phase: string | null): void;
   // A human gate: true once a person approved this stage's artifacts. `digest` is the hash of what they
   // read, so an approval of one version never covers another.
-  approved(n: number, stage: string, digest: string): Promise<boolean>;
+  // `need` is how many distinct people must have approved (from the risk tier); omitted means one.
+  approved(n: number, stage: string, digest: string, need?: number): Promise<boolean>;
 };
 
 export type CheckResult = { ok: boolean; evidence: string };

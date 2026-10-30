@@ -3,9 +3,9 @@ gate: [make, check]
 tests:
   unit: [npx, vitest, run]
   e2e: [npx, playwright, test, tests/e2e]
-  eval: [npx, tsx, scripts/eval.ts]
+  eval: [npx, tsx, api/src/eval.ts]
   prose: [npx, tsx, scripts/check-prose.ts, docs]
-  prepush: [bash, scripts/git/pre-push]
+  prepush: [npx, tsx, scripts/check-affected.ts, --base, origin/main]
   mutation: [npx, stryker, run]
 paths:
   contract: tests/contract

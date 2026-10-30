@@ -11,6 +11,12 @@ steps:
       brief: "State the outcome the epic must reach and how we will know, in a few lines. Reply with the intent only.",
     }
   - {
+      stage: constitution,
+      agent: planner,
+      writes: constitution.md,
+      brief: "List the standing rules this feature must obey, one per line, taken from AGENTS.md and .claude/rules (testing, security, file size, naming). Reply with the rules only.",
+    }
+  - {
       stage: spec,
       agent: planner,
       writes: spec.md,
@@ -18,11 +24,29 @@ steps:
       startsWith: "R1.",
       brief: "Write EARS requirements, one per line as 'R<n>. When <trigger>, the system shall <response>'. Start your reply with 'R1.' and reply with the requirements only: no commentary, no plan-mode notes, do not run the gate.",
     }
+  - {
+      stage: clarify,
+      agent: planner,
+      writes: clarify.md,
+      brief: "List every requirement in specs/<issue>/spec.md that two readers could build differently, each with the single reading the plan will assume. Reply with that list only, or the single line 'No ambiguity.'",
+    }
   - { stage: plan, agent: planner, writes: plan.md, gate: human, checks: [plan-drift] }
+  - {
+      stage: tasks,
+      agent: planner,
+      writes: tasks.md,
+      brief: "Break the plan into small ordered tasks, one per line as 'T<n>. <task> (R<n>)', each naming the requirement it serves. Reply with the tasks only.",
+    }
+  - {
+      stage: analyze,
+      agent: planner,
+      writes: analyze.md,
+      brief: "Cross-check spec.md, clarify.md, plan.md and tasks.md. List every requirement with no task, every task with no requirement and every plan file no task touches. Reply with the findings only, or the single line 'Consistent.'",
+    }
   - {
       stage: tests,
       agent: builder,
-      brief: "Write a vitest test or fast-check property for each requirement in specs/<issue>/golden. They fail on the base commit. Write no source.",
+      brief: "Write a vitest test or fast-check property for each requirement in specs/<issue>/golden, following specs/<issue>/tasks.md. They fail on the base commit. Write no source.",
       checks: [red, properties, lock],
       loop: { until: [red], max: 2 },
     }
@@ -40,7 +64,12 @@ steps:
       brief: "Strengthen the tests so mutants in the files this run changed are killed. Add tests under specs/<issue>/golden; never change source.",
       checks: [mutation],
     }
-  - { stage: review, agent: reviewer, checks: [plan-drift] }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }
   - {
       stage: release,
       agent: builder,
