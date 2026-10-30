@@ -138,7 +138,9 @@ async function runStep(
 // Returns true when an Important finding is left or a lens reply was not findings; the checks still run.
 async function runReview(host: Host, step: Step, n: number, res: Result): Promise<boolean> {
   const lenses = step.review?.lenses ?? [];
+  let fixed = false;
   const fixer = async () => {
+    fixed = true;
     const findings = (await host.read(artifactPath(n, "review.json"))) ?? "";
     host.setPhase("fix");
     const out = await host.agent(
@@ -152,7 +154,9 @@ async function runReview(host: Host, step: Step, n: number, res: Result): Promis
   const r = await reviewLoop(host, n, lenses, fixer);
   res.rounds[step.stage] = r.rounds;
   res.log.push(`${step.stage} ${r.clean ? "clean" : "NOT clean"} after ${r.rounds} round(s)`);
-  const results = await runChecks(host, n, step.checks);
+  // A fixer writes code after the build's checks passed, so the gate runs again on what it left.
+  const names = [...new Set([...(step.checks ?? []), ...(fixed ? ["gate"] : [])])];
+  const results = await runChecks(host, n, names);
   for (const [name, c] of Object.entries(results))
     res.log.push(`  check ${name} ${c.ok ? "ok" : "FAIL"}: ${c.evidence.split("\n")[0]}`);
   return !r.clean || failing(results).length > 0;
