@@ -4,12 +4,7 @@ method: prose check
 source: engineering standard
 for: documentation
 steps:
-  - {
-      stage: plan,
-      writes: plan.md,
-      agent: planner,
-      brief: "Reply with the plan and nothing else: one repo path per line for every file you will create or change, never a script you only run. Do not list files under specs/<issue>/; the runner allows those. A new file needs an owner in levels.json, so list levels.json whenever you add a file. Commentary of any kind makes the plan unusable. The runner saves your reply as specs/<issue>/plan.md, and later stages may touch only the files listed.",
-    }
+  - { stage: plan, writes: plan.md, agent: planner }
   - {
       stage: write,
       agent: builder,

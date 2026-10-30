@@ -58,9 +58,9 @@ describe("the human gate takes its approval count from the risk tier", () => {
     });
     expect((await runWorkflow(two.host, gate, 5, "t")).outcome).toBe("done");
   });
-  it("needs no person for a docs-only change", async () => {
+  it("still needs one person for a docs-only change", async () => {
     const { host } = fakeHost({ changed: ["docs/a.md"] });
-    expect((await runWorkflow(host, gate, 5, "t")).outcome).toBe("done");
+    expect((await runWorkflow(host, gate, 5, "t")).outcome).toBe("awaiting-approval");
   });
 });
 
