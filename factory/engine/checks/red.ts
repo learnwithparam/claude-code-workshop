@@ -1,10 +1,15 @@
+import { portable } from "../portable.ts";
 import type { Check } from "../types.ts";
 
 // TDD step one: the new tests must FAIL on the base commit. A test that already passes proves nothing.
 export const red: Check = {
   size: "small",
   async run({ host, n }) {
-    const r = await host.exec("npx", ["vitest", "run", `specs/${n}`], { ref: "base" });
+    const r = await host.exec(
+      portable().tests.unit[0] ?? "",
+      [...portable().tests.unit.slice(1), `specs/${n}`],
+      { ref: "base" },
+    );
     return r.code === 0
       ? {
           ok: false,

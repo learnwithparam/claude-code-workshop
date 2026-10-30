@@ -12,14 +12,10 @@ import {
 import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { resolveModel } from "./models.ts";
 import type { Host } from "./types.ts";
 
 const AGENT_ENV = ["PATH", "SHELL", "TERM", "LANG", "ANTHROPIC_API_KEY"];
-const MODELS: Record<string, string> = {
-  opus: "claude-opus-5-5",
-  sonnet: "claude-sonnet-5-5",
-  haiku: "claude-haiku-5-5",
-};
 
 // .claude/agents/<name>.md: the frontmatter sets what the agent may do, the body is its prompt.
 export function parseAgent(text: string) {
@@ -119,7 +115,7 @@ export function realHost(o: RealHostOptions): Host {
   const tag = (v: string) => createHmac("sha256", key).update(v).digest("hex");
 
   return {
-    async agent(name, prompt, { stage }) {
+    async agent(name, prompt, { stage, model, maxUsd }) {
       const { fm, body } = parseAgent(
         readFileSync(join(o.cwd, ".claude/agents", `${name}.md`), "utf8"),
       );
@@ -131,9 +127,9 @@ export function realHost(o: RealHostOptions): Host {
           prompt,
           options: {
             cwd: o.cwd,
-            model: MODELS[fm.model ?? "sonnet"] ?? fm.model,
+            model: model ?? resolveModel({ step: stage, type: "", frontmatter: fm.model }),
             maxTurns: Number(fm.maxTurns ?? 20),
-            maxBudgetUsd: o.maxUsdPerAgent ?? 3,
+            maxBudgetUsd: Math.min(o.maxUsdPerAgent ?? 3, maxUsd ?? Number.POSITIVE_INFINITY),
             permissionMode: fm.permissionMode === "acceptEdits" ? "acceptEdits" : "plan",
             allowedTools: fm.tools?.split(",").map((t) => t.trim()),
             systemPrompt: { type: "preset", preset: "claude_code", append: body },

@@ -17,11 +17,15 @@ export function fakeHost(script: FakeScript = {}) {
   const state = new Map<string, string>();
   const calls: string[] = [];
   const prompts: string[] = [];
+  const models: (string | undefined)[] = [];
+  const budgets: (number | undefined)[] = [];
   const phases: (string | null)[] = [];
   let agentCalls = 0;
   const host: Host = {
     async agent(name, prompt, o) {
       prompts.push(prompt);
+      models.push(o.model);
+      budgets.push(o.maxUsd);
       calls.push(`agent ${name} ${o.stage}`);
       const named = script.byAgent?.(name);
       if (named) return { text: "", costUsd: 0.01, ...named };
@@ -49,5 +53,5 @@ export function fakeHost(script: FakeScript = {}) {
       (script.approvals?.filter((a) => a === `${n}:${stage}` || a === `${n}:${stage}:${digest}`)
         .length ?? 0) >= need,
   };
-  return { host, files, calls, phases, prompts };
+  return { host, files, calls, phases, prompts, models, budgets };
 }
