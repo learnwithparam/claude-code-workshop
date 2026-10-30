@@ -1,6 +1,7 @@
 import { BANDS } from "./bands";
 import { escapeHtml } from "./escape-html";
 import { GEIST_FONT_FACE } from "./geist-font-face";
+import { ACTIVITY_CSS } from "./render-activity";
 import { renderAnswerKey } from "./render-answer-key";
 import { ART_HEIGHT, renderHeaderArt } from "./render-header-art";
 import { renderSection } from "./render-section";
@@ -31,7 +32,7 @@ export function renderWorksheet(sheet: Worksheet): string {
   #worksheet .line { display: inline-block; min-width: 4em; border-bottom: 2px solid ${theme.ink}; margin-left: 0.6em; }
   #worksheet .key { margin-top: 16px; border-top: 1px solid ${theme.rule}; font-size: ${Math.min(band.fontPx, 16)}px; }
   #worksheet .key h2 { font-size: ${Math.min(band.fontPx, 16)}px; margin: 8px 0 2px; }
-  #worksheet .key li { margin-bottom: 0.15em; }
+  #worksheet .key li { margin-bottom: 0.15em; }${sheet.sections.some((section) => section.activity) ? ACTIVITY_CSS : ""}
 </style>
 </head>
 <body>
@@ -39,7 +40,7 @@ export function renderWorksheet(sheet: Worksheet): string {
 ${renderHeaderArt(theme)}
 <h1>${escapeHtml(sheet.title)}</h1>
 <p class="meta">${escapeHtml(band.label)} &middot; ${escapeHtml(sheet.subject)} &middot; Name: ____________</p>
-${sheet.sections.map((section) => renderSection(section, band.pictureBoxes)).join("\n")}
+${sheet.sections.map((section) => renderSection(section, band.pictureBoxes, band.fontPx)).join("\n")}
 ${renderAnswerKey(sheet)}
 </div>
 </body>

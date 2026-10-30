@@ -1,3 +1,4 @@
+export * from "./activity-kinds";
 export * from "./art/icon-ids";
 export * from "./art/icon-registry";
 export * from "./band-theme";
