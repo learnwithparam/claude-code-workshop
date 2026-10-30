@@ -87,7 +87,8 @@ async function runStep(
   res: Result,
   manifests = false,
 ): Promise<boolean> {
-  const max = step.loop?.max ?? 1;
+  // A reply the runner refuses (chat instead of the artifact) gets the reason and two more tries.
+  const max = step.loop?.max ?? (step.writes ? 3 : 1);
   let feedback = "";
   const where = step.writes
     ? `Reply with the artifact only; the runner saves your reply as specs/${n}/${step.writes}.`
