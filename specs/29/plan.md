@@ -46,3 +46,7 @@ shared/src/check.ts
 shared/src/index.ts
 api/src/agent/prompt.ts
 fixtures/worksheets.json
+shared/src/art/icon-drum.ts
+shared/src/art/icon-kite.ts
+shared/src/art/icon-umbrella.ts
+shared/src/render-item.test.ts
