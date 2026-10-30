@@ -8,6 +8,7 @@ export * from "./render";
 export * from "./render-workbook";
 export * from "./schema";
 export * from "./sse-events";
+export * from "./template";
 export * from "./workbook-check";
 export * from "./workbook-plan";
 export * from "./workbook-schema";
