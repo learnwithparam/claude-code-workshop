@@ -7,6 +7,7 @@
       "!**/node_modules",
       "!fixtures",
       "!supplied",
+      "!.labs",
       "!test-results",
       "!playwright-report",
       "!.workshop-home",

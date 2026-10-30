@@ -128,7 +128,12 @@
     "scripts/commands.ts",
     "scripts/commands.test.ts",
     "docs/commands-by-level.md",
-    "tests/structure/recordings.test.ts"
+    "tests/structure/recordings.test.ts",
+    "labs/**",
+    "scripts/labs/**",
+    "docs/labs/**",
+    "tests/structure/labs.test.ts",
+    "tests/structure/lab-solutions.test.ts"
   ],
   "execution": [
     ".claude/agents/**",

@@ -15,3 +15,4 @@ test-results/
 playwright-report/
 .factory-base/
 **/.stryker-tmp/
+.labs/
