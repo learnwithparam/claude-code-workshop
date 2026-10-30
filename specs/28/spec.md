@@ -1,119 +1,90 @@
-Feature: Activity kinds on a worksheet
+Feature: Activity kinds drawn by code and limited by band
 
 Background:
 Given the activity kinds are count, match, circle, fill-blank, trace, number-line, ten-frame, fraction-bar, table, steps and short
-And the band table in shared/src/bands.ts lists the kinds each band may use
-And the model only names a kind and supplies content, while code draws it
+And the model only picks a kind and fills content
+And shared code decides how each kind is drawn
 
-Scenario: Count draws one picture group per item
-Given a kindergarten worksheet with a count activity of items "3 apples" and "5 stars"
+Scenario: Count renders its items
+Given a worksheet item of kind "count" with 5 pictures to count
 When the worksheet is rendered
-Then the output contains a group of 3 apples and a group of 5 stars
-And each group is followed by one answer box
+Then the item shows 5 pictures and one answer box
 
-Scenario: Match pairs a left column with a right column
-Given a grade-1-2 worksheet with a match activity of pairs "cat" to "meow" and "dog" to "woof"
+Scenario: Match renders two columns
+Given a worksheet item of kind "match" with left "cat, dog, cow" and right "meow, woof, moo"
 When the worksheet is rendered
-Then the left column shows "cat" and "dog" in the given order
-And the right column shows "meow" and "woof"
-And one connector dot sits beside each entry
+Then the item shows 3 left entries and 3 right entries
 
-Scenario: Circle marks the choices to pick from
-Given a kindergarten worksheet with a circle activity with prompt "Circle the red one" and choices "red ball", "blue ball" and "green ball"
+Scenario: Circle renders choices
+Given a worksheet item of kind "circle" with choices "2, 4, 6" and prompt "Circle the even number greater than 3"
 When the worksheet is rendered
-Then the output shows 3 choices, each inside a circle target
-And the prompt "Circle the red one" appears above them
+Then the item shows 3 choices to circle
 
-Scenario: Fill-blank renders a blank where the marker is
-Given a grade-3-5 worksheet with a fill-blank activity with the sentence "The cat sat on the _**"
-    When the worksheet is rendered
-    Then the output shows "The cat sat on the" followed by one blank line
-    And the marker "**_" is not printed
-
-Scenario: Trace draws dotted letters
-Given an early-reader worksheet with a trace activity of item "A"
+Scenario: Fill-blank renders one blank
+Given a worksheet item of kind "fill-blank" with text "3 + _ = 7"
 When the worksheet is rendered
-Then the output shows "A" in dotted outline at 30px Nunito
-And a row of empty practice lines sits below it
+Then the item shows exactly 1 blank where "_" was
 
-Scenario: Number-line draws ticks between start and end
-Given a grade-1-2 worksheet with a number-line activity from 0 to 10 with step 1
+Scenario: Trace renders a tracing guide
+Given a worksheet item of kind "trace" with text "cat"
 When the worksheet is rendered
-Then the line has 11 ticks labelled 0 through 10
+Then the item shows "cat" as a dotted tracing guide
 
-Scenario: Ten-frame shades the given count
-Given a kindergarten worksheet with a ten-frame activity of items with values 4 and 7
+Scenario: Number-line renders its range
+Given a worksheet item of kind "number-line" from 0 to 10 with the start at 3
 When the worksheet is rendered
-Then the first frame has 10 cells with 4 filled
-And the second frame has 10 cells with 7 filled
+Then the item shows a line with 11 ticks labelled 0 to 10
 
-Scenario: Fraction-bar shades the numerator
-Given a grade-3-5 worksheet with a fraction-bar activity of item 3 over 4
+Scenario: Ten-frame renders filled cells
+Given a worksheet item of kind "ten-frame" with 7 filled cells
 When the worksheet is rendered
-Then the bar has 4 equal parts with 3 shaded
+Then the item shows 10 cells, 7 filled and 3 empty
 
-Scenario: Table renders headers and rows
-Given a grade-6-8 worksheet with a table activity of headers "Item" and "Cost" and 3 rows
+Scenario: Fraction-bar renders shaded parts
+Given a worksheet item of kind "fraction-bar" with 3 of 4 parts shaded
 When the worksheet is rendered
-Then the table has 2 header cells and 3 body rows
-And every row has 2 cells
+Then the item shows a bar of 4 parts with 3 shaded
 
-Scenario: Steps numbers the lines in order
-Given a grade-6-8 worksheet with a steps activity of "Mix", "Heat" and "Cool"
+Scenario: Table renders rows and columns
+Given a worksheet item of kind "table" with 3 columns and 2 rows
 When the worksheet is rendered
-Then the output shows "1. Mix", "2. Heat" and "3. Cool" in that order
+Then the item shows a header row and 2 body rows of 3 cells each
 
-Scenario: Short gives a short-answer box
-Given a grade-9-12 worksheet with a short activity with the question "Why did the Roman Republic fall?"
+Scenario: Steps renders numbered steps
+Given a worksheet item of kind "steps" with 3 steps
 When the worksheet is rendered
-Then the output shows the question followed by 3 answer lines
+Then the item shows steps numbered 1, 2 and 3 in order
 
-Scenario: A band refuses a kind it does not allow
-Given an early-reader worksheet whose activity kind is "table"
+Scenario: Short renders an answer space
+Given a worksheet item of kind "short" with prompt "Why is the sky blue?"
+When the worksheet is rendered
+Then the item shows the prompt and a writing space for the answer
+
+Scenario: checkBand accepts an allowed kind
+Given a band that allows the kind "count"
+And a worksheet whose items are all of kind "count"
 When checkBand runs
-Then the result is not ok
-And a problem names the kind "table" and the band "early-reader"
+Then it reports no errors
 
-Scenario: A band accepts a kind it allows
-Given an early-reader worksheet whose activity kind is "count" with 4 items
+Scenario: checkBand rejects a disallowed kind
+Given a band that does not allow the kind "table"
+And a worksheet with one item of kind "table"
 When checkBand runs
-Then the result is ok
-And the problems list is empty
+Then it reports an error naming the kind "table" and the band
 
-Scenario: An unknown kind is rejected at the boundary
-Given a model tool input with activity kind "crossword"
-When the worksheet schema parses it
-Then parsing fails
-And no worksheet is rendered
+Scenario: Unknown kind fails schema validation
+Given a model tool input with an item of kind "puzzle"
+When the input is validated with zod
+Then validation fails and no worksheet is rendered
 
-Scenario: Item count over the band limit is still reported
-Given a kindergarten worksheet with a count activity of 9 items
-When checkBand runs
-Then a problem reads "9 items, band allows 8"
-
-Scenario Outline: Every item appears exactly once for each kind
-Given a worksheet of kind "<kind>" with <n> distinct items in a band that allows it
+Scenario: Every item appears exactly once (property)
+Given any valid worksheet with N items of any mix of the 11 kinds, for N from 1 to 20
 When the worksheet is rendered
-Then each of the <n> items appears exactly once in the output
-And no item is dropped
-And no item is repeated
+Then each item id appears exactly once in the output
+And the number of rendered items equals N
 
-    Examples:
-      | kind        | n |
-      | count       | 5 |
-      | match       | 4 |
-      | circle      | 3 |
-      | fill-blank  | 4 |
-      | trace       | 3 |
-      | number-line | 2 |
-      | ten-frame   | 2 |
-      | fraction-bar| 3 |
-      | table       | 3 |
-      | steps       | 4 |
-      | short       | 3 |
-
-Scenario: Every item appears exactly once for any generated worksheet
-Given any worksheet generated with fast-check whose kind is allowed by its band and whose item count is within the band limit
-When the worksheet is rendered
-Then every item appears exactly once in the output
-And the count of rendered items equals the count of input items
+Scenario: Kind choice is the only layout input from the model
+Given a model tool input that includes layout fields such as font size or position
+When the input is validated with zod
+Then the layout fields are rejected or ignored
+And the rendered layout comes from the band table

@@ -43,7 +43,7 @@ export function renderActivity(activity: Activity, fontPx: number): string {
       )}</div>`;
     case "fill-blank":
       return each(activity.items, (item, i) =>
-        frame(i, "sentence", item.sentence.split("___").map(e).join('<span class="blank"></span>')),
+        frame(i, "sentence", item.sentence.split(/_+/).map(e).join('<span class="blank"></span>')),
       );
     case "trace":
       return each(activity.items, (item, i) =>

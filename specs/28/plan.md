@@ -12,3 +12,5 @@ shared/src/render.test.ts
 api/src/agent/prompt.ts
 features/activity-kinds.feature
 levels.json
+shared/src/render-answer-key.ts
+shared/src/render.ts
