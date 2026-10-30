@@ -21,16 +21,18 @@ You do not write the workbook, template or cache code. Your factory does. You su
    make levels LEVEL=capstone
    ```
 
-2. Work in `supplied/workflows`. It has the engine, the workflows, the specs and the golden tests, and none of the workbook, template or cache code.
+2. Work in a stripped copy of `supplied/workflows`. The copy keeps the engine, the workflows, the specs and the golden tests, and loses the workbook, template and cache code.
 3. Install and confirm the suites are red:
 
    ```
-   cd supplied/workflows
+   cp -R supplied/workflows /tmp/capstone-start
+   npx tsx scripts/capstone-strip.ts /tmp/capstone-start
+   cd /tmp/capstone-start
    npm ci
    npx vitest run specs/34 specs/35 specs/37
    ```
 
-   Every file fails to import code that is not there yet. That is the starting line. If a suite is already green, stop: your snapshot is wrong.
+   Every file fails to import code that is not there yet. That is the starting line. If a suite is already green, stop: the strip did not run.
 
 4. Keep `supplied/capstone` closed. It is the reference answer, and reading it first turns the capstone into copying.
 
@@ -75,8 +77,8 @@ A ticket is done only when all three held and the spec folder is green.
 When all four tickets are done, in the repo you worked in:
 
 ```
-diff -r shared/src ../capstone/shared/src
-diff -r api/src ../capstone/api/src
+diff -r shared/src <this repo>/supplied/capstone/shared/src
+diff -r api/src <this repo>/supplied/capstone/api/src
 make prove LEVEL=capstone
 ```
 

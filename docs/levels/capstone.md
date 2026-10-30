@@ -4,7 +4,7 @@
 
 ## Goal
 
-Take the specs that are red on the workflows snapshot and turn them green by running your own factory, not by typing the code. The finished tree is the reference answer you compare against afterwards.
+Take the specs that go red when the feature is stripped out and turn them green by running your own factory, not by typing the code. The finished tree is the reference answer you compare against afterwards.
 
 ## The problem
 
@@ -19,16 +19,16 @@ Ask a model to "add workbooks and templates" in one session. It writes code and 
 - `shared/src/workbook-*.ts`, `shared/src/render-workbook.ts` and `shared/src/template.ts` plan, validate, check and render a multi-chapter workbook and a template made of slots.
 - `api/src/cache/` holds the exact-prompt cache. `api/src/templates/` distills a good sheet into a template, names it with a strict id and stores it.
 - `api/src/agent/workbook-agent.ts`, `fill-template.ts` and `template-eval.ts` run the workbook agent, fill only a template's slots, and compare output tokens with and without a template.
-- `specs/34`, `specs/35` and `specs/37` hold the red suites. They belong to the workflows level, so they are present, and failing, before the code exists.
-- `levels.json` gives the capstone the implementation files and their unit tests. Nothing else owns them.
+- `specs/34`, `specs/35` and `specs/37` hold the red suites. They belong to the workflows level and fail once the code is stripped.
+- `scripts/capstone-strip.ts` lists those files in one place and deletes them from a copy of the tree. The earlier levels own the same files, because the api server imports them.
 
 ## With
 
-On `supplied/workflows` the three spec folders fail because the code they import is missing. On `supplied/capstone` they pass, and the unit tests beside the code pass too.
+On a stripped copy the three spec folders fail because the code they import is missing. On `supplied/capstone` they pass, and the unit tests beside the code pass too.
 
 ## Run it
 
-1. Type `make levels LEVEL=workflows`, then `cd supplied/workflows` and `npm ci`.
+1. Type `make levels LEVEL=workflows`, then `cp -R supplied/workflows /tmp/capstone-start`, `npx tsx scripts/capstone-strip.ts /tmp/capstone-start`, `cd /tmp/capstone-start` and `npm ci`.
 2. Type `npx vitest run specs/34 specs/35 specs/37`. Expect red, and read the first failure.
 3. Run your factory on a ticket that names the spec folder. Follow [the capstone factory guide](../factory/f9-capstone.md).
 4. Type `make levels LEVEL=capstone` and diff your result against `supplied/capstone` for the files listed above.
