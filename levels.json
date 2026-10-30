@@ -4,6 +4,7 @@
     "features/**",
     "web/**",
     "tests/structure/bands.test.ts",
+    "tests/structure/workbook-boundaries.test.ts",
     "fixtures/worksheets.json",
     "scripts/prove/hand-built.ts",
     "biome.json",

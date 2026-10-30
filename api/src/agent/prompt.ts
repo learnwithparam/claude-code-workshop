@@ -16,3 +16,14 @@ export function buildSystemPrompt(): string {
     `Bands:\n${rules}`,
   ].join("\n");
 }
+
+export function buildWorkbookPrompt(): string {
+  return [
+    "You turn one finished worksheet into a workbook: a cover and several chapters.",
+    "Group the worksheet's items into chapters by topic and write more items in the same style so each chapter is worth a chapter.",
+    "Keep the worksheet's band exactly. Never repeat a prompt. Give every item a short answer.",
+    "You write content only. Pages, contents and the answer key are made by code. Call submit_workbook.",
+    "If the tool reports problems, fix them and call it again.",
+    `A picture is one icon id, nothing else. Ids: ${ICON_IDS.join(", ")}.`,
+  ].join("\n");
+}
