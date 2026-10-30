@@ -1,6 +1,6 @@
 # F5 Review: lenses, voting verifiers and a capped loop
 
-**Stage:** Review. **Layer:** verification. **Workflows:** every workflow ends with a `review` step; `bug-tdd`, `incident` and the others use the `reviewer` agent with the `plan-drift` check.
+**Stage:** Review. **Layer:** verification. **Workflows:** every workflow ends with a `review` step; `bug-tdd`, `incident` and the others run lenses and voters, then the `plan-drift` check.
 
 ## Goal
 
@@ -11,7 +11,8 @@ A review that reports few findings and is right about them. Several lenses hunt 
 Read this before the steps, because the pieces are not all wired the same way.
 
 - Built and tested: `factory/engine/review.ts` (lenses, 3 voters, 2 needed, nit cap, round cap, failed review), `factory/engine/risk.ts`, and `REVIEW.md`. `factory/engine/review.test.ts` proves them.
-- Not yet called by the runner: `factory/engine/interpret.ts` does not import `review.ts`. The `review` step in each workflow YAML is one `reviewer` agent plus `plan-drift`. The voting loop is a tested library you can wire into a workflow as an assignment (F10, "a new review lens").
+- Called by the runner: the `review` step in each workflow YAML carries `review: { lenses: [...] }`, and `factory/engine/interpret.ts` runs `reviewLoop` for it (lenses in parallel, 3 voters, 2 needed, a `builder` fix between rounds, cap of 3) and writes `specs/<n>/review.json`. A surviving Important finding or a lens reply that is not findings stops the run as `needs-human`. The `plan-drift` check still runs after it.
+- Risk at the human gate: `interpret.ts` calls `classify()` on the files changed so far and requires `APPROVALS[tier]` distinct people (docs-only needs none, high needs two) before a `gate: human` step passes.
 - Live on pull requests: `.github/workflows/review.yml` runs the `reviewer` agent, and `design-reviewer` for UI paths, and posts one comment ending in a `VERDICT` line. That review has no voting.
 - The delivery runner (`factory/run.ts`, `make factory ISSUE=n`) has its own loop: `review`, then `build` to fix, at most `reviewLoop.maxRounds` times (3 in `.factory/config.json`), then the `needs-human` label. It reads one `VERDICT: clean` or `VERDICT: blocking`.
 
