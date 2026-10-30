@@ -1,0 +1,4 @@
+{"version": 3, "term": {"cols": 80, "rows": 24}, "timestamp": 1793396600, "command": "make prove LEVEL=capstone", "env": {"SHELL": "/bin/zsh"}}
+[0.012, "o", "$ make prove LEVEL=capstone\r\n"]
+[6.0, "o", "$ make prove LEVEL=capstone\r\nnpm run prove -- capstone\r\n\r\n> claude-code-workshop@0.1.0 prove\r\n> tsx scripts/prove/run.ts capstone\r\n\r\nPASS capstone: the workbook and template specs are green on the finished tree (workbook plan, schema, check, pdf, template store, cache and routes all pass their specs)\r\n"]
+[0.0, "x", "0"]
