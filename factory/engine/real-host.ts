@@ -39,14 +39,21 @@ export function approvalIn(
   stage: string,
   digest: string,
   approvers?: string[],
+  need = 1,
 ): boolean {
   const line = `approve ${stage} ${digest}`;
-  return comments.some(
-    (c) =>
-      ["OWNER", "MEMBER", "COLLABORATOR"].includes(c.authorAssociation) &&
-      (!approvers || approvers.includes(c.author?.login ?? "")) &&
-      c.body.split("\n").some((l) => l.trim() === line),
+  // Distinct people: one person commenting twice is still one approval.
+  const who = new Set(
+    comments
+      .filter(
+        (c) =>
+          ["OWNER", "MEMBER", "COLLABORATOR"].includes(c.authorAssociation) &&
+          (!approvers || approvers.includes(c.author?.login ?? "")) &&
+          c.body.split("\n").some((l) => l.trim() === line),
+      )
+      .map((c) => c.author?.login ?? ""),
   );
+  return who.size >= need;
 }
 
 export type RealHostOptions = {
@@ -250,11 +257,11 @@ export function realHost(o: RealHostOptions): Host {
     setPhase(p) {
       phase = p;
     },
-    async approved(n, stage, digest) {
+    async approved(n, stage, digest, need = 1) {
       // Runner-side call with the real environment: gh needs the person's login, the agents never see it.
       const r = sh("gh", ["issue", "view", String(n), "--json", "comments"], o.cwd, process.env);
       if (r.status !== 0) return false;
-      return approvalIn(JSON.parse(r.stdout).comments ?? [], stage, digest, o.approvers);
+      return approvalIn(JSON.parse(r.stdout).comments ?? [], stage, digest, o.approvers, need);
     },
   };
 }

@@ -31,7 +31,12 @@ steps:
       brief: "Strengthen the tests so mutants in the files this run changed are killed. Add tests under specs/<issue>/golden; never change source.",
       checks: [mutation],
     }
-  - { stage: review, agent: reviewer, checks: [plan-drift] }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }
   - {
       stage: ci,
       agent: builder,

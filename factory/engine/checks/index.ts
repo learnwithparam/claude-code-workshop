@@ -44,9 +44,14 @@ export const CHECKS: Record<string, Check> = {
     vitestFor(() => "tests/contract"),
   ),
   visual: commandCheck("large", "npx", () => ["playwright", "test", "tests/e2e"]),
-  eval: commandCheck("large", "npx", () => ["tsx", "scripts/eval.ts"]),
+  eval: commandCheck("large", "npx", () => ["tsx", "api/src/eval.ts"]),
   gate: commandCheck("large", "make", () => ["check"]),
-  prepush: commandCheck("small", "bash", () => ["scripts/git/pre-push"]),
+  prepush: commandCheck("small", "npx", () => [
+    "tsx",
+    "scripts/check-affected.ts",
+    "--base",
+    "origin/main",
+  ]),
   ci: commandCheck("large", "gh", () => ["pr", "checks", "--watch"]),
   prose: commandCheck("small", "npx", () => ["tsx", "scripts/check-prose.ts", "docs"]),
 };

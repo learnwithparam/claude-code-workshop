@@ -36,6 +36,8 @@ const stepSchema = z.object({
   loop: z
     .object({ until: z.array(z.enum(CHECK_NAMES)).min(1), max: z.number().int().min(1).max(5) })
     .optional(),
+  // Parallel lenses hunt, three verifiers vote (2 of 3 keep a finding), a builder fixes what survives.
+  review: z.object({ lenses: z.array(z.string()).min(1) }).optional(),
   gate: z.enum(["human", "auto"]).default("auto"),
   // Fix steps run with the test lock on.
   phase: z.enum(["build", "fix"]).default("build"),
