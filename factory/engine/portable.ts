@@ -32,6 +32,13 @@ export const portable = (): Portable => {
   return cached;
 };
 
+// Called before the first agent runs, so a build that edits the file cannot change the commands
+// the gate runs: the working tree is never read for this again.
+export const pinPortable = (path?: string): Portable => {
+  cached = loadPortable(path);
+  return cached;
+};
+
 // ** crosses folders, * stays inside one.
 export function globToRegExp(glob: string): RegExp {
   const body = glob

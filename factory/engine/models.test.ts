@@ -1,10 +1,13 @@
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "../config.ts";
 import { badPlanLines } from "./artifacts.ts";
 import { fakeHost } from "./fake-host.ts";
 import { runWorkflow } from "./interpret.ts";
 import { resolveModel } from "./models.ts";
-import { globToRegExp, loadPortable } from "./portable.ts";
+import { globToRegExp, loadPortable, pinPortable, portable } from "./portable.ts";
 import { loadWorkflow } from "./workflow.ts";
 
 const cfg = loadConfig();
@@ -82,5 +85,18 @@ describe("portable config", () => {
   it("refuses a plan path matching a protected glob", () => {
     expect(badPlanLines("docs/a.md\nops/x.yml", false, ["ops/**"])).toEqual(["ops/x.yml"]);
     expect(globToRegExp("a/*.ts").test("a/b/c.ts")).toBe(false);
+  });
+});
+
+describe("pinned portable config", () => {
+  it("keeps the commands it read at the start when the file changes later", () => {
+    const dir = mkdtempSync(join(tmpdir(), "pin-"));
+    const file = join(dir, "config.yaml");
+    const original = readFileSync(".factory/config.yaml", "utf8");
+    writeFileSync(file, original);
+    const pinned = pinPortable(file);
+    writeFileSync(file, original.replace(/gate:.*/, "gate: [true]"));
+    expect(portable().gate).toEqual(pinned.gate);
+    pinPortable();
   });
 });
