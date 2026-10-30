@@ -20,6 +20,8 @@ export type Band = {
   font: "Nunito" | "Inter" | "EB Garamond";
   fontPx: number;
   maxItems: number;
+  // Workbook pages only: a page of this band must stay one printed sheet at its font size.
+  maxItemsPerPage: number;
   maxWordsPerItem: number;
   pictureBoxes: boolean;
   kinds: ActivityKind[];
@@ -44,6 +46,7 @@ export const BANDS: Record<BandId, Band> = {
     font: "Nunito",
     fontPx: 30,
     maxItems: 6,
+    maxItemsPerPage: 3,
     maxWordsPerItem: 6,
     pictureBoxes: true,
     kinds: ["count", "circle", "trace", "match"],
@@ -64,6 +67,7 @@ export const BANDS: Record<BandId, Band> = {
     font: "Nunito",
     fontPx: 26,
     maxItems: 8,
+    maxItemsPerPage: 4,
     maxWordsPerItem: 8,
     pictureBoxes: true,
     kinds: ["count", "circle", "ten-frame", "trace", "match"],
@@ -93,6 +97,7 @@ export const BANDS: Record<BandId, Band> = {
     font: "Nunito",
     fontPx: 22,
     maxItems: 10,
+    maxItemsPerPage: 5,
     maxWordsPerItem: 14,
     pictureBoxes: true,
     kinds: ["count", "match", "fill-blank", "number-line", "ten-frame", "short", "steps"],
@@ -113,6 +118,7 @@ export const BANDS: Record<BandId, Band> = {
     font: "Inter",
     fontPx: 18,
     maxItems: 12,
+    maxItemsPerPage: 6,
     maxWordsPerItem: 24,
     pictureBoxes: false,
     kinds: ["fill-blank", "number-line", "fraction-bar", "steps", "short", "table", "match"],
@@ -141,6 +147,7 @@ export const BANDS: Record<BandId, Band> = {
     font: "Inter",
     fontPx: 16,
     maxItems: 14,
+    maxItemsPerPage: 7,
     maxWordsPerItem: 36,
     pictureBoxes: false,
     kinds: ["fill-blank", "fraction-bar", "table", "steps", "short"],
@@ -161,6 +168,7 @@ export const BANDS: Record<BandId, Band> = {
     font: "Inter",
     fontPx: 15,
     maxItems: 16,
+    maxItemsPerPage: 8,
     maxWordsPerItem: 50,
     pictureBoxes: false,
     kinds: ["fill-blank", "table", "steps", "short"],
@@ -181,6 +189,7 @@ export const BANDS: Record<BandId, Band> = {
     font: "EB Garamond",
     fontPx: 15,
     maxItems: 20,
+    maxItemsPerPage: 10,
     maxWordsPerItem: 80,
     pictureBoxes: false,
     kinds: ["fill-blank", "table", "steps", "short"],

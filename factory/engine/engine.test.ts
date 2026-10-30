@@ -84,6 +84,18 @@ describe("runWorkflow", () => {
     expect((await runWorkflow(real.host, scenarios, 4, "t")).outcome).toBe("done");
     expect(real.files.get("specs/4/spec.md")).toBe("Feature: kinds\n  Scenario: one\n");
   });
+  it("retries a refused reply instead of ending the run, and tells the agent why", async () => {
+    // Run 35 stopped three times on one chat reply from the planner; a second try wrote the spec.
+    const scenarios = wf(
+      '  - {stage: scenarios, agent: planner, writes: spec.md, startsWith: "Feature:"}',
+    );
+    const { host, files, prompts } = fakeHost({
+      agents: [{ text: "Plan mode blocks edits." }, { text: "Feature: kinds\n  Scenario: one" }],
+    });
+    expect((await runWorkflow(host, scenarios, 4, "t")).outcome).toBe("done");
+    expect(files.get("specs/4/spec.md")).toContain("Feature: kinds");
+    expect(prompts[1]).toContain('the reply must begin with "Feature:"');
+  });
   it("tells a step that has `writes` to reply, not to write files", async () => {
     // Run 34: the read-only planner was told to write under specs/<n>/, could not, and replied with plan-mode chatter.
     const { host, prompts } = fakeHost({ agents: [{ text: "R1. When x, the system shall y." }] });
@@ -128,8 +140,22 @@ describe("runWorkflow", () => {
     const d = (files: Record<string, string>) =>
       artifactDigest(fakeHost({ files }).host, 5, "spec");
     expect(await d({ "specs/5/spec.md": "" })).not.toBe(await d({}));
-    expect(await d({ a: "b\nc", "specs/5/spec.md": "x" })).not.toBe(
-      await d({ "a\nb": "c", "specs/5/spec.md": "x" }),
+    expect(await d({ "specs/5/spec.md": "a\nb" })).not.toBe(
+      await d({ "specs/5/spec.md": "a", "specs/5/intent.md": "b" }),
+    );
+  });
+  it("keeps a spec or plan approval valid after later stages change other files", async () => {
+    // Run 34: the build changed code, so the approved spec hashed differently and a resume regenerated it.
+    const d = (stage: string, files: Record<string, string>) =>
+      artifactDigest(fakeHost({ files: { "specs/6/spec.md": "s", ...files } }).host, 6, stage);
+    expect(await d("spec", {})).toBe(
+      await d("spec", { "specs/6/plan.md": "p", "shared/a.ts": "x" }),
+    );
+    expect(await d("plan", { "specs/6/plan.md": "p" })).toBe(
+      await d("plan", { "specs/6/plan.md": "p", "shared/a.ts": "x" }),
+    );
+    expect(await d("plan", { "specs/6/plan.md": "p" })).not.toBe(
+      await d("plan", { "specs/6/plan.md": "q" }),
     );
   });
   it("binds an approval to the artifact digest, so edited artifacts need a new one", async () => {
@@ -202,6 +228,16 @@ describe("checks", () => {
     expect(planDrift("a.ts", ["specs/25/golden/other.test.ts"], 29)).toEqual([
       "specs/25/golden/other.test.ts",
     ]);
+  });
+});
+
+describe("badPlanLines for another spec's golden test", () => {
+  it("lets a plan list an older spec's golden test, which the lock check already protects", () => {
+    expect(badPlanLines("specs/31/golden/sse-contract.golden.test.ts")).toEqual([]);
+  });
+  it("still refuses golden snapshots and other golden files", () => {
+    const plan = "specs/31/golden/__snapshots__/a.html\nspecs/31/golden/data.json";
+    expect(badPlanLines(plan)).toEqual(plan.split("\n"));
   });
 });
 

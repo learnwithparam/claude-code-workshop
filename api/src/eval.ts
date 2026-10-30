@@ -7,6 +7,7 @@ import { runAgent } from "./agent/agent.ts";
 import { fillSlots } from "./agent/fill-template.ts";
 import { LIVE_CAP_USD, withinLiveCap } from "./agent/live-cap.ts";
 import { costUsd } from "./agent/model.ts";
+import { runWorkbookAgent } from "./agent/workbook-agent.ts";
 import { parseEnv } from "./env.ts";
 import { distillTemplate } from "./templates/distill-template.ts";
 
@@ -39,6 +40,18 @@ for (const { prompt } of fixtures) {
     costUsd: Number(costUsd(result.usage).toFixed(5)),
   });
   console.log(prompt.slice(0, 40), result.kind, compliant, result.usage.output);
+  // One workbook per fixture, recorded as its own row so its spend counts toward the live-run cap.
+  if (result.kind === "worksheet") {
+    const workbook = await runWorkbookAgent(client, result.sheet);
+    rows.push({
+      prompt: `workbook: ${prompt}`,
+      kind: workbook.kind,
+      compliant: workbook.kind === "workbook",
+      bandMatches: workbook.kind === "workbook" && workbook.workbook.band === result.sheet.band,
+      outputTokens: workbook.usage.output,
+      costUsd: Number(costUsd(workbook.usage).toFixed(5)),
+    });
+  }
 }
 // Acceptance: a template fill spends fewer output tokens than a full generation of the same prompt.
 const probe = "Grade 2 addition worksheet, 5 items";

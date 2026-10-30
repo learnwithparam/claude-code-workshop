@@ -71,13 +71,15 @@ const firstPage = fixtures[0] ? renderWorksheet(worksheetSchema.parse(fixtures[0
         </ul>
       </section>
       <section class="preview" aria-label="Worksheet preview">
-        <div class="bar"><span class="chip">Preview</span><button type="button" id="print" class="ghost" style="width:auto;margin:0">Print / Save PDF</button></div>
+        <div class="bar"><span class="chip">Preview</span><span><button type="button" id="workbook" class="ghost" style="width:auto;margin:0" hidden>Make this a workbook</button> <button type="button" id="print" class="ghost" style="width:auto;margin:0">Print / Save PDF</button></span></div>
         <iframe id="frame" title="Worksheet preview" srcdoc={firstPage}></iframe>
         <nav id="strip" aria-label="Worksheet pages"><ul id="pages"></ul></nav>
       </section>
     </main>
     <script>
       import { chat, type ChatMessage } from "../lib/api.ts";
+      import { requestWorkbook, showWorkbookAction } from "../lib/workbook-action.ts";
+      import type { Worksheet } from "@workshop/shared";
       import { remember } from "../lib/history.ts";
       import { stripSlots } from "../lib/page-strip.ts";
 
@@ -94,6 +96,8 @@ const firstPage = fixtures[0] ? renderWorksheet(worksheetSchema.parse(fixtures[0
       const pages: string[] = [frame.srcdoc];
       let active = 0;
       let loading = false;
+      let sheet: Worksheet | null = null;
+      const workbookButton = document.getElementById("workbook") as HTMLButtonElement;
 
       const add = (role: "user" | "assistant", content: string) => {
         const div = document.createElement("div");
@@ -171,6 +175,8 @@ const firstPage = fixtures[0] ? renderWorksheet(worksheetSchema.parse(fixtures[0
             pages.splice(0, pages.length, ev.data.html);
             active = 0;
             frame.srcdoc = ev.data.html;
+            sheet = ev.data.sheet;
+            workbookButton.hidden = !showWorkbookAction(sheet);
           }
           const shown = remember(history, ev);
           if (shown) add("assistant", shown);
@@ -193,6 +199,24 @@ const firstPage = fixtures[0] ? renderWorksheet(worksheetSchema.parse(fixtures[0
           text.focus();
         });
       }
+      workbookButton.addEventListener("click", async () => {
+        if (!sheet) return;
+        lock(true);
+        workbookButton.disabled = true;
+        chip.textContent = "Making the workbook...";
+        const result = await requestWorkbook(sheet);
+        if (result) {
+          pages.splice(0, pages.length, result.html);
+          active = 0;
+          frame.srcdoc = result.html;
+          chip.textContent = "Workbook ready.";
+          drawStrip();
+        } else {
+          chip.textContent = "Could not make a workbook. Try again.";
+        }
+        workbookButton.disabled = false;
+        lock(false);
+      });
       document.getElementById("print")?.addEventListener("click", () => frame.contentWindow?.print());
       drawStrip();
     </script>
