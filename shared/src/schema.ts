@@ -1,10 +1,12 @@
 import { z } from "zod";
+import { iconIdSchema } from "./art/icon-ids";
 import { bandIdSchema } from "./bands";
 
 export const itemSchema = z.object({
   prompt: z.string().min(1),
   answer: z.string().min(1),
-  picture: z.string().optional(),
+  // An id from the fixed icon set. Never free text or markup, so the renderer only injects registry SVG.
+  picture: iconIdSchema.optional(),
 });
 
 export const sectionSchema = z.object({

@@ -1,0 +1,1 @@
+export const HAT_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="hat" focusable="false"><title>hat</title><ellipse cx="32" cy="44" rx="26" ry="7" fill="#7c3aed"/><path d="M16 44C16 14 48 14 48 44z" fill="#8b5cf6"/><rect x="16" y="36" width="32" height="6" rx="0" fill="#facc15"/></svg>`;

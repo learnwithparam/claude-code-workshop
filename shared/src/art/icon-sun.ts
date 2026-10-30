@@ -1,0 +1,1 @@
+export const SUN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="sun" focusable="false"><title>sun</title><circle cx="32" cy="32" r="13" fill="#f59e0b"/><path d="M32 6v8M32 50v8M6 32h8M50 32h8M14 14l6 6M44 44l6 6M14 50l6-6M44 20l6-6" fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/></svg>`;

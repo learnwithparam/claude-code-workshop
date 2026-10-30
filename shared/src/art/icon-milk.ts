@@ -1,0 +1,1 @@
+export const MILK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="milk" focusable="false"><title>milk</title><rect x="18" y="22" width="28" height="34" rx="3" fill="#f8fafc"/><path d="M18 22l8-12h12l8 12z" fill="#3b82f6"/><rect x="18" y="34" width="28" height="12" rx="0" fill="#3b82f6"/><path d="M26 10h12v4H26z" fill="#1d4ed8"/></svg>`;

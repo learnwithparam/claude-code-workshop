@@ -13,7 +13,9 @@
   #worksheet .instruction { margin: 0 0 10px; color: #5c4a1a; }
   #worksheet ol { margin: 0; padding-left: 1.6em; }
   #worksheet li { margin-bottom: 0.5em; }
-  #worksheet .picture { display: inline-block; min-width: 3.2em; min-height: 3.2em; border: 2px dashed #d9a62e; border-radius: 8px; margin-right: 0.6em; padding: 0.2em 0.4em; text-align: center; }
+  #worksheet .picture { display: inline-block; vertical-align: middle; min-width: 3.2em; border: 2px dashed #d9a62e; border-radius: 8px; margin-right: 0.6em; padding: 0.2em 0.4em; text-align: center; }
+  /* The icon is smaller than the old 3.2em box height: four rows at 30px type must still fit one Letter page. */
+  #worksheet .picture svg { display: block; width: 2.2em; height: 2.2em; max-width: 100%; margin: 0 auto; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   #worksheet .line { display: inline-block; min-width: 4em; border-bottom: 2px solid #1f1a14; margin-left: 0.6em; }
   #worksheet .key { margin-top: 16px; border-top: 1px solid #d9a62e; font-size: 16px; }
   #worksheet .key h2 { font-size: 16px; margin: 8px 0 2px; }
@@ -25,8 +27,8 @@
 <svg class="art" data-art="balloons" aria-hidden="true" focusable="false" viewBox="0 0 688 56" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><ellipse cx="40" cy="24" rx="14" ry="18" fill="#ffd166"/><path d="M40 42v14" stroke="#d9a62e" stroke-width="2"/><ellipse cx="116" cy="30" rx="14" ry="18" fill="#ffd166"/><path d="M116 48v14" stroke="#d9a62e" stroke-width="2"/><ellipse cx="192" cy="24" rx="14" ry="18" fill="#ffd166"/><path d="M192 42v14" stroke="#d9a62e" stroke-width="2"/><ellipse cx="268" cy="30" rx="14" ry="18" fill="#ffd166"/><path d="M268 48v14" stroke="#d9a62e" stroke-width="2"/><ellipse cx="344" cy="24" rx="14" ry="18" fill="#ffd166"/><path d="M344 42v14" stroke="#d9a62e" stroke-width="2"/><ellipse cx="420" cy="30" rx="14" ry="18" fill="#ffd166"/><path d="M420 48v14" stroke="#d9a62e" stroke-width="2"/><ellipse cx="496" cy="24" rx="14" ry="18" fill="#ffd166"/><path d="M496 42v14" stroke="#d9a62e" stroke-width="2"/><ellipse cx="572" cy="30" rx="14" ry="18" fill="#ffd166"/><path d="M572 48v14" stroke="#d9a62e" stroke-width="2"/><ellipse cx="648" cy="24" rx="14" ry="18" fill="#ffd166"/><path d="M648 42v14" stroke="#d9a62e" stroke-width="2"/></svg>
 <h1>Tom &amp; &quot;Jerry&quot; &lt;early-reader&gt;</h1>
 <p class="meta">Early reader &middot; Reading &amp; &lt;Writing&gt; &middot; Name: ____________</p>
-<section><h2>Read &lt;first&gt;</h2><p class="instruction">Say &quot;hi&quot; &amp; answer.</p><ol><li value="1"><div class="picture">cat &lt;img&gt;</div><span class="prompt">Who ran? &lt;b&gt;</span><span class="line"></span></li><li value="2"><div class="picture"></div><span class="prompt">No picture here</span><span class="line"></span></li></ol></section>
-<section><h2>Then write</h2><p class="instruction">One line each.</p><ol><li value="1"><div class="picture">paint</div><span class="prompt">Name a colour</span><span class="line"></span></li></ol></section>
+<section><h2>Read &lt;first&gt;</h2><p class="instruction">Say &quot;hi&quot; &amp; answer.</p><ol><li value="1"><div class="picture">undefined</div><span class="prompt">Who ran? &lt;b&gt;</span><span class="line"></span></li><li value="2"><div class="picture"></div><span class="prompt">No picture here</span><span class="line"></span></li></ol></section>
+<section><h2>Then write</h2><p class="instruction">One line each.</p><ol><li value="1"><div class="picture">undefined</div><span class="prompt">Name a colour</span><span class="line"></span></li></ol></section>
 <section class="key"><h2>Answer key</h2><ol><li value="1">Tom &amp; Jerry</li><li value="2">The &quot;dog&quot;</li><li value="3">Red</li></ol></section>
 </div>
 </body>
