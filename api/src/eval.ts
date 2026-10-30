@@ -7,9 +7,9 @@ import { runAgent } from "./agent/agent.ts";
 import { fillSlots } from "./agent/fill-template.ts";
 import { LIVE_CAP_USD, withinLiveCap } from "./agent/live-cap.ts";
 import { costUsd } from "./agent/model.ts";
+import { runTemplateEval } from "./agent/template-eval.ts";
 import { runWorkbookAgent } from "./agent/workbook-agent.ts";
 import { parseEnv } from "./env.ts";
-import { distillTemplate } from "./templates/distill-template.ts";
 
 // Live eval: runs every fixture prompt through the agent and records the result for offline replay.
 process.loadEnvFile(new URL("../.env", import.meta.url));
@@ -54,24 +54,26 @@ for (const { prompt } of fixtures) {
   }
 }
 // Acceptance: a template fill spends fewer output tokens than a full generation of the same prompt.
-const probe = "Grade 2 addition worksheet, 5 items";
-const full = canSpend() ? await runAgent(client, [{ role: "user", content: probe }]) : null;
-if (full) spent += costUsd(full.usage);
-if (full?.kind === "worksheet" && canSpend()) {
-  const distilled = distillTemplate(full.sheet, probe);
-  if (distilled.ok) {
-    const runTemplateFill = await fillSlots(client, {
-      slots: distilled.template.slots,
-      prompt: probe,
-    });
-    spent += costUsd(runTemplateFill.usage);
-    console.log(
-      "output tokens without template:",
-      full.usage.output,
-      "with template:",
-      runTemplateFill.usage.output,
-    );
-  }
-}
+const comparison = await runTemplateEval({
+  prompt: "Grade 2 addition worksheet, 5 items",
+  spentUsd: spent,
+  estimateUsd: CALL_CEILING_USD * 2,
+  capUsd: LIVE_CAP_USD,
+  client,
+  run: runAgent,
+  fill: fillSlots,
+});
+if (comparison.kind === "over-budget") console.log(comparison.message);
+else
+  console.log(
+    "output tokens without template:",
+    comparison.without,
+    "with template:",
+    comparison.withTemplate,
+  );
 
 writeFileSync("fixtures/eval.json", `${JSON.stringify(rows, null, 2)}\n`);
+if (comparison.kind === "report" && !comparison.ok) {
+  console.error("template fill did not use fewer output tokens");
+  process.exit(1);
+}

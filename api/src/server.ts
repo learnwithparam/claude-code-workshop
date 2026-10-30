@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import type Anthropic from "@anthropic-ai/sdk";
 import {
+  BANDS,
   checkBand,
   fillSlotsSchema,
   fillTemplate,
@@ -46,6 +47,7 @@ type Deps = {
   run?: typeof runAgent;
   runWorkbook?: typeof runWorkbookAgent;
   fill?: (client: Anthropic, args: { slots: string[]; prompt: string }) => Promise<FillResult>;
+  templates?: ReturnType<typeof createTemplateStore>;
 };
 
 export function createApp({
@@ -54,10 +56,10 @@ export function createApp({
   run = runAgent,
   runWorkbook = runWorkbookAgent,
   fill = fillSlots,
+  templates = createTemplateStore(),
 }: Deps) {
   const app = new Hono();
   const cache = createPromptCache();
-  const templates = createTemplateStore();
   // Every sheet the api sent, so "mark good" can name one by id without trusting a client copy.
   const sheets = new Map<string, { sheet: Worksheet; prompt: string }>();
   const remember = (sheet: Worksheet, prompt: string) => {
@@ -75,7 +77,9 @@ export function createApp({
   app.get("/health", (c) => c.json({ ok: true }));
 
   app.post("/templates/good", async (c) => {
-    const body = goodSchema.safeParse(await c.req.json().catch(() => null));
+    const admitted = await admit(c);
+    if (admitted instanceof Response) return admitted;
+    const body = goodSchema.safeParse(admitted.json);
     if (!body.success) return c.json({ error: "Bad request" }, 400);
     const known = sheets.get(body.data.sheetId);
     if (!known) return c.json({ error: "Unknown sheet" }, 404);
@@ -145,7 +149,9 @@ export function createApp({
           if (hit && checkBand(hit).ok) return await sendSheet(hit, NO_USAGE);
           if (hit) cache.delete(prompt, band);
 
-          const template = templates.find(band, normalisePrompt(prompt).split(" "));
+          const found = templates.find(band, normalisePrompt(prompt).split(" "));
+          // A slot count past the band's limit could never pass checkBand, so skip it up front.
+          const template = found && found.slots.length <= BANDS[band].maxItems ? found : undefined;
           if (template) {
             if (capped()) return await refuse();
             const filled = await fill(client, { slots: template.slots, prompt });

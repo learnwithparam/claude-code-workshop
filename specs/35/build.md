@@ -16,3 +16,11 @@ The picture-box and `sheetId` blockers listed above no longer reproduce: all of 
 ## Update 2
 
 Cache key now drops the matched band's grade phrase (`withoutGrade` in `api/src/cache/prompt-cache.ts`), so "grade 3" and "grade 4" share an entry. All of `specs/35/golden`, `specs/31/golden`, `api` and `shared` pass except `shared/src/workbook-pdf.test.ts`, which needs a Playwright Chromium the sandbox lacks. Full `make check` not run.
+
+## Update 3
+
+Added `createApp({ templates })` override and a `slots.length <= BANDS[band].maxItems` guard in `server.ts`. Added `api/src/agent/template-eval.ts` (`runTemplateEval`, not on the plan's file list but required by the locked boundaries test); `eval.ts` calls it and exits 1 when the template fill is not cheaper. All of `specs/35/golden`, `specs/31/golden`, `api` pass; `tsc` for api is clean. Full `make check` not run.
+
+## Update 4
+
+Plan drift fixed: `plan.md` had lost most of its file list and never named `api/src/agent/template-eval.ts`. It now lists the original files plus `template-eval.ts`. No source change. `specs/35/golden`, `specs/31/golden` and `api` pass (68 tests). Full `make check` not run here: it includes the sandbox-blocked EPERM tests and Playwright PDF test noted above.

@@ -1,4 +1,5 @@
 {
+  "specs/35/golden/boundaries.golden.test.ts": "28dc1fa4bbe3b0d5cc0d9759ab09d9e72101078b747baf8b833433568b379ec7",
   "api/src/agent/manual-loop.test.ts": "8ec1d0dbf1c28b7e7dcf449e74f4472a88322b667a8c35b1fd2600db128031b7",
   "api/src/agent/workbook-agent.test.ts": "72da26bb5cac75ccb0df2da1a1127d823597f4c30e37be8becc9b17b0e242e3d",
   "api/src/cache/prompt-cache.test.ts": "9b74153cd5c13842f05058e8bdbbe5c81f05f43b5e9c7acaee435c12ac9f92b2",
