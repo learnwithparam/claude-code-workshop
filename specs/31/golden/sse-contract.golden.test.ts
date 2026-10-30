@@ -61,7 +61,8 @@ afterEach(() => vi.unstubAllGlobals());
 describe("api writes the recorded events", () => {
   it.each(["question", "worksheet", "failed"] as const)("%s outcome", async (name) => {
     const { result, wire } = recorded[name];
-    const live = await apiWire(result as AgentResult);
+    // sheetId is added by the template cache (spec 35) and is not part of the recorded wire.
+    const live = (await apiWire(result as AgentResult)).replace(/,"sheetId":"[^"]*"/, "");
     const sheet = (result as { sheet?: Worksheet }).sheet;
     const shown = sheet
       ? live.replace(JSON.stringify(renderWorksheet(sheet)), `"${MARKER}"`)
