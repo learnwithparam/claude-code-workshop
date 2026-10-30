@@ -128,8 +128,22 @@ describe("runWorkflow", () => {
     const d = (files: Record<string, string>) =>
       artifactDigest(fakeHost({ files }).host, 5, "spec");
     expect(await d({ "specs/5/spec.md": "" })).not.toBe(await d({}));
-    expect(await d({ a: "b\nc", "specs/5/spec.md": "x" })).not.toBe(
-      await d({ "a\nb": "c", "specs/5/spec.md": "x" }),
+    expect(await d({ "specs/5/spec.md": "a\nb" })).not.toBe(
+      await d({ "specs/5/spec.md": "a", "specs/5/intent.md": "b" }),
+    );
+  });
+  it("keeps a spec or plan approval valid after later stages change other files", async () => {
+    // Run 34: the build changed code, so the approved spec hashed differently and a resume regenerated it.
+    const d = (stage: string, files: Record<string, string>) =>
+      artifactDigest(fakeHost({ files: { "specs/6/spec.md": "s", ...files } }).host, 6, stage);
+    expect(await d("spec", {})).toBe(
+      await d("spec", { "specs/6/plan.md": "p", "shared/a.ts": "x" }),
+    );
+    expect(await d("plan", { "specs/6/plan.md": "p" })).toBe(
+      await d("plan", { "specs/6/plan.md": "p", "shared/a.ts": "x" }),
+    );
+    expect(await d("plan", { "specs/6/plan.md": "p" })).not.toBe(
+      await d("plan", { "specs/6/plan.md": "q" }),
     );
   });
   it("binds an approval to the artifact digest, so edited artifacts need a new one", async () => {
