@@ -23,6 +23,7 @@ import { runWorkbookAgent } from "./agent/workbook-agent.ts";
 import { createPromptCache, normalisePrompt } from "./cache/prompt-cache.ts";
 import type { Env } from "./env.ts";
 import { distillTemplate } from "./templates/distill-template.ts";
+import { templateIdSchema } from "./templates/template-id.ts";
 import { createTemplateStore } from "./templates/template-store.ts";
 
 const bodySchema = z.object({
@@ -37,7 +38,7 @@ const workbookBodySchema = z.object({ sheet: worksheetSchema });
 const MAX_BODY_BYTES = 16_000;
 const RATE_PER_MINUTE = 10;
 
-const goodSchema = z.object({ sheetId: z.string().min(1).max(100) });
+const goodSchema = z.object({ sheetId: templateIdSchema });
 const MAX_SHEETS = 500;
 const NO_USAGE: Usage = { input: 0, cacheRead: 0, cacheWrite: 0, output: 0 };
 
