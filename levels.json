@@ -93,6 +93,7 @@
     ".mcp.json",
     "tests/structure/agent-frontmatter.test.ts",
     ".factory/config.json",
+    ".factory/config.yaml",
     "factory/config.ts",
     "factory/tsconfig.json",
     "scripts/prove/execution.ts",

@@ -50,6 +50,24 @@
       "permissionMode": "plan"
     }
   },
+  "stepStages": {
+    "intent": "triage",
+    "spec": "plan",
+    "plan": "plan",
+    "decide": "plan",
+    "tests": "build",
+    "build": "build",
+    "fix": "build",
+    "harden": "build",
+    "refactor": "build",
+    "bump": "build",
+    "release": "build",
+    "review": "review",
+    "ci": "verify",
+    "eval": "verify",
+    "reproduce": "verify"
+  },
+  "spend": { "capUsd": 10, "stopAt": 0.75 },
   "baselineModel": "claude-opus-5-5",
   "tiers": {
     "high": "claude-opus-5-5",

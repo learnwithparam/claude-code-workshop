@@ -1,6 +1,7 @@
 import { parse } from "yaml";
 import { z } from "zod";
 import { AGENT_ARTIFACTS } from "./artifacts.ts";
+import { portable } from "./portable.ts";
 
 export const CHECK_NAMES = [
   "red",
@@ -59,5 +60,8 @@ export function loadWorkflow(text: string): Workflow {
     for (const c of step.loop?.until ?? [])
       if (!step.checks.includes(c))
         throw new Error(`step ${step.stage}: loop check ${c} is not in its checks`);
+  // The plan brief is written once, in .factory/config.yaml; a plan step that sets none takes it.
+  for (const step of wf.steps)
+    if (step.writes === "plan.md" && !step.brief) step.brief = portable().planBrief;
   return wf;
 }

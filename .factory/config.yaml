@@ -1,0 +1,26 @@
+# What a repo supplies for the factory engine to run on it. Names only: no key value lives here.
+gate: [make, check]
+tests:
+  unit: [npx, vitest, run]
+  e2e: [npx, playwright, test, tests/e2e]
+  eval: [npx, tsx, scripts/eval.ts]
+  prose: [npx, tsx, scripts/check-prose.ts, docs]
+  prepush: [bash, scripts/git/pre-push]
+  mutation: [npx, stryker, run]
+paths:
+  contract: tests/contract
+  holdout: .factory/holdout
+  source: shared/src
+# Where the engine finds the model key: the variable name and the file that may define it.
+keySource:
+  env: ANTHROPIC_API_KEY
+  file: api/.env
+# A plan may never list these, on top of the engine's own gate-owned files.
+protected: [".github/**", ".claude/**", ".factory/**", "factory/**", "scripts/**"]
+# One brief for every plan step; a workflow's plan step that sets none uses it.
+planBrief: >-
+  Reply with the plan and nothing else: one repo path per line for every file you will create or
+  change, never a script you only run. Do not list files under specs/<issue>/; the runner allows those.
+  A new file needs an owner in levels.json, so list levels.json whenever you add a file. Commentary of
+  any kind makes the plan unusable. The runner saves your reply as specs/<issue>/plan.md, and later
+  stages may touch only the files listed.

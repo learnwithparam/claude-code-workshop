@@ -3,8 +3,13 @@
 export type AgentResult = { text: string; costUsd: number; failed?: string };
 export type ExecResult = { code: number; output: string };
 export type Host = {
+  // `model` and `maxUsd` come from the resolver and the run cap; without them the frontmatter decides.
   // Runs .claude/agents/<name>.md: its frontmatter sets the tools, permission mode and isolation.
-  agent(name: string, prompt: string, o: { stage: string }): Promise<AgentResult>;
+  agent(
+    name: string,
+    prompt: string,
+    o: { stage: string; model?: string; maxUsd?: number },
+  ): Promise<AgentResult>;
   // `ref: "base"` runs the command against the base commit, which is how `red` proves a test fails first.
   exec(cmd: string, args: string[], o?: { ref?: "base" | "head" }): Promise<ExecResult>;
   read(path: string): Promise<string | null>;

@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { globToRegExp } from "./portable.ts";
 import type { Host } from "./types.ts";
 
 // What each stage commits for the next one to read. The commit chain is the audit trail.
@@ -8,6 +9,7 @@ export const ARTIFACTS = [
   "plan.md",
   "review.json",
   "run.log",
+  "cost.json",
   "incident.md",
   "lock.json",
 ] as const;
@@ -63,10 +65,16 @@ const GATE_OWNED =
 const MANIFEST = /(^|\/)package(-lock)?\.json$/;
 // A dependency update must edit the manifests, so that workflow alone may list them; the manifest-deps
 // check then holds the edit to dependency fields.
-export function badPlanLines(plan: string, manifests = false): string[] {
+export function badPlanLines(
+  plan: string,
+  manifests = false,
+  protectedGlobs: string[] = [],
+): string[] {
+  const extra = protectedGlobs.map(globToRegExp);
   return planLines(plan).filter(
     (l) =>
       !PLAN_PATH.test(l) ||
+      extra.some((g) => g.test(l)) ||
       l.split("/").includes("..") ||
       (GATE_OWNED.test(l) && !(manifests && MANIFEST.test(l))),
   );
