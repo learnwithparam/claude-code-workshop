@@ -15,7 +15,8 @@ steps:
       agent: planner,
       writes: spec.md,
       gate: human,
-      brief: "Write EARS requirements, one per line as 'When <trigger>, the system shall <response>', each with a numbered id. Reply with the requirements only.",
+      startsWith: "R1.",
+      brief: "Write EARS requirements, one per line as 'R<n>. When <trigger>, the system shall <response>'. Start your reply with 'R1.' and reply with the requirements only: no commentary, no plan-mode notes, do not run the gate.",
     }
   - {
       stage: plan,

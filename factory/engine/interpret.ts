@@ -89,7 +89,10 @@ async function runStep(
 ): Promise<boolean> {
   const max = step.loop?.max ?? 1;
   let feedback = "";
-  const brief = `Stage: ${step.stage}. ${step.brief ?? ""}\nWrite this stage's artifacts under specs/${n}/.`;
+  const where = step.writes
+    ? `Reply with the artifact only; the runner saves your reply as specs/${n}/${step.writes}.`
+    : `Write this stage's artifacts under specs/${n}/.`;
+  const brief = `Stage: ${step.stage}. ${step.brief ?? ""}\n${where}`;
   for (let round = 1; round <= max; round++) {
     res.rounds[step.stage] = round;
     host.setPhase(round > 1 || step.phase === "fix" ? "fix" : "build");

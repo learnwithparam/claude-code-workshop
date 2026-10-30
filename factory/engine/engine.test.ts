@@ -84,6 +84,14 @@ describe("runWorkflow", () => {
     expect((await runWorkflow(real.host, scenarios, 4, "t")).outcome).toBe("done");
     expect(real.files.get("specs/4/spec.md")).toBe("Feature: kinds\n  Scenario: one\n");
   });
+  it("tells a step that has `writes` to reply, not to write files", async () => {
+    // Run 34: the read-only planner was told to write under specs/<n>/, could not, and replied with plan-mode chatter.
+    const { host, prompts } = fakeHost({ agents: [{ text: "R1. When x, the system shall y." }] });
+    const spec = wf("  - {stage: spec, agent: planner, writes: spec.md}");
+    await runWorkflow(host, spec, 5, "t");
+    expect(prompts[0]).toContain("runner saves your reply as specs/5/spec.md");
+    expect(prompts[0]).not.toContain("Write this stage's artifacts");
+  });
   it("stops at the cap and writes run.log", async () => {
     const { host, files } = fakeHost({
       exec: [{ match: "npx vitest", result: { code: 1, output: "x" } }],
