@@ -73,7 +73,10 @@ const SOLUTIONS: Record<string, string> = {
     `echo 0.012 > ${W}/cost.txt`,
   ),
   "advanced-03": sh(`mkdir -p ${W}/wt`, `echo 'gitdir: /x' > ${W}/wt/.git`),
-  "advanced-04": sh(`mkdir -p ${W} docs`, `cat > ${W}/check-kebab.mjs <<'EOF'\n${KEBAB}\nEOF`),
+  "advanced-04": sh(
+    `mkdir -p ${W} docs/levels`,
+    `cat > ${W}/check-kebab.mjs <<'EOF'\n${KEBAB}\nEOF`,
+  ),
 };
 
 function inTempDir(setup: string | undefined, proof: string) {

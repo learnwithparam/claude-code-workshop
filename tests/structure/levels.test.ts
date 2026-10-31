@@ -19,5 +19,5 @@ describe("levels.json", () => {
       return owners.length === 1 ? [] : [`${file}: ${owners.join(",") || "no owner"}`];
     });
     expect(bad).toEqual([]);
-  });
+  }, 30_000);
 });

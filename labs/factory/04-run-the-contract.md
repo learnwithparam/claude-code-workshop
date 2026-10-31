@@ -10,7 +10,7 @@ Run the workflow contract tests and keep the log, so you know the stages and the
 
 1. Read the module: `cat docs/factory/f8-workflows.md`.
 2. Make the folder: `mkdir -p .labs/work`.
-3. Run the contract tests: `npx vitest run tests/contract > .labs/work/contract.log 2>&1`.
+3. Run the contract tests: `npx vitest run factory/engine/workflows.test.ts > .labs/work/contract.log 2>&1`.
 4. Read what failed or passed: `tail -8 .labs/work/contract.log`.
 
 ## Proof
@@ -22,8 +22,8 @@ grep -q 'passed' .labs/work/contract.log && ! grep -q 'failed' .labs/work/contra
 ## Hints
 
 1. The proof reads `.labs/work/contract.log` for `passed` and no `failed`.
-2. The tests live in `tests/contract/`.
-3. A failure names the workflow file. Open it under `.factory/workflows/`.
+2. The test is `factory/engine/workflows.test.ts`. It loads every file in `.factory/workflows/`.
+3. A failure names the workflow it broke on. Open that file under `.factory/workflows/`.
 
 ## What you just learned
 

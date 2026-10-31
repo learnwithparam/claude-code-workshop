@@ -11,7 +11,8 @@ Create a second checkout of the repo so two Claude sessions can edit at once wit
 1. Make the folder: `mkdir -p .labs/work`.
 2. Add the worktree: `git worktree add .labs/work/wt -b lab/parallel`.
 3. Start a session in it: `cd .labs/work/wt && claude`, then leave with `/exit`.
-4. Remove it when you are done: `git worktree remove .labs/work/wt`. Keep it until the proof is green.
+4. Run `make lab` while the worktree still exists, so the proof can see it.
+5. Then remove it: `git worktree remove .labs/work/wt`. To redo the lab later, delete the branch too: `git branch -D lab/parallel`.
 
 ## Proof
 
