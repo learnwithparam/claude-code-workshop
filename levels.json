@@ -201,6 +201,7 @@
     "tests/contract/**",
     "factory/engine/**",
     ".factory/workflows/**",
+    "tests/structure/f5-review-doc.test.ts",
     ".factory/bands.yaml",
     "scripts/prove/workflows.ts",
     "scripts/check-prose.ts",

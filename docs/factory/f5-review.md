@@ -76,7 +76,7 @@ This is only a design here. The idea from Anthropic's code review post is to run
 
 ## See it on a real run
 
-There is no `review.json` committed in `specs/`; the engine writes it to `specs/<n>/review.json` on every review round, through `reviewLoop` in `interpret.ts`, wired in db9032e (#84), and no committed run folder holds one yet. Do not expect one. What is committed is the live evidence of the tests above and the `specs/35/ci.md` record used in F6. To see a real voted review, run any workflow on an issue of your own, then read the `votes` field of each finding in `specs/<n>/review.json`.
+There is no `review.json` committed in `specs/`; the engine writes it to `specs/<n>/review.json` on every review round, through `reviewLoop` in `interpret.ts`, for every shipped workflow except `spike`, which has no `review` step (`tests/structure/f5-review-doc.test.ts`). No committed run folder holds one yet, so do not expect one. What is committed is the live evidence of the tests above and the `specs/35/ci.md` record used in F6. To see a real voted review, run any workflow on an issue of your own, then read the `votes` field of each finding in `specs/<n>/review.json`.
 
 ## Discussion
 
