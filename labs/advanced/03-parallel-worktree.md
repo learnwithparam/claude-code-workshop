@@ -12,7 +12,8 @@ Create a second checkout of this repo at .labs/work/wt on a new branch, so two s
 1. Make the lab work folder.
 2. Add a worktree there on a new branch.
 3. Open a Claude session inside it, then leave.
-4. Remove the worktree once the proof is green.
+4. Run make lab while the worktree still exists, so the proof can see it.
+5. Then remove the worktree. To redo the lab later, delete the branch too.
 
 ## Proof
 

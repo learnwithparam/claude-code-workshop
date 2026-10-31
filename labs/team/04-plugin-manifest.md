@@ -5,7 +5,7 @@
 
 ## Goal
 
-Write a plugin manifest so a teammate can install your skill and hook in one command.
+Write a plugin manifest so a teammate can install your skill in one command.
 
 ## Steps
 

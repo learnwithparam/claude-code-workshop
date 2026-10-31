@@ -11,7 +11,7 @@ Run one level's proof and save the output, so you can show the team it passed.
 
 1. Make the folder: `mkdir -p .labs/work`.
 2. Run the proof: `make prove LEVEL=hand-built | tee .labs/work/prove.txt`.
-3. Run the exercise view: `make exercise LEVEL=hand-built TRACK=b`.
+3. Run the exercise view: `make exercise LEVEL=hand-built TRACK=b`. It prints `PASS` when the level is green. On a red level, track `a` adds a hint and track `b` prints only the failing line.
 
 ## Proof
 
