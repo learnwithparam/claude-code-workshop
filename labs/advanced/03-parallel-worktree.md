@@ -3,6 +3,12 @@
 **Pairs with:** `docs/electives/agent-teams.md`
 **Help:** goal
 
+## Warm-up
+
+What do you do instead of re-explaining a task to Claude?
+From: daily-01
+Answer: Resume the saved session and carry on from where you left off.
+
 ## Goal
 
 Create a second checkout of this repo at .labs/work/wt on a new branch, so two sessions can edit at once without sharing files. Keep it until the proof passes, then remove it. The proof below must pass.
@@ -12,7 +18,8 @@ Create a second checkout of this repo at .labs/work/wt on a new branch, so two s
 1. Make the lab work folder.
 2. Add a worktree there on a new branch.
 3. Open a Claude session inside it, then leave.
-4. Remove the worktree once the proof is green.
+4. Run make lab while the worktree still exists, so the proof can see it.
+5. Then remove the worktree. To redo the lab later, delete the branch too.
 
 ## Proof
 

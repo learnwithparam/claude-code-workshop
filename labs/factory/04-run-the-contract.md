@@ -3,6 +3,12 @@
 **Pairs with:** `docs/factory/f8-workflows.md`
 **Help:** goal
 
+## Warm-up
+
+What does the factory read: your chat or what was committed?
+From: factory-01
+Answer: Only what was committed. An intent with a checkable done is the contract.
+
 ## Goal
 
 Run the workflow contract tests and save the log to .labs/work/contract.log, then read what passed or failed. This shows the stages and their artifacts agree. The proof below must pass.
@@ -11,7 +17,7 @@ Run the workflow contract tests and save the log to .labs/work/contract.log, the
 
 1. Read the workflow module doc.
 2. Make the lab work folder.
-3. Run the contract tests and save the whole log.
+3. Run the contract test for the workflows and save the whole log.
 4. Read the end of the log.
 
 ## Proof
@@ -30,9 +36,9 @@ Run the workflow contract tests and save the log to .labs/work/contract.log, the
 ## Hints
 
 1. The proof reads `.labs/work/contract.log` for `passed` and no `failed`.
-2. The tests live in `tests/contract/`.
+2. The test is `factory/engine/workflows.test.ts`. It loads every file in `.factory/workflows/`.
 3. A failure names the workflow file. Open it under `.factory/workflows/`.
-4. Commands: `cat docs/factory/f8-workflows.md`, `mkdir -p .labs/work`, `npx vitest run tests/contract > .labs/work/contract.log 2>&1`, `tail -8 .labs/work/contract.log`.
+4. Commands: `cat docs/factory/f8-workflows.md`, `mkdir -p .labs/work`, `npx vitest run factory/engine/workflows.test.ts > .labs/work/contract.log 2>&1`, `tail -8 .labs/work/contract.log`.
 
 ## What you just learned
 

@@ -3,6 +3,12 @@
 **Pairs with:** `docs/factory/f3-build.md`
 **Help:** goal
 
+## Warm-up
+
+What does plan mode let you review for free?
+From: start-03
+Answer: The plan, before any edit. A dry run does the same for a factory run.
+
 ## Goal
 
 Run the factory in dry-run mode for issue 1, save its output to .labs/work/dry-run.txt, and find which stage has the largest budget. The dry run needs no key and spends nothing. The proof below must pass.

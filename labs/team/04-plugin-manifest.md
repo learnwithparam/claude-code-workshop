@@ -3,9 +3,15 @@
 **Pairs with:** `docs/levels/sharing.md`
 **Help:** hinted
 
+## Warm-up
+
+Why does a deny rule in `.claude/settings.json` protect the whole team?
+From: team-01
+Answer: The file is committed, so every clone gets the same rule.
+
 ## Goal
 
-Write a plugin manifest so a teammate can install your skill and hook in one command.
+Write a plugin manifest so a teammate can install your skill in one command.
 
 ## Steps
 

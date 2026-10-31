@@ -60,6 +60,20 @@ describe("labs", () => {
     expect(wrong.map((s) => s.at)).toEqual([]);
   });
 
+  // Recall: a lab after a lane's first reopens an idea the learner already finished.
+  it.each(labs.filter((l) => !l.id.endsWith("-01")))(
+    "$id opens with a warm-up from an earlier lab",
+    (lab) => {
+      expect(lab.warmup, `${lab.id} has no ## Warm-up`).toBeDefined();
+      const from = labs.findIndex((l) => l.id === lab.warmup?.from);
+      expect(
+        from,
+        `${lab.id} warm-up From ${lab.warmup?.from} is not a lab`,
+      ).toBeGreaterThanOrEqual(0);
+      expect(from).toBeLessThan(labs.indexOf(lab));
+    },
+  );
+
   it("help never decreases along the lane order", () => {
     const ranks = labs.map((l) => RANK[l.help]);
     expect(ranks).toEqual([...ranks].sort((a, b) => a - b));

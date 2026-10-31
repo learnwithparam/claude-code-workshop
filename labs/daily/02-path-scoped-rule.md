@@ -3,6 +3,12 @@
 **Pairs with:** `docs/levels/context.md`
 **Help:** hinted
 
+## Warm-up
+
+Why does a private habit not belong in `AGENTS.md`?
+From: start-04
+Answer: `AGENTS.md` is committed and shared, so the habit would land on everyone.
+
 ## Goal
 
 Write a rule file scoped to one folder, so Claude reads it only when it works there.

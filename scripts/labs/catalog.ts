@@ -29,6 +29,13 @@ export const WINDOWS = ["shell", "claude", "editor"] as const;
 export type Window = (typeof WINDOWS)[number];
 export const stepSchema = z.object({ where: z.enum(WINDOWS), text: z.string().min(1) });
 export type Step = z.infer<typeof stepSchema>;
+
+export const warmupSchema = z.object({
+  question: oneLine,
+  from: z.string().regex(/^[a-z]+-\d{2}$/),
+  answer: oneLine,
+});
+
 const proofItem = z.object({ text: oneLine, command: z.string().min(1) });
 export type ProofItem = z.infer<typeof proofItem>;
 
@@ -37,6 +44,8 @@ export const labSchema = z.object({
   lane: z.enum(LANES),
   title: oneLine,
   pairs: z.string().min(1),
+  // Recall of an earlier lab; shown only once that lab is done.
+  warmup: warmupSchema.optional(),
   help: z.enum(HELP),
   goal: oneLine,
   steps: z.array(stepSchema).min(1),
@@ -89,6 +98,18 @@ function proofOf(body: string): ProofItem[] {
   });
 }
 
+// "<question>", then "From: <lab id>", then "Answer: <text>".
+function warmupOf(body: string | undefined): unknown {
+  if (body === undefined) return undefined;
+  const from = /^From: (.*)$/m.exec(body);
+  const answer = /^Answer: (.*)$/m.exec(body);
+  return {
+    question: body.split("\n")[0]?.trim(),
+    from: from?.[1]?.trim(),
+    answer: answer?.[1]?.trim(),
+  };
+}
+
 export function parseLab(lane: string, file: string, text: string): Lab {
   const number = /^(\d{2})-[a-z0-9]+(-[a-z0-9]+)*\.md$/.exec(file)?.[1];
   if (!number) throw new Error(`${lane}/${file}: file name must be NN-kebab-case.md`);
@@ -98,6 +119,7 @@ export function parseLab(lane: string, file: string, text: string): Lab {
     lane,
     title: /^# (.+)$/m.exec(text)?.[1],
     pairs: /^\*\*Pairs with:\*\* `([^`]+)`/m.exec(text)?.[1],
+    warmup: warmupOf(parts.get("warm-up")),
     help: /^\*\*Help:\*\* (\w+)\s*$/m.exec(text)?.[1],
     goal: parts.get("goal"),
     steps: listItems(parts.get("steps") ?? "").map(parseStep),
@@ -108,10 +130,16 @@ export function parseLab(lane: string, file: string, text: string): Lab {
 }
 
 export function loadLabs(root: string): Lab[] {
-  return LANES.flatMap((lane) =>
+  const labs = LANES.flatMap((lane) =>
     readdirSync(join(root, lane))
       .filter((f) => f.endsWith(".md"))
       .sort()
       .map((f) => parseLab(lane, f, readFileSync(join(root, lane, f), "utf8"))),
   );
+  labs.forEach((lab, i) => {
+    const from = lab.warmup?.from;
+    if (from !== undefined && !labs.slice(0, i).some((l) => l.id === from))
+      throw new Error(`${lab.id}: warm-up From ${from} must name an earlier lab`);
+  });
+  return labs;
 }

@@ -74,12 +74,21 @@ function body(lab: Lab, color: boolean): string[] {
   return [paint(color, "bold", "Steps"), ...lab.steps.map(step), ""];
 }
 
+// The form's `lab` field is prefilled from the query string, so a report names its lab.
+export const feedbackUrl = (id: string): string =>
+  `https://github.com/learnwithparam/claude-code-workshop/issues/new?template=lab-feedback.yml&lab=${id}`;
+
 export function renderBrief(lab: Lab, progress: Progress, color: boolean): string {
   const shown = progress.hints[lab.id] ?? 0;
+  // Ask only about a lab the learner finished; otherwise the question is about nothing they know.
+  const recall = lab.warmup && lab.warmup.from in progress.done ? lab.warmup : undefined;
   const lines = [
     paint(color, "bold", `${lab.id}  ${lab.title}`),
     paint(color, "dim", `Pairs with ${lab.pairs}`),
     "",
+    ...(recall
+      ? [`${paint(color, "bold", `Warm-up (from ${recall.from})`)} ${recall.question}`, ""]
+      : []),
     `${paint(color, "bold", "Goal")} ${lab.goal}`,
     "",
     ...body(lab, color),
@@ -88,7 +97,9 @@ export function renderBrief(lab: Lab, progress: Progress, color: boolean): strin
       "dim",
       `Hints: ${shown} of ${lab.hints.length} revealed. Reveal the next with: make lab HINT=1`,
     ),
+    paint(color, "dim", `Stuck? ${feedbackUrl(lab.id)}`),
   ];
+  if (recall) lines.push(`Answer: ${commands(recall.answer, color)}`);
   for (let i = 0; i < shown; i++)
     lines.push(`Hint ${i + 1}: ${commands(lab.hints[i] ?? "", color)}`);
   return lines.join("\n");

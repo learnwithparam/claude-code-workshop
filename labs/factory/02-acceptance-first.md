@@ -3,6 +3,12 @@
 **Pairs with:** `docs/factory/f2-design.md`
 **Help:** goal
 
+## Warm-up
+
+What do you share to show a check passes?
+From: team-03
+Answer: The command output, not a sentence saying it works.
+
 ## Goal
 
 Write .labs/work/specs/1/acceptance.md from your intent: two scenarios, each with a Given, a When and a Then line a test could assert. Write it before any code exists. The proof below must pass.

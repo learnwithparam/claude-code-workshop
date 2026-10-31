@@ -3,6 +3,12 @@
 **Pairs with:** `docs/agent/agent-sdk.md`
 **Help:** goal
 
+## Warm-up
+
+What can you read about a run before you start it?
+From: factory-03
+Answer: The model, turn cap and budget of every stage, all set in config.
+
 ## Goal
 
 Make one headless Claude call capped at two turns, save its JSON result to .labs/work/call.json, and write the call's cost in dollars, as a bare number, to .labs/work/cost.txt. The proof below must pass.
