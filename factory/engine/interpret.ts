@@ -7,8 +7,10 @@ import {
   writeArtifact,
 } from "./artifacts.ts";
 import { CHECKS } from "./checks/index.ts";
+import { runDeploy } from "./deploy-step.ts";
 import { resolveModel } from "./models.ts";
 import { portable } from "./portable.ts";
+import { type RetroOutcome, retro } from "./retro.ts";
 import { reviewLoop } from "./review.ts";
 import { APPROVALS, classify } from "./risk.ts";
 import type { CheckResult, Host } from "./types.ts";
@@ -55,7 +57,12 @@ async function gateMet(host: Host, n: number, step: Step, log?: string[]): Promi
 
 // Runs a workflow's steps in order. A step repeats its agent while its loop checks fail, up to the cap;
 // the evidence of the failing checks is the next round's prompt, so the loop learns from the check, not the model.
-export type RunOptions = { config?: FactoryConfig; ticketType?: string };
+export type RunOptions = {
+  config?: FactoryConfig;
+  ticketType?: string;
+  // When set, a finished run ends with one retro. `evalCmd` must print `SCORE <number>`.
+  retro?: { evalCmd: [string, ...string[]]; revert: () => Promise<void> };
+};
 
 export async function runWorkflow(
   host: Host,
@@ -107,7 +114,32 @@ export async function runWorkflow(
       return finish("awaiting-approval", step.stage);
     }
   }
-  return finish("done");
+  const done = await finish("done");
+  if (opts.retro) await endWithRetro(host, n, done, opts.retro);
+  return done;
+}
+
+// The retro reads run.log, so it runs after the log is saved; its outcome is appended to the log.
+async function endWithRetro(
+  host: Host,
+  n: number,
+  res: Result,
+  r: NonNullable<RunOptions["retro"]>,
+) {
+  let out: RetroOutcome;
+  try {
+    out = await retro(host, n, r.evalCmd, r.revert);
+  } catch (e) {
+    out = { kind: "error", error: e instanceof Error ? e.message : String(e) };
+  }
+  res.log.push(
+    out.kind === "error"
+      ? `retro error: ${out.error}`
+      : out.kind === "none"
+        ? "retro none"
+        : `retro ${out.kind} ${out.proposal.file} delta ${out.delta.toFixed(2)}`,
+  );
+  await writeArtifact(host, n, "run.log", `${res.log.join("\n")}\n`);
 }
 
 // Returns true when the step could not reach its checks within its cap.
@@ -124,6 +156,15 @@ async function runStep(
   const cfg = opts.config;
   // A reply the runner refuses (chat instead of the artifact) gets the reason and two more tries.
   if (step.review) return runReview(host, step, n, res);
+  if (step.deploy) {
+    const d = await runDeploy(host, n, step);
+    res.rounds[step.stage] = 1;
+    res.log.push(`${step.stage} ${step.deploy} ${d.ok ? "ok" : "FAILED"}: ${d.reason}`);
+    if (!d.ok) res.reason = d.reason;
+    return !d.ok;
+  }
+  const agent = step.agent;
+  if (!agent) throw new Error(`step ${step.stage} has no agent`);
   const max = step.loop?.max ?? (step.writes ? 3 : 1);
   let feedback = "";
   const where = step.writes
@@ -143,7 +184,7 @@ async function runStep(
     const model = cfg
       ? resolveModel({ cfg, step: step.stage, type: opts.ticketType ?? wf.name })
       : undefined;
-    const out = await host.agent(step.agent, `${brief}\n${ticket}\n${feedback}`, {
+    const out = await host.agent(agent, `${brief}\n${ticket}\n${feedback}`, {
       stage: step.stage,
       model,
       maxUsd: cap === undefined ? undefined : cap - res.costUsd,

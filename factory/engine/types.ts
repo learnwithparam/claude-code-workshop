@@ -26,6 +26,8 @@ export type Host = {
   // A human gate: true once a person approved this stage's artifacts. `digest` is the hash of what they
   // read, so an approval of one version never covers another.
   // `need` is how many distinct people must have approved (from the risk tier); omitted means one.
+  // Logins that commented on issue n and hold write, maintain or admin on the repo. Never a bot or app.
+  writers(n: number): Promise<string[]>;
   approved(n: number, stage: string, digest: string, need?: number): Promise<boolean>;
 };
 

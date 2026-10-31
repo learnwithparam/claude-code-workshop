@@ -23,7 +23,7 @@ Triage here picks a model and a refusal, not the workflow. The engine takes the 
 
 `APPROVALS` maps the tier to human approvals: low 0, medium 1, high 2. `approvalsMet` counts only approvals of kind `human` on the current head commit, so an agent never counts and a push voids earlier approvals.
 
-Be exact about what runs today. `classify` and `approvalsMet` are tested, and `release` in `factory/engine/deploy.ts` takes a `tier` argument and refuses production without the approvals. No code in this checkout calls `classify` for you, so the caller computes the tier. The triage RISK and the path tier are different values: the first is the model's guess used to route models, the second is code over the diff used to gate approvals.
+Be exact about what runs today. `classify` and `approvalsMet` are tested, and `release` in `factory/engine/deploy.ts` takes a `tier` argument and refuses production without the approvals. `interpret.ts` calls `classify` for the human gate and for a `deploy: production` step; the approvers are the issue's commenters who hold write, maintain or admin on the repo, never a bot (`approvers.ts`). The triage RISK and the path tier are different values: the first is the model's guess used to route models, the second is code over the diff used to gate approvals.
 
 ## Steps you run
 

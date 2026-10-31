@@ -12,6 +12,7 @@ import {
 import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { type Comment, writersFrom } from "./approvers.ts";
 import { resolveModel } from "./models.ts";
 import type { Host } from "./types.ts";
 
@@ -28,7 +29,6 @@ export function parseAgent(text: string) {
   return { fm, body: (m?.[2] ?? text).trim() };
 }
 
-type Comment = { body: string; authorAssociation: string; author?: { login: string } };
 // Only a person with write access counts. The agents hold no GitHub token, so they cannot approve.
 export function approvalIn(
   comments: Comment[],
@@ -86,6 +86,11 @@ export function realHost(o: RealHostOptions): Host {
         homedir(),
         process.platform === "darwin" ? "Library/Caches/ms-playwright" : ".cache/ms-playwright",
       ),
+  };
+  // Runner-side call with the real environment: gh needs the person's login, the agents never see it.
+  const issueComments = (n: number): Comment[] | null => {
+    const r = sh("gh", ["issue", "view", String(n), "--json", "comments"], o.cwd, process.env);
+    return r.status === 0 ? (JSON.parse(r.stdout).comments ?? []) : null;
   };
   const sh = (cmd: string, args: string[], cwd = o.cwd, env: NodeJS.ProcessEnv = SAFE_ENV) =>
     spawnSync(cmd, args, { cwd, encoding: "utf8", maxBuffer: 64 << 20, env });
@@ -253,11 +258,25 @@ export function realHost(o: RealHostOptions): Host {
     setPhase(p) {
       phase = p;
     },
+    async writers(n) {
+      const comments = issueComments(n);
+      if (!comments) return [];
+      return writersFrom(comments, async (login) => {
+        const r = sh(
+          "gh",
+          ["api", `repos/{owner}/{repo}/collaborators/${login}/permission`, "-q", ".permission"],
+          o.cwd,
+          process.env,
+        );
+        return r.status === 0 ? r.stdout.trim() : "none";
+      });
+    },
     async approved(n, stage, digest, need = 1) {
-      // Runner-side call with the real environment: gh needs the person's login, the agents never see it.
-      const r = sh("gh", ["issue", "view", String(n), "--json", "comments"], o.cwd, process.env);
-      if (r.status !== 0) return false;
-      return approvalIn(JSON.parse(r.stdout).comments ?? [], stage, digest, o.approvers, need);
+      const comments = issueComments(n);
+      if (!comments) return false;
+      // An explicit list wins; otherwise the people who can write to the repo and commented here.
+      const approvers = o.approvers ?? (await this.writers(n));
+      return approvalIn(comments, stage, digest, approvers, need);
     },
   };
 }

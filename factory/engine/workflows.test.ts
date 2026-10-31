@@ -43,7 +43,8 @@ describe.each(files)("workflow %s", (file) => {
     if (plan) expect(plan.brief).toContain("Commentary of any kind makes the plan unusable");
   });
   it("uses only agents that exist in .claude/agents", () => {
-    for (const s of wf.steps) expect(agents.has(s.agent), `${s.stage}: ${s.agent}`).toBe(true);
+    for (const s of wf.steps)
+      expect(agents.has(s.agent ?? ""), `${s.stage}: ${s.agent}`).toBe(true);
   });
   it("dry-runs every step in order", async () => {
     // A deps workflow must change a manifest to pass, so its dry run bumps one dependency.
