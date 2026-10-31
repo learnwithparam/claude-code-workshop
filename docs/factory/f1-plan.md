@@ -35,7 +35,7 @@ The triage RISK and the path tier are different values: the first is the model's
 2. Run `npx vitest run factory/route-ticket.test.ts` and read what each case routes to.
 3. Compute a tier by hand: `npx tsx -e 'import {classify} from "./factory/engine/risk.ts"; console.log(classify([".github/workflows/ci.yml"]), classify(["docs/a.md"]), classify(["shared/src/bands.ts"]))'`. Expect `high low medium`.
 4. File a small docs issue and read its plan without spending: `make factory ISSUE=<n> FLAGS=--dry-run` lists the stages, models and budgets.
-5. For a real plan, label the issue `factory:ready` and run `npx tsx factory/engine/main.ts <n> --workflow=feature-atdd`. It needs `gh` signed in and an API key available to the api workspace, and it spends tokens against the per stage caps in `.factory/config.json`. It stops at the `spec` human gate. Read `specs/<n>/intent.md` and `specs/<n>/spec.md` before you approve, then find the `gate spec tier ... needs ... approvals` line in `specs/<n>/run.log` to see how many people the tier asked for.
+5. For a real plan, label the issue `factory:ready` and run `npx tsx factory/engine/main.ts <n> --workflow=feature-atdd`. It needs `gh` signed in and a credential: an API key available to the api workspace, which spends tokens against the per stage caps in `.factory/config.json`, or a subscription token with `--auth=subscription`, which stops at `subscriptionCap` in `.factory/config.yaml` (see [Auth modes](auth-modes.md)). It stops at the `spec` human gate. Read `specs/<n>/intent.md` and `specs/<n>/spec.md` before you approve, then find the `gate spec tier ... needs ... approvals` line in `specs/<n>/run.log` to see how many people the tier asked for.
 
 ## Proof that bites
 
