@@ -68,7 +68,10 @@ export function renderMap(
 }
 
 function body(lab: Lab, color: boolean): string[] {
-  if (lab.help === "goal") return [paint(color, "bold", "Done when this passes"), lab.proof, ""];
+  if (lab.help === "goal") {
+    const items = lab.proof.map((item, i) => `${i + 1}. ${item.text}`);
+    return [paint(color, "bold", "Done when all of these pass"), ...items, ""];
+  }
   const show = (s: string) => (lab.help === "hinted" ? hideCommands(s) : commands(s, color));
   const step = (s: Step, i: number) => [
     `${i + 1}. ${tag(s.where, color)} ${show(s.text)}`,

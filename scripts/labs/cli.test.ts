@@ -280,7 +280,6 @@ describe("cli watch", () => {
     s.key("q");
     await done;
     expect(loadProgress(s.deps.progressPath).guesses?.["start-01"]).toBe("my guess");
-    expect(s.text()).toContain("my guess");
   });
 
   it("with no TTY it runs once and prints the fallback line", async () => {

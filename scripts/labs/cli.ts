@@ -177,8 +177,13 @@ export async function runWatch(args: string[], deps: CliDeps): Promise<number> {
     : currentLab(deps.labs, loadProgress(deps.progressPath));
   if (!lab) return run(plain, deps);
 
+  const guess = deps.guess?.trim();
+  if (guess) {
+    saveProgress(deps.progressPath, saveGuess(loadProgress(deps.progressPath), lab.id, guess));
+  }
   deps.out(renderBrief(lab, loadProgress(deps.progressPath), deps.color));
-  deps.out(`\n${paint(deps.color, "dim", `Proof: ${lab.proof}`)}`);
+  deps.out(`\n${paint(deps.color, "dim", "Proof")}`);
+  for (const item of lab.proof) deps.out(paint(deps.color, "dim", `- ${item.text}`));
   return new Promise<number>((resolve) => {
     const stops: Array<() => void> = [];
     const end = (code: number) => {
@@ -186,13 +191,14 @@ export async function runWatch(args: string[], deps: CliDeps): Promise<number> {
       resolve(code);
     };
     const check = () => {
-      const result = deps.proof(lab.proof);
-      if (result.ok) {
+      const failed = lab.proof.map((item) => deps.proof(item.command)).filter((r) => !r.ok);
+      if (failed.length === 0) {
         finish(deps, loadProgress(deps.progressPath), lab);
         return end(0);
       }
       deps.status(failLine(deps, lab));
-      if (result.output.trim()) deps.out(tail(result.output, 6));
+      const output = failed.map((r) => r.output).join("");
+      if (output.trim()) deps.out(tail(output, 6));
     };
     stops.push(watch(check));
     stops.push(
