@@ -51,6 +51,36 @@ describe("progress", () => {
     expect(currentLab(labs, all)).toBeUndefined();
   });
 
+  it("on pro with every team lab done, the current lab is the first advanced lab", () => {
+    const all = [
+      lab("start-01", "start"),
+      lab("daily-01", "daily"),
+      lab("team-01", "team"),
+      lab("factory-01", "factory"),
+      lab("advanced-01", "advanced"),
+    ];
+    const done = { "start-01": "x", "daily-01": "x", "team-01": "x" };
+    expect(currentLab(all, { done, hints: {}, path: "pro" })?.id).toBe("advanced-01");
+    expect(currentLab(all, { done, hints: {}, path: "factory" })?.id).toBe("factory-01");
+  });
+
+  it("on factory with every daily lab done, the current lab is the first factory lab", () => {
+    const all = [
+      lab("start-01", "start"),
+      lab("daily-01", "daily"),
+      lab("team-01", "team"),
+      lab("factory-01", "factory"),
+    ];
+    const done = { "start-01": "x", "daily-01": "x" };
+    expect(currentLab(all, { done, hints: {}, path: "factory" })?.id).toBe("factory-01");
+    expect(currentLab(all, { done, hints: {}, path: "pro" })?.id).toBe("team-01");
+  });
+
+  it("lane stats cover only the chosen path", () => {
+    const stats = laneStats(labs, { done: {}, hints: {}, path: "factory" });
+    expect(stats.map((s) => s.lane)).toEqual(["start", "daily", "factory"]);
+  });
+
   it("reveals hints one at a time and stops at the last", () => {
     let p = { done: {}, hints: {} };
     const first = revealHint(p, labs[0] as Lab);
