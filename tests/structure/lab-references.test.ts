@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import levels from "../../levels.json" with { type: "json" };
 import { type Lab, loadLabs } from "../../scripts/labs/catalog.ts";
 
 // The gate swaps Claude steps for their output, so it never reads step text. This reads it:
@@ -50,12 +51,22 @@ function badReferences(
   return bad;
 }
 
+// A level snapshot holds only its own files, so a path counts when some level owns it.
+const owned = (Object.values(levels) as string[][]).flat();
+const isOwned = (f: string) => {
+  const dir = `${f.replace(/\/$/, "")}/`;
+  return owned.some(
+    (g) => g === f || (g.endsWith("/**") && f.startsWith(g.slice(0, -2))) || g.startsWith(dir),
+  );
+};
+const present = (f: string) => existsSync(f) || isOwned(f);
+
 const targets = targetsOf(readFileSync("Makefile", "utf8"));
 const labs = loadLabs("labs");
 
 describe("lab references", () => {
   it.each(labs)("$id names only make targets and paths that exist", (lab) => {
-    expect(badReferences(lab, targets, existsSync)).toEqual([]);
+    expect(badReferences(lab, targets, present)).toEqual([]);
   });
 
   it("fails when a step names a missing target or file", () => {
@@ -64,11 +75,12 @@ describe("lab references", () => {
       steps: ["Run `make labz`.", "Open `scripts/missing.ts`."],
       hints: ["Try `make lab` then `docs/labs/README.md`.", "b"],
     };
-    expect(badReferences(broken, targets, existsSync)).toEqual(["make labz", "scripts/missing.ts"]);
+    const bad = badReferences(broken, targets, (f) => f !== "scripts/missing.ts");
+    expect(bad).toEqual(["make labz", "scripts/missing.ts"]);
   });
 
   it("allows a path under .labs/work, since the learner creates it", () => {
     const lab: Lab = { ...(labs[0] as Lab), steps: ["Write `.labs/work/notes.md`."] };
-    expect(badReferences(lab, targets, existsSync)).toEqual([]);
+    expect(badReferences(lab, targets, present)).toEqual([]);
   });
 });
