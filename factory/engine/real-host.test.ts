@@ -2,7 +2,9 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import type { Options, query } from "@anthropic-ai/claude-agent-sdk";
 import { describe, expect, it } from "vitest";
+import { type Auth, TOKEN_ENV } from "./auth.ts";
 import { approvalIn, parseAgent, realHost } from "./real-host.ts";
 
 const git = (cwd: string, ...a: string[]) => execFileSync("git", a, { cwd, encoding: "utf8" });
@@ -150,12 +152,95 @@ describe("realHost over a git repo", () => {
 });
 
 describe("realHost isolation", () => {
-  it("runs checks without the API key or a GitHub token", async () => {
+  it("runs checks without the API key, the subscription token or a GitHub token", async () => {
     const { host } = repo();
     process.env.ANTHROPIC_API_KEY = "k";
+    process.env.CLAUDE_CODE_OAUTH_TOKEN = "t";
     process.env.GH_TOKEN = "g";
-    const r = await host.exec("sh", ["-c", 'echo "[$ANTHROPIC_API_KEY][$GH_TOKEN]"']);
-    expect(r.output.trim()).toBe("[][]");
+    const r = await host.exec("sh", [
+      "-c",
+      'echo "[$ANTHROPIC_API_KEY][$CLAUDE_CODE_OAUTH_TOKEN][$GH_TOKEN]"',
+    ]);
+    expect(r.output.trim()).toBe("[][][]");
+  });
+});
+
+// A stand-in for the SDK's query(): records the options and answers with one result message.
+function fakeQuery(seen: Options[], tokens = 10) {
+  return (({ options }: { options: Options }) => {
+    seen.push(options);
+    return (async function* () {
+      yield {
+        type: "result",
+        result: "ok",
+        total_cost_usd: 0.25,
+        modelUsage: {
+          m: {
+            inputTokens: tokens,
+            outputTokens: 0,
+            cacheReadInputTokens: 0,
+            cacheCreationInputTokens: 0,
+          },
+        },
+      };
+    })();
+  }) as unknown as typeof query;
+}
+
+describe("realHost auth", () => {
+  const agents = (cwd: string) => {
+    mkdirSync(join(cwd, ".claude/agents"), { recursive: true });
+    writeFileSync(join(cwd, ".claude/agents/a.md"), "---\nmodel: haiku\n---\nBe brief.\n");
+  };
+  const host = (auth: Auth, seen: Options[], tokens?: number) => {
+    const { cwd, base } = repo();
+    agents(cwd);
+    return realHost({
+      cwd,
+      base,
+      stateDir: join(cwd, "..", `sa-${Date.now()}`),
+      auth,
+      subscriptionCap: { calls: 2, tokens: 1000 },
+      query: fakeQuery(seen, tokens),
+    });
+  };
+  const sub: Auth = { mode: "subscription", credential: { name: TOKEN_ENV, value: "tok" } };
+  const key: Auth = { mode: "api-key", credential: { name: "ANTHROPIC_API_KEY", value: "key" } };
+
+  it("hands the agent only the subscription token, and no dollar budget", async () => {
+    process.env.ANTHROPIC_API_KEY = "k";
+    const seen: Options[] = [];
+    const h = host(sub, seen);
+    const r = await h.agent("a", "p", { stage: "build" });
+    expect(seen[0]?.env?.[TOKEN_ENV]).toBe("tok");
+    expect(seen[0]?.env?.ANTHROPIC_API_KEY).toBeUndefined();
+    expect(seen[0]?.maxBudgetUsd).toBeUndefined();
+    // No bill: the dollar figure stays out of the run total, the estimate is kept for the report.
+    expect(r.costUsd).toBe(0);
+    expect(h.usage()).toMatchObject({
+      auth: "subscription",
+      calls: 1,
+      tokens: 10,
+      estimatedUsd: 0.25,
+    });
+  });
+  it("hands the agent only the key in api-key mode, with a dollar budget", async () => {
+    process.env.CLAUDE_CODE_OAUTH_TOKEN = "t";
+    const seen: Options[] = [];
+    const r = await host(key, seen).agent("a", "p", { stage: "build" });
+    expect(seen[0]?.env?.ANTHROPIC_API_KEY).toBe("key");
+    expect(seen[0]?.env?.[TOKEN_ENV]).toBeUndefined();
+    expect(seen[0]?.maxBudgetUsd).toBe(3);
+    expect(r.costUsd).toBe(0.25);
+  });
+  it("refuses a subscription call past the run's call cap", async () => {
+    const seen: Options[] = [];
+    const h = host(sub, seen);
+    await h.agent("a", "p", { stage: "build" });
+    await h.agent("a", "p", { stage: "build" });
+    const r = await h.agent("a", "p", { stage: "build" });
+    expect(r.failed).toMatch(/subscription cap/);
+    expect(seen).toHaveLength(2);
   });
 });
 

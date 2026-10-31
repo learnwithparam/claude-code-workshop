@@ -60,10 +60,10 @@ In a scratch branch, set `stages.build.maxBudgetUsd` to a very small value such 
 The rules, each with the file that enforces it:
 
 - The key lives in `api/.env`, and `api/` is the only process that holds `ANTHROPIC_API_KEY` (`AGENTS.md`).
-- `factory/engine/main.ts` reads the variable and file named in `keySource` of `.factory/config.yaml`, parses that one variable out of the file inside its own process, and sets it for the run, so the key never appears on a command line, in shell history or in `ps`. `factory/main.ts` does the same with `process.loadEnvFile`. `config.yaml` names the source and holds no key.
+- `factory/engine/main.ts` reads the variable and file named in `keySource` of `.factory/config.yaml`, parses that one variable out of the file inside its own process, and hands it to the agents, so the key never appears on a command line, in shell history or in `ps`. In subscription mode it takes `CLAUDE_CODE_OAUTH_TOKEN` instead and never opens the key file ([Auth modes](auth-modes.md)). `factory/main.ts` does the same with `process.loadEnvFile`. `config.yaml` names the source and holds no key.
 - The engine pins `config.yaml` before the first agent, so a build cannot edit the key source or the commands the gate runs.
 - `.gitignore` lists `.env` and `.env.*`, and `.claude/settings.json` denies `Read(**/.env*)` and `Edit(**/.env*)`, with the sandbox also denying reads of the same paths.
-- In `real-host.ts` the agent gets `ANTHROPIC_API_KEY` and a short allow-list of other variables, a throwaway `HOME` and `GIT_CONFIG_GLOBAL=/dev/null`. The checks that run code the agent wrote get none of the key, no GitHub token and no global git config.
+- In `real-host.ts` the agent gets the one chosen credential (the key or the subscription token, never both, from `agentEnv` in `auth.ts`) and a short allow-list of other variables, a throwaway `HOME` and `GIT_CONFIG_GLOBAL=/dev/null`. The checks that run code the agent wrote get no credential, no GitHub token and no global git config.
 - A key in a cloud session follows F11: an environment variable is readable by anyone who uses the environment, so keep the factory key out of cloud sessions or put the run behind a network secret where the host allows it.
 
 If a key leaks, rotate it. Do not rely on deleting the message.

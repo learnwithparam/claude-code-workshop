@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { firstPass, type Metrics, rollup } from "./metrics.ts";
+import type { Result } from "./interpret.ts";
+import { firstPass, type Metrics, metricsFor, metricsSchema, rollup } from "./metrics.ts";
 
 const m = (rounds: Record<string, number>, outcome: Metrics["outcome"] = "done"): Metrics => ({
   ticket: 1,
@@ -25,6 +26,17 @@ describe("metrics", () => {
       costUsd: 1,
     });
     expect(r.costByWorkflow["bug-tdd"]).toBe(1);
+  });
+  it("records the auth mode and usage, and still reads metrics written without them", () => {
+    const result = { outcome: "done", rounds: { fix: 1 }, costUsd: 0 } as unknown as Result;
+    const u = { auth: "subscription" as const, calls: 3, tokens: 900, estimatedUsd: 0.4 };
+    const saved = metricsSchema.parse(metricsFor(1, "bug-tdd", result, u));
+    expect(saved).toMatchObject({
+      auth: "subscription",
+      costUsd: 0,
+      usage: { calls: 3, tokens: 900 },
+    });
+    expect(metricsSchema.parse(m({ fix: 1 })).auth).toBeUndefined();
   });
 });
 
