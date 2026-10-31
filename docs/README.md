@@ -86,6 +86,7 @@ Each extends a level: [agent teams](electives/agent-teams.md), [status line](ele
 
 - [When to use what](when-to-use-what.md), [commands by level](commands-by-level.md), [versions](versions.md), [managed settings example](managed-settings.example.json).
 - Official docs: [the .claude directory](https://code.claude.com/docs/en/claude-directory) and [best practices](https://code.claude.com/docs/en/best-practices).
+- [Harness retro](factory/harness-retro.md): the friction hit while the factory built this repo and the fix for each.
 - Stuck on an exercise: `make exercise LEVEL=<name> TRACK=a` prints PASS or FAIL with a hint, and `TRACK=b` prints only the failing line.
 
 ## How the levels are kept correct
