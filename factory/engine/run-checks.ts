@@ -15,4 +15,5 @@ export async function runChecks(
   return out;
 }
 
-export const failing = (r: Record<string, CheckResult>) => Object.entries(r).filter(([, v]) => !v.ok);
+export const failing = (r: Record<string, CheckResult>) =>
+  Object.entries(r).filter(([, v]) => !v.ok);

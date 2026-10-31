@@ -7,7 +7,7 @@ import type { Step } from "./workflow.ts";
 
 // Lenses hunt in parallel, three verifiers vote, and a builder fixes what survives, up to the round cap.
 // Returns true when an Important finding is left or a lens reply was not findings; the checks still run.
-export export async function runReview(
+export async function runReview(
   host: Host,
   step: Step,
   n: number,
