@@ -32,6 +32,7 @@ If you fall behind, `make levels LEVEL=<name>` writes a finished copy of that le
 
 - **Agent track**, to learn the loop under the product and under Claude Code: [one call](agent/one-call.md), [manual loop](agent/manual-loop.md), [tool runner](agent/tool-runner.md), [mini Claude Code](agent/mini-claude.md), [Agent SDK](agent/agent-sdk.md).
 - **Electives**, each extends a level: [agent teams](electives/agent-teams.md), [status line](electives/status-line.md), [fast mode](electives/fast-mode.md), [chrome](electives/chrome.md), [screenshots](electives/screenshots.md), [ide](electives/ide.md), [built-in help](electives/built-in-help.md), [loop and routines](electives/loop-and-routines.md).
+- **Factory retro**: [harness retro](factory/harness-retro.md), the friction hit while the factory built this repo and the fix for each.
 - **Pick the right tool**: [when to use what](when-to-use-what.md). **Every command**: [commands by level](commands-by-level.md). **Which Claude Code**: [versions](versions.md).
 - **Stuck on an exercise**: `make exercise LEVEL=<name> TRACK=a` prints PASS or FAIL with a hint, and `TRACK=b` prints only the failing line.
 
