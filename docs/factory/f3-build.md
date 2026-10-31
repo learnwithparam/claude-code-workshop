@@ -2,6 +2,18 @@
 
 **Stage:** build. **Layers:** execution and delivery. **Workflows:** every one of them has a `plan` step; the build step differs (`feature-atdd`, `bug-tdd`, `refactor`, `ui-visual`).
 
+## Story
+
+**The ticket.** Issue 35, the prompt cache and learned templates.
+
+**Without the layer.** `specs/35/build.md`, Update 3: the builder added `api/src/agent/template-eval.ts`, "not on the plan's file list but required by the locked boundaries test". The reason was sound, and the file was still outside what anyone had approved.
+
+**What the layer did.** `plan-drift` failed the run. Update 4 reads "Plan drift fixed: `plan.md` had lost most of its file list and never named `api/src/agent/template-eval.ts`". The fence did not judge the reason. It made the plan say it.
+
+![A timeline of run 35, each event quoted from a file in specs/35](img/run-35-timeline.svg)
+
+_Notice:_ the red box is the one place code stopped the builder, and the fix went into the plan, not the source.
+
 ## Goal
 
 Let a builder change code with the smallest reach. The plan lists the files, the builder works in an isolated worktree with limited tools, and a check fails the run if the diff leaves the plan.
