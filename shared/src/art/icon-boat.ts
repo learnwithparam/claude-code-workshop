@@ -1,0 +1,1 @@
+export const BOAT_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="boat" focusable="false"><title>boat</title><path d="M6 40h52l-8 14H14z" fill="#92400e"/><rect x="31" y="8" width="3" height="32" rx="0" fill="#78350f"/><path d="M36 10l18 26H36z" fill="#f8fafc"/><path d="M28 14L12 36h16z" fill="#ef4444"/></svg>`;

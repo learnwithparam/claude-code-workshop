@@ -1,0 +1,34 @@
+# Method: STRIDE threat check, a failing exploit test kept private, and a PR that names the class of bug, not the exploit.
+name: security
+method: STRIDE then red test then fix
+source: Anthropic AI-native SDLC playbook
+for: security fixes
+steps:
+  - {
+      stage: threat,
+      agent: security-reviewer,
+      writes: intent.md,
+      brief: "Name the attacker, the asset and the entry point for the ticket in STRIDE terms. Do not write exploit detail. Reply with the threat model only.",
+    }
+  - { stage: plan, writes: plan.md, agent: planner }
+  - {
+      stage: reproduce,
+      agent: builder,
+      brief: "Write one vitest test in specs/<issue>/golden that fails on the base commit because the weakness exists, using a harmless input. Do not fix it yet.",
+      checks: [red, lock],
+      loop: { until: [red], max: 2 },
+    }
+  - {
+      stage: fix,
+      agent: builder,
+      brief: "Close the weakness with the smallest change, validating input at the boundary with zod. Never edit the test.",
+      phase: fix,
+      checks: [green, lock, gate],
+      loop: { until: [green, lock, gate], max: 3 },
+    }
+  - {
+      stage: review,
+      agent: security-reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }

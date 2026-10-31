@@ -6,4 +6,5 @@ model: sonnet
 maxTurns: 40
 tools: Read, Edit, Write, Bash, Grep, Glob
 isolation: worktree
+permissionMode: acceptEdits
 ---

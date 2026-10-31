@@ -1,4 +1,4 @@
-.PHONY: doctor dev check check-affected prove levels claude smoke hooks eval factory
+.PHONY: lab next progress prove-homework doctor dev check check-affected prove levels claude smoke hooks eval factory exercise
 
 doctor:
 	@node -v | grep -qE '^v2[2-9]' && echo "ok node $$(node -v)" || (echo "need Node 22+" && exit 1)
@@ -15,6 +15,7 @@ check:
 	npm run typecheck
 	npm test
 	npm run build -w web
+	npm run e2e
 	npm run prove
 
 # Only the checks the change reaches, from the impact map in repo.json. BASE=origin/main before a PR.
@@ -23,6 +24,10 @@ check-affected:
 
 prove:
 	npm run prove -- $(LEVEL)
+
+# The take-home. Red until your factory run builds multi-page worksheets; skipped in make check.
+prove-homework:
+	HOMEWORK=1 npx vitest run tests/take-home
 
 smoke:
 	npx tsx api/src/smoke.ts
@@ -36,9 +41,23 @@ eval:
 factory:
 	npx tsx factory/main.ts $(ISSUE) $(FLAGS)
 
+# PASS or FAIL for one level's proof. TRACK=a adds the hint; TRACK=b prints only the failing line.
+exercise:
+	npx tsx scripts/exercise.ts $(LEVEL) $(TRACK)
+
 levels:
 	npx tsx scripts/levels.ts $(LEVEL)
 
 # A session that ignores your own ~/.claude, so a demo shows only this repo's config.
 claude:
 	CLAUDE_CONFIG_DIR=$(CURDIR)/.workshop-home claude
+
+# Hands-on labs, start to advanced. HINT=1 reveals one hint; WATCH=1 reruns the proof on each save; PATH_ID=pro|factory picks your workshop; ID=<lab> picks a lab; progress is in .labs/ (gitignored).
+lab:
+	npx tsx scripts/labs/main.ts lab $(ID) $(if $(PATH_ID),--path=$(PATH_ID)) $(if $(HINT),--hint) $(if $(WATCH),--watch)
+
+next:
+	npx tsx scripts/labs/main.ts next
+
+progress:
+	npx tsx scripts/labs/main.ts progress

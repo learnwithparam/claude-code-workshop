@@ -25,6 +25,10 @@ Run one agent on a ticket with no stages. There is no plan to approve and no evi
 
 ## With
 
+The same ticket now moves through named stages, and a person decides twice: the plan and the merge.
+
+## Run it
+
 1. File an issue with `gh issue create`. Run `make factory ISSUE=<n>`. Expect a plan comment and a stop at awaiting approval.
 2. Read the plan. Add the approved label.
 3. Run `make factory ISSUE=<n>` again. Expect build, review and verify, then a result of `pr-ready` or `needs-human`.
@@ -33,9 +37,17 @@ Run one agent on a ticket with no stages. There is no plan to approve and no evi
 
 `make prove LEVEL=delivery` runs the dry run, checks the six stages appear in order with the loop cap, and checks the PR template. The state machine tests use a fake runner and cover approval, order, the cap, routing and the unlisted-model failure.
 
+![The proof passing](../recordings/delivery.gif)
+
 ## Exercise
 
 Track A: file a bug ticket for the Kindergarten parser and run it through the dry run. Track B: add a retro stage that proposes one change to `.claude/` and must keep the eval score.
+
+## Go further: headless and bounded
+
+- `claude -p "classify this issue" --output-format json` runs one turn without a screen and prints JSON you can pipe to `jq`.
+- Every factory stage has `maxTurns` and `maxBudgetUsd` in `.factory/config.json`. Lower one to a value too small, run the stage, and read the stop reason. A run that ends at its budget is a feature, not a failure.
+- `.github/workflows/review.yml` runs a review on a pull request with a model and a turn cap set in the workflow.
 
 ## Discussion
 

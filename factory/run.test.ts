@@ -18,11 +18,20 @@ function fake(
   const calls: string[] = [];
   const prompts: Record<string, string> = {};
   const queues = Object.fromEntries(Object.entries(script).map(([k, v]) => [k, [...v]]));
+  const adrs: string[] = [];
+  const released: string[] = [];
+  const comments: string[] = [];
   const saved: { ledger?: Ledger; lines?: string[] } = {};
   const deps: Deps = {
+    listAdrs: async () => ["docs/adr/0003-old.md"],
+    writeAdr: async (f) => void adrs.push(f),
+    applyRelease: async (entry) => {
+      released.push(entry("0.2.0"));
+      return "0.2.0";
+    },
     saveRun: async (_n, ledger, lines) => void Object.assign(saved, { ledger, lines }),
     getIssue: async (n): Promise<Issue> => ({ number: n, title: "t", body: "b", labels }),
-    comment: async () => {},
+    comment: async (_n, b) => void comments.push(b),
     label: async (_n, l) => void calls.push(`label:${l}`),
     latestPlan: async () => plan,
     testResults: async () => results,
@@ -33,14 +42,16 @@ function fake(
       return "url";
     },
     unlabel: async (_n, l) => void calls.push(`unlabel:${l}`),
-    runStage: async (stage, model, prompt) => {
+    runStage: async (stage, model, prompt, _limits, extra) => {
+      if (extra?.allowProtected) calls.push(`protected:${stage}`);
       calls.push(`${stage}:${model}`);
       prompts[stage] = prompt;
-      const text = queues[stage]?.shift() ?? "VERDICT: clean";
+      const text =
+        queues[stage]?.shift() ?? (stage === "adr" ? "CRITICALITY: C1" : "VERDICT: clean");
       return { text, modelsUsed: [model], costUsd: 0.01 };
     },
   };
-  return { deps, calls, prompts, saved };
+  return { deps, calls, prompts, saved, adrs, released, comments };
 }
 
 describe("factory state machine", () => {
@@ -58,9 +69,9 @@ describe("factory state machine", () => {
     ]);
     const r = await runFactory(deps, cfg, 1);
     expect(r.outcome).toBe("pr-ready");
-    expect(r.stages).toEqual(["triage", "build", "review", "verify"]);
+    expect(r.stages).toEqual(["triage", "build", "review", "verify", "adr"]);
     expect(calls.indexOf("branch")).toBeLessThan(calls.indexOf("build:claude-sonnet-5-5"));
-    expect(calls.at(-1)).toBe("pr");
+    expect(calls.filter((c) => !c.startsWith("retro")).at(-1)).toBe("pr");
   });
 
   it("caps the review loop at maxRounds and hands over to a human", async () => {
@@ -193,5 +204,16 @@ describe("factory state machine", () => {
       expect(r.outcome).toBe("needs-human");
       expect(calls).not.toContain("pr");
     }
+  });
+
+  it("lets only the build stage edit protected files, and only when a person labelled the issue", async () => {
+    const script = { triage: ["TYPE: bug DECISION: proceed"] };
+    const approved = [cfg.labels.approved, cfg.labels.planned];
+    const plain = fake(script, approved);
+    await runFactory(plain.deps, cfg, 1);
+    expect(plain.calls.some((c) => c.startsWith("protected:"))).toBe(false);
+    const labelled = fake(script, [...approved, cfg.labels.protectedOk]);
+    await runFactory(labelled.deps, cfg, 1);
+    expect(labelled.calls.filter((c) => c.startsWith("protected:"))).toEqual(["protected:build"]);
   });
 });

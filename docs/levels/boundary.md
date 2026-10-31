@@ -38,9 +38,21 @@ Repeat the "debug the env" prompt. The hook blocks the command and tells Claude 
 
 `make prove LEVEL=boundary` greps the built bundle for key shapes, checks that `web/` reads only `PUBLIC_` variables, checks the Dockerfile, checks the 500 body has no model name or stack, and runs the hook against known bad commands.
 
+![The proof passing](../recordings/boundary.gif)
+
 ## Exercise
 
 Track A: add a second secret to `api/src/env.ts` and prove the bundle stays clean. Track B: write a hook case for a command that reads the file through `base64`.
+
+## Go further: modes and scopes
+
+- Settings merge from user, project, local and managed scopes, and a deny rule in any scope wins. `.claude/settings.json` is the project scope and is committed. Put personal changes in `.claude/settings.local.json`, which stays out of git.
+- Start the same risky ask in `default`, `plan` and `acceptEdits` (`claude --permission-mode plan`) and note which tool calls each mode allowed without asking. The factory picks one per stage in `.factory/config.json`: `plan` for reading stages, `acceptEdits` for build.
+- A dev container keeps a mistake off your laptop. Open the repo in one and the sandbox plus the deny rules are a second wall around the same secret.
+
+## Go further: the hook catalogue
+
+Besides the secrets guard, five hooks each show one pattern: a prompt router that adds a hint, a session-start hash of the settings, an output scan for leaked keys, a warn-only length check and a fail-safe formatter. `hook-catalogue.test.ts` feeds each one bad input. `docs/managed-settings.example.json` shows the deny list an organisation would enforce above every repo.
 
 ## Discussion
 

@@ -8,7 +8,16 @@ const stageSchema = z.object({
   permissionMode: z.enum(["plan", "acceptEdits", "default"]),
 });
 
-export const STAGE_NAMES = ["triage", "plan", "build", "review", "verify", "retro"] as const;
+export const STAGE_NAMES = [
+  "triage",
+  "plan",
+  "build",
+  "review",
+  "verify",
+  "adr",
+  "delivery",
+  "retro",
+] as const;
 export type StageName = (typeof STAGE_NAMES)[number];
 
 export const configSchema = z
@@ -30,6 +39,13 @@ export const configSchema = z
         cacheWrite: z.number().nonnegative(),
       }),
     ),
+    // Which config stage a workflow step takes its model from. A step missing here and not named like a
+    // stage falls back to the agent's frontmatter.
+    stepStages: z.record(z.string(), z.enum(STAGE_NAMES)).default({}),
+    // Run-level spend: the run stops once it has spent `stopAt` of `capUsd`, and no call may pass the cap.
+    spend: z
+      .object({ capUsd: z.number().positive(), stopAt: z.number().gt(0).max(1) })
+      .default({ capUsd: 10, stopAt: 0.75 }),
     baselineModel: z.string(),
     tiers: z.object({ high: z.string(), mid: z.string(), low: z.string() }),
     routes: z.record(z.string(), z.record(z.string(), z.string())),
@@ -39,6 +55,7 @@ export const configSchema = z
       planned: z.string(),
       approved: z.string(),
       needsHuman: z.string(),
+      protectedOk: z.string(),
     }),
   })
   .superRefine((cfg, ctx) => {

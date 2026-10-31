@@ -34,11 +34,21 @@ Break the code and let Claude try to stop. The gate refuses and prints the failu
 
 The proof undoes each fix in turn, runs the named test, expects it to fail, then restores the file. It also checks both hooks are wired in `.claude/settings.json`. Expect `3 bugs bite, hooks wired`.
 
+![The proof passing](../recordings/verification.gif)
+
 The layout test reads the page source. A browser replay with Playwright and axe is the next step and is part of the take-home.
 
 ## Exercise
 
 Track A: add a fourth bug and its biting test. Track B: replace the layout test with a Playwright check at 375 px.
+
+## Go further: let a tool look
+
+A hook that fails the turn is a check you cannot forget. The `design-reviewer` agent adds eyes: it builds the app, opens it at 375 and 1280 px and reports sideways scroll, low contrast and print clipping. Run it after changing a font size and compare its verdict with `tests/e2e/layout.e2e.ts`, which asserts no sideways scroll, no serious accessibility violation and no clipped print page.
+
+## Go further: review rules and a test lock
+
+`REVIEW.md` tells the reviewer what failure looks like here: the count first, `file:line` evidence, at most three nits. The `pretooluse-test-lock.mjs` hook blocks edits to test files while `FACTORY_PHASE=fix`, so a fix cannot pass by changing the test. Set the variable in a shell and try to edit a test to see it refuse.
 
 ## Discussion
 

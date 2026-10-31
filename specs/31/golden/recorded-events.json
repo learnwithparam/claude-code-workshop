@@ -1,0 +1,59 @@
+{
+  "question": {
+    "result": {
+      "kind": "question",
+      "text": "Which grade is this for?",
+      "usage": {
+        "input": 100,
+        "cacheRead": 20,
+        "cacheWrite": 10,
+        "output": 50
+      }
+    },
+    "wire": "event: question\ndata: {\"text\":\"Which grade is this for?\"}\n\nevent: usage\ndata: {\"input\":100,\"cacheRead\":20,\"cacheWrite\":10,\"output\":50,\"costUsd\":0.0003645}\n\n"
+  },
+  "worksheet": {
+    "result": {
+      "kind": "worksheet",
+      "sheet": {
+        "title": "Fractions",
+        "band": "grade-3-5",
+        "subject": "Maths",
+        "sections": [
+          {
+            "heading": "Halves",
+            "instruction": "Circle the answer.",
+            "items": [
+              {
+                "prompt": "Half of 4?",
+                "answer": "2"
+              }
+            ]
+          }
+        ]
+      },
+      "usage": {
+        "input": 100,
+        "cacheRead": 20,
+        "cacheWrite": 10,
+        "output": 50
+      }
+    },
+    "wire": "event: worksheet\ndata: {\"sheet\":{\"title\":\"Fractions\",\"band\":\"grade-3-5\",\"subject\":\"Maths\",\"sections\":[{\"heading\":\"Halves\",\"instruction\":\"Circle the answer.\",\"items\":[{\"prompt\":\"Half of 4?\",\"answer\":\"2\"}]}]},\"html\":\"<rendered>\"}\n\nevent: usage\ndata: {\"input\":100,\"cacheRead\":20,\"cacheWrite\":10,\"output\":50,\"costUsd\":0.0003645}\n\n"
+  },
+  "failed": {
+    "result": {
+      "kind": "failed",
+      "usage": {
+        "input": 100,
+        "cacheRead": 20,
+        "cacheWrite": 10,
+        "output": 50
+      }
+    },
+    "wire": "event: error\ndata: {\"message\":\"Could not make a worksheet. Try again.\"}\n\nevent: usage\ndata: {\"input\":100,\"cacheRead\":20,\"cacheWrite\":10,\"output\":50,\"costUsd\":0.0003645}\n\n"
+  },
+  "thrown": {
+    "wire": "event: error\ndata: {\"message\":\"Something went wrong. Try again.\"}\n\n"
+  }
+}

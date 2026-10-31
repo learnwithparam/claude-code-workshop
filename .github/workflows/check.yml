@@ -14,7 +14,11 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - run: npx playwright install --with-deps chromium
       - run: make check
+      # The CLI judges the manifests; a missing binary fails the step instead of skipping it.
+      - run: npx --yes @anthropic-ai/claude-code@2.1.312 plugin validate plugins/factory-kit --strict
+      - run: npx --yes @anthropic-ai/claude-code@2.1.312 plugin validate . --strict
 
   # Each level is generated from trunk and must pass its own gate, so a fix on main
   # can never leave a learner's catch-up copy broken.
@@ -24,7 +28,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        level: [hand-built, boundary, context, skills, execution, verification, delivery]
+        level:
+          [
+            hand-built,
+            boundary,
+            context,
+            skills,
+            execution,
+            verification,
+            delivery,
+            sharing,
+            workflows,
+          ]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,6 +47,8 @@ jobs:
       - run: npm ci
       - run: make levels LEVEL=${{ matrix.level }}
       - run: npm ci
+        working-directory: supplied/${{ matrix.level }}
+      - run: npx playwright install --with-deps chromium
         working-directory: supplied/${{ matrix.level }}
       - run: make check
         working-directory: supplied/${{ matrix.level }}

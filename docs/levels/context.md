@@ -35,9 +35,24 @@ Run the same prompt. Claude adds `formatBand` to `shared/src/bands.ts` with a te
 
 `make prove LEVEL=context` checks that `CLAUDE.md` imports `AGENTS.md` and is short, that every rule's `paths` glob matches a real file, and that the repo passes its own conventions.
 
+![The proof passing](../recordings/context.gif)
+
 ## Exercise
 
 Track A: add a rule for `tests/`. Track B: add a convention to `check-conventions.ts` and watch the proof catch a violation.
+
+## Go further: a ticket from request to commit
+
+1. Explore: ask Claude to read the files a small ticket touches, in plan mode, and write nothing.
+2. Plan: ask for the steps and the test that will fail first.
+3. Code: leave plan mode and build only that plan.
+4. Commit: one change, one message that says why.
+
+Type `/context` before step 1 and after step 3 to see what each step cost in window. Then `/compact` and compare. `/memory` shows which instruction files loaded, so you can confirm `AGENTS.md` came in through `CLAUDE.md`.
+
+## Go further: your own files
+
+Two files here are not shared. Copy `docs/examples/CLAUDE.local.md` to `CLAUDE.local.md` for notes only you need; git ignores it. Pick the `Teaching` output style with `/output-style` to change how replies read without touching any rule. `.worktreeinclude` lists the ignored files a new worktree should receive, and a test keeps secrets off that list.
 
 ## Discussion
 

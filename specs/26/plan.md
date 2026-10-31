@@ -1,0 +1,14 @@
+shared/src/geist-font-face.ts
+shared/src/render.ts
+shared/src/render.test.ts
+shared/src/bands.ts
+shared/src/bands.test.ts
+specs/26/plan.md
+specs/25/golden/**snapshots**/early-reader.html
+specs/25/golden/**snapshots**/grade-1-2.html
+specs/25/golden/**snapshots**/grade-3-5.html
+specs/25/golden/**snapshots**/grade-6-8.html
+specs/25/golden/**snapshots**/grade-9-12.html
+specs/25/golden/**snapshots**/kindergarten.html
+specs/25/golden/**snapshots**/single-item.html
+specs/25/golden/**snapshots**/university.html

@@ -1,0 +1,27 @@
+# Method: a dependency change is vetted, then proved by the whole gate, never by the bump alone.
+name: deps
+method: vet then gate
+source: Anthropic AI-native SDLC playbook
+for: dependency updates
+manifests: true
+steps:
+  - {
+      stage: vet,
+      agent: security-reviewer,
+      writes: intent.md,
+      brief: "For each package named in the ticket, report its age, maintainer and whether a sibling app pins another major version. Reply with the findings only.",
+    }
+  - { stage: plan, writes: plan.md, agent: planner }
+  - {
+      stage: bump,
+      agent: builder,
+      brief: "Bump only the packages the plan lists with npm, fix any breakage the bump causes, and keep the lockfile in step. Change dependency versions only: never scripts, config or other fields of a manifest.",
+      checks: [manifest-deps, gate],
+      loop: { until: [manifest-deps, gate], max: 3 },
+    }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift, manifest-deps],
+    }

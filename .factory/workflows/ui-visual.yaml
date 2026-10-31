@@ -1,0 +1,37 @@
+# Method: design contract, then visual iteration with screenshots (Anthropic best practices), then the design lens and human feedback.
+name: ui-visual
+method: screenshot loop with visual and a11y checks
+source: Anthropic Claude Code best practices
+for: UI
+steps:
+  - {
+      stage: contract,
+      agent: planner,
+      writes: intent.md,
+      brief: "Write a short design contract for the ticket: the screen job, the primary action, the states it needs, the responsive rules, and the patterns to reject. Reply with the contract only.",
+    }
+  - { stage: plan, writes: plan.md, agent: planner }
+  - {
+      stage: build,
+      agent: builder,
+      brief: "Build the UI the contract describes in the files the plan lists. Use the existing tokens and the Geist font, keep it accessible at 375 and 1280 px, and add a test beside each new module.",
+      checks: [visual, gate],
+      loop: { until: [visual, gate], max: 4 },
+    }
+  - {
+      stage: design-review,
+      agent: design-reviewer,
+      brief: "Review the built UI against the design contract and list what is off. Change nothing.",
+    }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }
+  - {
+      stage: feedback,
+      agent: planner,
+      brief: "Summarise what changed for the human who approves, in plain words.",
+      gate: human,
+    }

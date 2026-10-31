@@ -1,0 +1,4 @@
+{"version":3,"term":{"cols":70,"rows":22},"timestamp":1793278041,"command":"bash -c 'echo \"$ make prove LEVEL=skills\"; make prove LEVEL=skills 2>&1 | tail -16'","env":{"SHELL":"/bin/zsh"}}
+[0.009, "o", "$ make prove LEVEL=skills\r\n"]
+[0.335, "o", "npm run prove -- skills\r\n\r\n> claude-code-workshop@0.1.0 prove\r\n> tsx scripts/prove/run.ts skills\r\n\r\nPASS skills: skills are intact and the agent hits every band under the token budget (7/7 on band, median 1098 tokens)\r\n"]
+[0.001, "x", "0"]

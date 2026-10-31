@@ -1,0 +1,4 @@
+{"version":3,"term":{"cols":70,"rows":22},"timestamp":1793278042,"command":"bash -c 'echo \"$ make prove LEVEL=verification\"; make prove LEVEL=verification 2>&1 | tail -16'","env":{"SHELL":"/bin/zsh"}}
+[0.008, "o", "$ make prove LEVEL=verification\r\n"]
+[4.797, "o", "npm run prove -- verification\r\n\r\n> claude-code-workshop@0.1.0 prove\r\n> tsx scripts/prove/run.ts verification\r\n\r\nPASS verification: every seeded bug has a test that bites, and Claude cannot stop on a red gate (3 bugs bite, hooks wired)\r\n"]
+[0.001, "x", "0"]

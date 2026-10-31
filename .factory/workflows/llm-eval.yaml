@@ -1,0 +1,28 @@
+# Method: eval-driven development. Evals are the tests for model behaviour: red on main, then a loop to the pass rate and token ceiling.
+name: llm-eval
+method: eval rows red first, no regression
+source: Anthropic AI-native SDLC playbook
+for: prompts, models, agents and any .claude change
+steps:
+  - { stage: plan, writes: plan.md, agent: planner }
+  - {
+      stage: rows,
+      agent: builder,
+      brief: "Add eval rows that fail against main for the behaviour in the ticket. Write no prompt or source change yet.",
+      checks: [red, lock],
+      loop: { until: [red], max: 2 },
+    }
+  - {
+      stage: tune,
+      agent: builder,
+      brief: "Change the prompt or model call until the new rows pass without a regression or a higher token count. Never edit the rows.",
+      phase: fix,
+      checks: [eval, lock],
+      loop: { until: [eval, lock], max: 4 },
+    }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }

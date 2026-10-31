@@ -1,0 +1,34 @@
+# Method: the incident record becomes an eval first, then a fix (Anthropic SDLC playbook: incidents become evals).
+name: incident
+method: incident to eval to fix
+source: Anthropic AI-native SDLC playbook
+for: incidents and band breaches
+steps:
+  - {
+      stage: diagnose,
+      agent: verifier,
+      writes: intent.md,
+      brief: "From the incident in the ticket, state the failing behaviour, the likely cause and the evidence. Change nothing. Reply with the record only.",
+    }
+  - { stage: plan, writes: plan.md, agent: planner }
+  - {
+      stage: eval,
+      agent: builder,
+      brief: "Turn the incident into a test in specs/<issue>/golden that fails on the base commit the same way production failed. Write no source.",
+      checks: [red, lock],
+      loop: { until: [red], max: 2 },
+    }
+  - {
+      stage: fix,
+      agent: builder,
+      brief: "Fix the cause with the smallest change. Never edit the test.",
+      phase: fix,
+      checks: [green, lock, gate],
+      loop: { until: [green, lock, gate], max: 3 },
+    }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }

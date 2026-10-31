@@ -1,0 +1,8 @@
+{
+  "name": "factory-kit",
+  "version": "1.0.1",
+  "description": "The workshop factory as a plugin: triage, plan, build, review and verify agents, the retro and handoff skills, and a guard that keeps secrets out of shell commands.",
+  "author": { "name": "learnwithparam" },
+  "repository": "https://github.com/learnwithparam/claude-code-workshop",
+  "license": "MIT"
+}

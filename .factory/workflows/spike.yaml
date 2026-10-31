@@ -1,0 +1,18 @@
+# Method: a time-boxed spike. The output is a decision record, not code.
+name: spike
+method: ADR within a budget
+source: Architecture decision records
+for: open questions
+steps:
+  - {
+      stage: explore,
+      agent: planner,
+      brief: "List the options for the question in the ticket with the cost and risk of each, from the repo as it is. Reply with the options only.",
+    }
+  - {
+      stage: decide,
+      agent: planner,
+      writes: spec.md,
+      gate: human,
+      brief: "Write the decision record: context, the option chosen, why, and what it rules out. Reply with the record only.",
+    }

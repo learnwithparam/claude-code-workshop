@@ -1,0 +1,33 @@
+name: review
+
+# A same-repo pull request gets a review from the reviewer and design-reviewer agents.
+# pull_request, never pull_request_target: a fork gets no secret and runs no code with one.
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - uses: anthropics/claude-code-action@d70510b174a1244958df0b03166a54912811f3e6 # v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Without this the action asks for an OIDC token, which needs id-token: write.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            Review this pull request with the reviewer agent. If it touches web/ or
+            shared/src/render.ts, also use the design-reviewer agent. Post one comment
+            with the blocking findings and a final VERDICT line.
+          claude_args: --model claude-sonnet-5-5 --max-turns 15

@@ -1,0 +1,28 @@
+# Method: consumer-driven contract. The recorded contract test comes first, then both sides move to meet it.
+name: contract
+method: contract test first
+source: consumer-driven contracts
+for: api and web boundary
+steps:
+  - { stage: plan, writes: plan.md, agent: planner }
+  - {
+      stage: contract,
+      agent: builder,
+      brief: "Write the contract test first in specs/<issue>/golden: it replays recorded events through both sides and fails on the base commit. Write no source.",
+      checks: [red, lock],
+      loop: { until: [red], max: 2 },
+    }
+  - {
+      stage: sides,
+      agent: builder,
+      brief: "Change the api and the web side until the contract test passes. Never edit the test.",
+      phase: fix,
+      checks: [contract, lock, gate],
+      loop: { until: [contract, lock, gate], max: 3 },
+    }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }

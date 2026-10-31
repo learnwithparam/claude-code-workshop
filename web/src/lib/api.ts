@@ -1,26 +1,31 @@
+import { type ChatEvent, eventSchemas, type Usage } from "@workshop/shared";
+
 export type ChatMessage = { role: "user" | "assistant"; content: string };
-export type Usage = {
-  input: number;
-  cacheRead: number;
-  cacheWrite: number;
-  output: number;
-  costUsd: number;
-};
-export type ChatEvent =
-  | { event: "question"; data: { text: string } }
-  | { event: "worksheet"; data: { html: string } }
-  | { event: "usage"; data: Usage }
-  | { event: "error"; data: { message: string } };
+export type { ChatEvent, Usage };
 
 // The only config the browser has: where the API lives. No key, no secret, nothing else.
 const API_URL: string = import.meta.env.PUBLIC_API_URL ?? "http://localhost:8787";
 
+const DRIFTED: ChatEvent = {
+  event: "error",
+  data: { message: "Something went wrong. Try again." },
+};
+
+function parseBlock(block: string): ChatEvent[] {
+  const event = /^event: (.+)$/m.exec(block)?.[1];
+  const data = /^data: (.+)$/m.exec(block)?.[1];
+  if (!event || !data) return [];
+  const schema = eventSchemas[event as keyof typeof eventSchemas];
+  try {
+    const parsed = schema?.safeParse(JSON.parse(data));
+    return parsed?.success ? [{ event, data: parsed.data } as ChatEvent] : [DRIFTED];
+  } catch {
+    return [DRIFTED];
+  }
+}
+
 export function parseSse(chunk: string): ChatEvent[] {
-  return chunk.split("\n\n").flatMap((block) => {
-    const event = /^event: (.+)$/m.exec(block)?.[1];
-    const data = /^data: (.+)$/m.exec(block)?.[1];
-    return event && data ? [{ event, data: JSON.parse(data) } as ChatEvent] : [];
-  });
+  return chunk.split("\n\n").flatMap(parseBlock);
 }
 
 export async function* chat(messages: ChatMessage[]): AsyncGenerator<ChatEvent> {

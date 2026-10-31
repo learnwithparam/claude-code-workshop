@@ -1,0 +1,48 @@
+# Method: acceptance tests from agreed examples (Adzic, Specification by Example). Source: Anthropic AI-native SDLC playbook.
+name: feature-atdd
+method: ATDD, one test per AC example
+source: Anthropic AI-native SDLC playbook
+for: small features
+steps:
+  - {
+      stage: intent,
+      agent: planner,
+      writes: intent.md,
+      brief: "State the outcome the feature must reach and how we will know, in a few lines. Reply with the intent only.",
+    }
+  - {
+      stage: spec,
+      agent: planner,
+      writes: spec.md,
+      gate: human,
+      brief: "Write concrete examples, one per line as 'Given <state>, when <action>, then <result>' with real values. Reply with the examples only.",
+    }
+  - { stage: plan, writes: plan.md, agent: planner }
+  - {
+      stage: tests,
+      agent: builder,
+      brief: "Turn each example into a vitest test in specs/<issue>/golden whose assertion matches its Then. They fail on the base commit. Write no source.",
+      checks: [red, lock],
+      loop: { until: [red], max: 2 },
+    }
+  - {
+      stage: build,
+      agent: builder,
+      brief: "Make the locked example tests pass with the smallest change in the files the plan lists. Never edit the tests.",
+      phase: fix,
+      checks: [acceptance, holdout, lock],
+      loop: { until: [acceptance, holdout, lock], max: 4 },
+    }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }
+  - {
+      stage: ci,
+      agent: builder,
+      brief: "Read the failing CI job log and fix what it names. Never edit the locked tests.",
+      checks: [ci],
+      loop: { until: [ci], max: 2 },
+    }

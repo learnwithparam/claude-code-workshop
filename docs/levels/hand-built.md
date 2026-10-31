@@ -34,11 +34,17 @@ If the page is blank, run `make doctor` and check you are on Node 22.
 
 `make prove LEVEL=hand-built` renders all seven bands, runs `hyperframes lint` on each, and checks that nothing in `web/` calls an API. Expect `PASS hand-built`.
 
+![The proof passing](../recordings/hand-built.gif)
+
 ## Exercise
 
 Track A: add a band alias such as "year 1" and make the structural test pass. Track B: add a band for adult learners with its own font size and item cap.
 
 Catch up with `make levels LEVEL=hand-built`, then open `supplied/hand-built`.
+
+## Go further: a clean place to start
+
+Run `make doctor` before anything else. It names what is missing instead of failing three steps later. `/help` lists the commands in your version, and `/doctor` checks the install.
 
 ## Discussion
 

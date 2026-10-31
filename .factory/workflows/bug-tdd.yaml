@@ -1,0 +1,41 @@
+# Method: TDD, red then green then refactor (Beck). Source: Anthropic best practices, "commit the tests, then write code without touching them".
+name: bug-tdd
+method: TDD with a locked test
+source: Anthropic Claude Code best practices
+for: bugs
+steps:
+  - { stage: plan, writes: plan.md, agent: planner }
+  - {
+      stage: reproduce,
+      agent: builder,
+      brief: "Do not fix the bug. Write one vitest test in specs/<issue>/golden that fails on the base commit because of the bug in the ticket, and fails for that reason only.",
+      checks: [red, lock],
+      loop: { until: [red], max: 2 },
+    }
+  - {
+      stage: fix,
+      agent: builder,
+      brief: "Fix the bug with the smallest change that makes the locked test pass. Never edit the test.",
+      phase: fix,
+      checks: [green, lock, gate],
+      loop: { until: [green, lock, gate], max: 3 },
+    }
+  - {
+      stage: harden,
+      agent: test-reviewer,
+      brief: "Strengthen the tests so mutants in the files this run changed are killed. Add tests under specs/<issue>/golden; never change source.",
+      checks: [mutation],
+    }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }
+  - {
+      stage: ci,
+      agent: builder,
+      brief: "Read the failing CI job log and fix what it names. Never edit the locked tests.",
+      checks: [ci],
+      loop: { until: [ci], max: 2 },
+    }

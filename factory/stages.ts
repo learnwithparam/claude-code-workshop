@@ -1,10 +1,20 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { ADR_PATH } from "./adr.ts";
 import { formatReport } from "./cost-report.ts";
-import type { Deps, Issue, StageResult } from "./run.ts";
+import { nextVersion, prependEntry } from "./release.ts";
+import { type Deps, type Issue, PLAN_MARK, type StageResult } from "./run.ts";
 import { writeRunFiles } from "./run-files.ts";
 import { parseVitestJson } from "./spec.ts";
 
@@ -38,7 +48,7 @@ function withScrubbedEnv<T>(fn: (env: ReturnType<typeof scrubbedEnv>) => T): T {
 let base = "";
 // Matched at any depth: a nested package manifest or config rewrites the gate as well.
 const GATE_FILES =
-  /(^|\/)(G?[Mm]akefile|package(-lock)?\.json|tsconfig[^/]*\.json|biome\.jsonc?|vitest\.config\.[cm]?[jt]s|\.github\/|\.claude\/hooks\/|scripts\/|factory\/|\.factory\/)/;
+  /(^|\/)(G?[Mm]akefile|package(-lock)?\.json|tsconfig[^/]*\.json|biome\.jsonc?|vitest\.config\.[cm]?[jt]s|\.github\/|\.claude\/(hooks|agents)\/|\.claude\/settings[^/]*\.json|levels\.json|scripts\/|factory\/|\.factory\/)/;
 
 export const githubDeps: Pick<
   Deps,
@@ -50,6 +60,9 @@ export const githubDeps: Pick<
   | "startBranch"
   | "openPr"
   | "gate"
+  | "listAdrs"
+  | "applyRelease"
+  | "writeAdr"
   | "testResults"
   | "saveRun"
 > = {
@@ -119,6 +132,27 @@ export const githubDeps: Pick<
     );
     return parseVitestJson(out);
   },
+  async listAdrs() {
+    try {
+      return readdirSync("docs/adr").map((f) => `docs/adr/${f}`);
+    } catch {
+      return [];
+    }
+  },
+  async writeAdr(file, content) {
+    if (!ADR_PATH.test(file)) throw new Error(`refusing to write ${file}`);
+    mkdirSync("docs/adr", { recursive: true });
+    writeFileSync(file, content, { flag: "wx" });
+  },
+  // The build may not touch package.json, so the runner bumps it itself, after the gate.
+  async applyRelease(entry) {
+    const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+    pkg.version = nextVersion(String(pkg.version));
+    writeFileSync("package.json", `${JSON.stringify(pkg, null, 2)}\n`);
+    const old = existsSync("CHANGELOG.md") ? readFileSync("CHANGELOG.md", "utf8") : "";
+    writeFileSync("CHANGELOG.md", prependEntry(old, entry(pkg.version)));
+    return String(pkg.version);
+  },
   async openPr(n, title, body) {
     // The agent must not have committed or staged anything itself: the diff is what a human reviews.
     const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
@@ -132,8 +166,13 @@ export const githubDeps: Pick<
     const stray = execFileSync("git", ["ls-files", "--others", "--exclude-standard"], {
       encoding: "utf8",
     }).trim();
-    if (stray) throw new Error(`untracked files, a human must review them:\n${stray}`);
+    // The one new file allowed is the ADR the adr stage had the runner write, by exact path shape.
+    const others = stray.split("\n").filter((f) => f && f !== "CHANGELOG.md" && !ADR_PATH.test(f));
+    if (others.length)
+      throw new Error(`untracked files, a human must review them:\n${others.join("\n")}`);
     execFileSync("git", ["add", "-u"]);
+    for (const f of stray.split("\n").filter((f) => f === "CHANGELOG.md" || ADR_PATH.test(f)))
+      execFileSync("git", ["add", f]);
     execFileSync("git", ["commit", "-m", `${title} (#${n})`], { stdio: "ignore" });
     execFileSync("git", ["push", "-u", "origin", `HEAD:refs/heads/factory/issue-${n}`], {
       stdio: "ignore",
@@ -145,11 +184,15 @@ export const githubDeps: Pick<
     if (raw.labels.some((l: { name: string }) => l.name === label))
       gh("issue", "edit", String(n), "--remove-label", label);
   },
-  // The approved plan is the newest comment by the factory's own identity; anyone else's is ignored.
+  // The approved plan is the newest marked comment by the factory's own identity; anyone else's,
+  // and the factory's own refusals, notices and retro proposals, are ignored.
   async latestPlan(n) {
     const me = gh("api", "user", "--jq", ".login").trim();
     const raw = JSON.parse(gh("issue", "view", String(n), "--json", "comments"));
-    const mine = raw.comments.filter((c: { author: { login: string } }) => c.author.login === me);
+    const mine = raw.comments.filter(
+      (c: { author: { login: string }; body: string }) =>
+        c.author.login === me && String(c.body).startsWith(PLAN_MARK),
+    );
     return String(mine.at(-1)?.body ?? "");
   },
 };
@@ -157,7 +200,7 @@ export const githubDeps: Pick<
 const AGENT_ENV = ["PATH", "HOME", "SHELL", "TERM", "LANG", "ANTHROPIC_API_KEY"];
 
 // Agent SDK: the right tool for an agent that works on the codebase (files, shell, hooks, skills).
-export const runStage: Deps["runStage"] = async (_stage, model, prompt, limits) => {
+export const runStage: Deps["runStage"] = async (_stage, model, prompt, limits, extra) => {
   let text = "";
   let failed: string | undefined;
   let costUsd = 0;
@@ -179,6 +222,7 @@ export const runStage: Deps["runStage"] = async (_stage, model, prompt, limits) 
             AGENT_ENV.flatMap((k) => (process.env[k] ? [[k, process.env[k]]] : [])),
           ),
           CLAUDE_CODE_DISABLE_AUTO_MEMORY: "1",
+          ...(extra?.allowProtected ? { FACTORY_ALLOW_PROTECTED: "1" } : {}),
           ANTHROPIC_DEFAULT_HAIKU_MODEL: "claude-haiku-5-5",
         },
       },

@@ -9,6 +9,9 @@ const ALLOWED_NAMES = new Set([
   "AGENTS.md",
   "CLAUDE.md",
   "SKILL.md",
+  "MEMORY.md", // Claude Code fixes the agent-memory file name
+  "REVIEW.md", // Claude Code reads this exact name for review guidance
+  "CLAUDE.local.md", // the example under docs/examples keeps the real name
   "Dockerfile",
   "Makefile",
   "README.md",

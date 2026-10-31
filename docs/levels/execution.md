@@ -34,9 +34,27 @@ Run `make factory ISSUE=1 FLAGS=--dry-run`. It prints each stage with its limits
 
 `make prove LEVEL=execution` checks every agent has `model`, `maxTurns` and `tools`, the config validates, every stage model is allowed, and prints the worst-case cost of one pass.
 
+![The proof passing](../recordings/execution.gif)
+
 ## Exercise
 
 Track A: add a stage budget and see the worst case change. Track B: write a new agent for accessibility review.
+
+## Go further: effort, parallel sessions and orchestration
+
+- Models are routed per stage in `.factory/config.json`. Read `cost.json` from a run to see what each stage spent, and lower the effort on the stages that spent most for the least gain.
+- Two terminals, each on its own worktree (`git worktree add`), run two sessions at once without overwriting each other. The builder agent uses `isolation: worktree` for the same reason.
+- Pick the orchestration by what you need back:
+
+| Need                                | Use                                                  |
+| ----------------------------------- | ---------------------------------------------------- |
+| A result from one focused read      | a subagent                                           |
+| A fixed order of stages with caps   | the factory runner or `.claude/workflows/factory.js` |
+| Many independent runs of one prompt | `claude -p` in a loop                                |
+
+## Go further: what an agent file can set
+
+The `verifier` runs in plan mode, the `builder` accepts edits inside its own worktree, and the `reviewer` keeps notes in `.claude/agent-memory/reviewer/`. `.mcp.json` names a GitHub server whose token comes from the environment, so it holds no secret. A project server still asks for approval before it connects.
 
 ## Discussion
 

@@ -5,8 +5,16 @@ dist/
 .env.*
 !.env.example
 .workshop-home/
-CLAUDE.local.md
+/CLAUDE.local.md
 .claude/settings.local.json
-.factory/runs/
+**/.factory/runs/
+**/.cc-writes/
 *.log
+# The run commits its own log as an audit artifact.
+!specs/*/run.log
 supplied/
+test-results/
+playwright-report/
+.factory-base/
+**/.stryker-tmp/
+.labs/
