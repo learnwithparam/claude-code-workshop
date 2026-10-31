@@ -67,24 +67,29 @@ In the engine the spec is a file, `specs/<n>/spec.md`, saved by the runner. The 
 A gate stops the run with the outcome `awaiting-approval` until a person approves what they read.
 
 - The approval is a comment on the issue with the exact line `approve <stage> <digest>`.
-- The digest is a hash of `intent.md` and `spec.md` for the `spec` stage, and adds `plan.md` for later stages (`artifactDigest` in `factory/engine/artifacts.ts`). Edit the spec after approving and the old approval no longer matches.
+- The digest is a hash of `intent.md` and `spec.md` for the `spec` stage, and adds `plan.md` for later stages (`artifactDigest` in `factory/engine/artifacts.ts`). `constitution.md`, `clarify.md`, `tasks.md` and `analyze.md` join the hash only when the run wrote them. Edit the spec after approving and the old approval no longer matches.
 - Only an `OWNER`, `MEMBER` or `COLLABORATOR` counts, and the real run narrows that to the logged-in `gh` user. The agents hold no GitHub token, so they cannot approve (`approvalIn` in `factory/engine/real-host.ts`).
+- How many distinct people must approve comes from the risk tier of the files changed so far: one for a docs-only or medium change, two for a high one (F1). The log line is `gate spec tier medium needs 1 approval`.
 - On resume the runner skips every step up to the last approved gate, so regenerating an artifact cannot change what the person signed.
 
 ## Spec Kit and Kiro compared with this repo
 
-`feature-sdd.yaml` names both as its source. What the file actually contains:
+`feature-sdd.yaml` names both as its source. What the file actually contains, in order: `intent`, `constitution`, `spec` (human gate), `clarify`, `plan` (human gate), `tasks`, `analyze`, then the build stages.
 
-| idea                         | Spec Kit           | Kiro                              | here                                                            |
-| ---------------------------- | ------------------ | --------------------------------- | --------------------------------------------------------------- |
-| Requirements notation        | free prose spec    | EARS, "when X the system shall Y" | EARS, `startsWith: "R1."`                                       |
-| Approval between phases      | per command        | per phase                         | `gate: human` on `spec` and `plan`                              |
-| Plan stays bounded           | `plan` and `tasks` | design and tasks                  | `plan.md` is an allowlist; `plan-drift` fails a stray file (F3) |
-| Properties from requirements | not part of it     | "for any ... shall"               | the `properties` check runs `specs/<n>/properties` (F4)         |
-| Project constitution         | `constitution`     | steering files                    | `AGENTS.md` and `.claude/rules/`, no workflow stage             |
-| `clarify` and `analyze`      | yes                | no                                | no stage; a reviewer reads the spec by hand                     |
+| idea                         | Spec Kit           | Kiro                              | here                                                                                                       |
+| ---------------------------- | ------------------ | --------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Requirements notation        | free prose spec    | EARS, "when X the system shall Y" | EARS, `startsWith: "R1."`                                                                                  |
+| Approval between phases      | per command        | per phase                         | `gate: human` on `spec` and `plan`                                                                         |
+| Plan stays bounded           | `plan` and `tasks` | design and tasks                  | `plan.md` is an allowlist; `plan-drift` fails a stray file (F3)                                            |
+| Properties from requirements | not part of it     | "for any ... shall"               | the `properties` check runs `specs/<n>/properties` (F4)                                                    |
+| Project constitution         | `constitution`     | steering files                    | the `constitution` stage lists the standing rules from `AGENTS.md` and `.claude/rules`                     |
+| `clarify`                    | yes                | no                                | the `clarify` stage lists every requirement two readers could build differently                            |
+| `tasks`                      | yes                | tasks                             | the `tasks` stage writes `T<n>. <task> (R<n>)` lines, each naming the requirement it serves                |
+| `analyze`                    | yes                | no                                | the `analyze` stage lists requirements with no task, tasks with no requirement, plan files no task touches |
 
-The last row is a gap, not a claim. `feature-sdd.yaml` has no `clarify`, `tasks` or `analyze` stage, so nothing checks that every requirement maps to a test. You close that gap in the exercise.
+Each new stage is `agent: planner` with `writes: <stage>.md`, so the runner saves the reply as `specs/<n>/constitution.md`, `clarify.md`, `tasks.md` or `analyze.md`. The `tests` stage brief then tells the builder to follow `tasks.md`. `factory/engine/wiring.test.ts` pins the order and that each stage writes its own artifact.
+
+A gap remains. `analyze` is a model reading four documents, so it is a review aid, not a check: no code fails the run when a requirement has no task or no test. You close that in Track B.
 
 ## Proof that bites
 
@@ -103,7 +108,7 @@ Break it once: in `factory/engine/interpret.ts` delete the `else if (step.starts
 
 - Spec 35, BDD: `specs/35/spec.md` is a Gherkin file with a `Background` and one scenario per behaviour (cache hit, band change, failed generation not cached, template holds slots and no filled content). `specs/35/red.md` maps each scenario to a golden test by title.
 - Spec 28, BDD: `specs/28/spec.md` and `features/activity-kinds.feature`.
-- Spec 34, SDD: `specs/34/spec.md` is EARS, `R1.` onward. `specs/34/tests.md` lists which requirement each test covers.
+- Spec 34, SDD: `specs/34/spec.md` is EARS, `R1.` onward. `specs/34/tests.md` lists which requirement each test covers. That run came before the four Spec Kit stages, so no committed run holds a `constitution.md`, `clarify.md`, `tasks.md` or `analyze.md`.
 - Spec 33, a spike: `specs/33/spec.md` is an ADR, the decision (files) and why, with no code.
 
 The `.feature` files are read by people and by the `amigos` agent. No Gherkin runner executes them: each scenario is a hand-written vitest test, and the `Then` is the assertion.
@@ -114,7 +119,7 @@ No committed run used `feature-atdd`, so this module shows its workflow file and
 
 Track A: take one scenario from `specs/35/spec.md` and rewrite it as an example line and as an EARS line. Say which of the three you would have asked the planner for, and why.
 
-Track B: add an `analyze` check that fails when a requirement id in `spec.md` (`R<n>.`) appears in no file under `specs/<n>/golden` or `specs/<n>/properties`. Give it a failing input first, add it to `CHECK_NAMES` and `CHECKS`, and wire it into `feature-sdd.yaml`.
+Track B: the `analyze` stage is a model's reading. Add a code check named `requirements-covered` that fails when a requirement id in `spec.md` (`R<n>.`) appears in no file under `specs/<n>/golden` or `specs/<n>/properties`. Give it a failing input first, add it to `CHECK_NAMES` and `CHECKS`, and wire it into the `analyze` step of `feature-sdd.yaml`.
 
 ## Discussion
 
