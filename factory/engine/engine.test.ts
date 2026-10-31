@@ -46,6 +46,20 @@ describe("runWorkflow", () => {
     expect(r.rounds.fix).toBe(2);
     expect(calls.filter((c) => c.startsWith("agent"))).toHaveLength(2);
   });
+  it("never shows a failing holdout case to the builder or writes it to run.log", async () => {
+    const held = wf(
+      "  - {stage: fix, agent: builder, checks: [holdout], loop: {until: [holdout], max: 3}}",
+    );
+    const { host, prompts, files } = fakeHost({
+      files: { ".factory/holdout/1/a.test.ts": "x" },
+      exec: [{ match: "npx vitest", result: { code: 1, output: "expected 42 to equal SECRET-9" } }],
+    });
+    const r = await runWorkflow(host, held, 1, "t");
+    expect(r.outcome).toBe("needs-human");
+    expect(prompts.join("\n")).not.toContain("SECRET-9");
+    expect(files.get("specs/1/run.log")).not.toContain("SECRET-9");
+    expect(files.get("specs/1/run.log")).toContain("check holdout FAIL");
+  });
   it("keeps looping while the failing evidence changes", async () => {
     const same = wf(
       "  - {stage: fix, agent: builder, checks: [green], loop: {until: [green], max: 3}}",
