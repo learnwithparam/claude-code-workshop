@@ -1,4 +1,7 @@
 import { spawnSync } from "node:child_process";
+import { copyFileSync, mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { fakeHost } from "./fake-host.ts";
 import { runWorkflow } from "./interpret.ts";
@@ -30,7 +33,11 @@ describe("run measurement", () => {
     expect(quiet.calls.filter((c) => c.startsWith("commit"))).toEqual([]);
   });
   it("does not git-ignore the run log", () => {
-    const r = spawnSync("git", ["check-ignore", "-q", "specs/1/run.log"]);
+    // A throwaway repo with the real .gitignore: a snapshot sits under an ignored folder of the outer repo.
+    const dir = mkdtempSync(join(tmpdir(), "run-log-"));
+    spawnSync("git", ["init", "-q"], { cwd: dir });
+    copyFileSync(".gitignore", join(dir, ".gitignore"));
+    const r = spawnSync("git", ["check-ignore", "-q", "specs/1/run.log"], { cwd: dir });
     expect(r.status).toBe(1);
   });
 });

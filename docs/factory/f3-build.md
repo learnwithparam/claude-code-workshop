@@ -94,7 +94,7 @@ For a UI change, `ui-visual.yaml` has the builder work against checks `visual` a
 
 ## See it on a real run
 
-- Spec 35: `specs/35/build.md` records four updates. The last one says plan drift was fixed: `plan.md` had lost its file list and never named `api/src/agent/template-eval.ts`. `specs/35/ci.md` quotes the failing line, `check plan-drift FAIL: files outside plan.md: api/src/agent/template-eval.ts`. The `run.log` it quotes is gitignored, so only the notes are in the repo.
+- Spec 35: `specs/35/build.md` records four updates. The last one says plan drift was fixed: `plan.md` had lost its file list and never named `api/src/agent/template-eval.ts`. `specs/35/ci.md` quotes the failing line, `check plan-drift FAIL: files outside plan.md: api/src/agent/template-eval.ts`. That run predates the commit of `run.log`, so only the notes are in the repo.
 - Spec 25, the refactor: `specs/25/refactor.md` lists the four functions moved out of `render.ts`, with bodies unchanged, and says the golden tests and snapshots were untouched.
 - Spec 26, the bug: `specs/26/fix.md` is the smallest change that made the locked test pass.
 

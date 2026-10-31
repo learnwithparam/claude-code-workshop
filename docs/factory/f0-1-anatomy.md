@@ -92,7 +92,7 @@ Expect `test lock > blocks an edit to api/src/a.test.ts during a fix` to fail, b
 
 ## See it on a real run
 
-`specs/26/` ran `bug-tdd`. Its `reproduce` step wrote `specs/26/golden/font-face.golden.test.ts`, and `specs/26/lock.json` lists the hash of that file. The `fix` step has `phase: fix`, which sets `FACTORY_PHASE=fix` for the hook above, and `specs/26/fix.md` says the locked test "passes", with no edit to it. The same note records that `make check` lint still failed on `specs/26/lock.json` formatting, a runner-owned file the agent left alone. No `run.log` is committed because `.gitignore` excludes `*.log`.
+`specs/26/` ran `bug-tdd`. Its `reproduce` step wrote `specs/26/golden/font-face.golden.test.ts`, and `specs/26/lock.json` lists the hash of that file. The `fix` step has `phase: fix`, which sets `FACTORY_PHASE=fix` for the hook above, and `specs/26/fix.md` says the locked test "passes", with no edit to it. The same note records that `make check` lint still failed on `specs/26/lock.json` formatting, a runner-owned file the agent left alone. The run commits its own `run.log` as an audit artifact; `.gitignore` excludes `*.log` but keeps `specs/*/run.log`, so runs made before that exception have none.
 
 ## Discussion
 
