@@ -50,7 +50,7 @@ The retro stage in `.claude/skills/factory-retro/SKILL.md` proposes one change p
 
 **Guard.** `factory/engine/real-host.test.ts` asserts that an agent's shell does not see `ANTHROPIC_API_KEY` or `GH_TOKEN`. That guards the agent side only.
 
-**Status.** Unverified. No commit in this repo records a run failing on a missing login, and no test runs `approved()` with `gh` logged out. The failure as a silent "not approved" is read from the code, not from a log. Open: a preflight that runs `gh auth status` before the first agent and says so.
+**Status.** Unverified. No commit in this repo records a run failing on a missing login, and no test runs `approved()` with `gh` logged out. The failure as a silent "not approved" is read from the code, not from a log. Fixed since: `ghPreflight` in `factory/engine/gh-preflight.ts` runs `gh auth status` before the first agent, guarded by `gh-preflight.test.ts`.
 
 ## 4. Agent worktrees had no `node_modules`
 
