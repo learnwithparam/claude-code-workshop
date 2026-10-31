@@ -100,17 +100,17 @@ Each red test below is skipped by default in the finished design, as `make prove
 
 ## 12. Count the review calls in the spend cap
 
-- **Goal:** `runReview` in `factory/engine/interpret.ts` adds the cost of the builder's fix to the run total, but not the lens hunts or the verifier ballots, and gives those calls no remaining-budget ceiling. Close the gap so the cap covers every agent call.
+- **Goal:** closed in the harness (`factory/engine/review-spend.test.ts`): `runReview` in `factory/engine/interpret.ts` counts every lens hunt, ballot and fix and gives each the remaining-budget ceiling. Use it as the worked example for a cap on another kind of call.
 - **Workflow:** `feature-atdd`.
 - **Issue:** "A review step adds every lens and verifier cost to the run total, checks the cap before each round, and stops with the reason `spend cap`."
 - **Failing test (proposed `tests/assignments/review-spend.test.ts`):** with `fakeHost` from `factory/engine/fake-host.ts`, give every agent a `costUsd`, run a `review` step with a small `spend.capUsd`, and assert `cost.json` lists the review calls and the run stops with the reason. `factory/engine/models.test.ts` has the same shape for the other steps.
 
 ## 13. A model for every stage name
 
-- **Goal:** a step whose stage name is in neither `stepStages` nor the stage list falls back to the middle model. The `docs` workflow names its build step `write`, so the `routes.docs.build` route to the cheap model never applies to it. Make an unmapped stage name fail a test instead of silently using the middle model.
+- **Goal:** a step whose stage name is in neither `stepStages` nor the stage list falls back to the middle model. The `docs` workflow's `write` step is already mapped (`factory/engine/docs-routing.test.ts`); names such as `analyze` and `characterize` are not. Make an unmapped stage name fail a test instead of silently using the middle model.
 - **Workflow:** `llm-eval`.
 - **Issue:** "Every stage name in every workflow resolves to a config stage, or the workflow test fails."
-- **Failing test (proposed `tests/assignments/stage-names.test.ts`):** load each file in `.factory/workflows/`, call `resolveModel` from `factory/engine/models.ts` for every step, and assert each stage name is a key of `stepStages` or one of `STAGE_NAMES`. It fails for `write` until you map it.
+- **Failing test (proposed `tests/assignments/stage-names.test.ts`):** load each file in `.factory/workflows/`, call `resolveModel` from `factory/engine/models.ts` for every step, and assert each stage name is a key of `stepStages` or one of `STAGE_NAMES`. It fails for the names still unmapped until you map them.
 
 ## Discussion
 

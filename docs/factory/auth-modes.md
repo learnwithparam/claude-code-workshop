@@ -13,7 +13,7 @@ Set `auth` in `.factory/config.yaml`, or pass `--auth=` on one run. The flag win
 | `auto` (default) | the token when it is set, else the key                                               |
 
 ```
-npx tsx factory/engine/main.ts <issue> --workflow=typo --auth=subscription
+npx tsx factory/engine/main.ts <issue> --workflow=docs --auth=subscription
 ```
 
 One resolver decides this: `resolveAuth` in `factory/engine/auth.ts`. The agent gets exactly the chosen credential and never both (`agentEnv`, same file). The checks that run code the agent wrote get neither (`SAFE_ENV` in `factory/engine/real-host.ts`). `factory/engine/auth.test.ts` and `factory/engine/real-host.test.ts` assert both rules, and `make check` runs them through `npm test`.
@@ -79,7 +79,7 @@ To close the first gap, run one tiny real call yourself:
 ```
 claude setup-token
 read -rs CLAUDE_CODE_OAUTH_TOKEN && export CLAUDE_CODE_OAUTH_TOKEN   # paste at the silent prompt, so it stays out of history
-npx tsx factory/engine/main.ts <a docs issue> --workflow=typo --auth=subscription
+npx tsx factory/engine/main.ts <a docs issue> --workflow=docs --auth=subscription
 ```
 
 Expect a summary with `"auth": "subscription"`, `"costUsd": 0` and a `usage` block with calls and tokens above zero.

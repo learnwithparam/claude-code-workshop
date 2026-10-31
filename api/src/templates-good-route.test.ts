@@ -1,5 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it } from "vitest";
+import worksheets from "../../fixtures/worksheets.json" with { type: "json" };
+import type { AgentResult } from "./agent/agent.ts";
 import { parseEnv } from "./env.ts";
 import { createApp } from "./server.ts";
 
@@ -25,5 +27,27 @@ describe("POST /templates/good", () => {
     for (let i = 0; i < 40; i++)
       codes.push((await mark(a, JSON.stringify({ sheetId: "nope" }))).status);
     expect(codes).toContain(429);
+  });
+
+  it("refuses to distill a sheet whose remembered prompt is empty", async () => {
+    const sheet = worksheets[0]?.worksheet as never;
+    const usage = { input: 1, cacheRead: 0, cacheWrite: 0, output: 1 };
+    const run = async (): Promise<AgentResult> => ({ kind: "worksheet", sheet, usage });
+    const a = createApp({ env, client: {} as Anthropic, run });
+    // Two turns make the request unstable, so the api remembers the sheet with an empty prompt.
+    const chat = await a.request("/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          { role: "user", content: "a" },
+          { role: "assistant", content: "b" },
+          { role: "user", content: "c" },
+        ],
+      }),
+    });
+    const sheetId = /"sheetId":"([0-9a-f]+)"/.exec(await chat.text())?.[1];
+    expect(sheetId).toBeTruthy();
+    expect((await mark(a, JSON.stringify({ sheetId }))).status).toBe(422);
   });
 });

@@ -239,7 +239,7 @@ export function realHost(o: RealHostOptions): Host & { usage(): Usage } {
       return [...new Set([...diff, ...dirty])].filter(Boolean);
     },
 
-    async commit(message) {
+    async commit(message, paths) {
       // No repo hooks or fsmonitor: the agent can write .git/hooks, and a commit must not run them.
       if (gitConfig() !== pinnedConfig)
         throw new Error("git config changed during the run; refusing to commit");
@@ -255,7 +255,8 @@ export function realHost(o: RealHostOptions): Host & { usage(): Usage } {
           "core.attributesFile=/dev/null",
           ...a,
         ]);
-      g("add", "-A");
+      const scope = paths?.length ? ["--", ...paths] : [];
+      g("add", ...(scope.length ? scope : ["-A"]));
       const r = g(
         "-c",
         "user.name=factory",
@@ -265,6 +266,7 @@ export function realHost(o: RealHostOptions): Host & { usage(): Usage } {
         "--no-verify",
         "-m",
         message,
+        ...scope,
       );
       if (r.status !== 0) throw new Error(`commit failed: ${r.stderr}`);
     },

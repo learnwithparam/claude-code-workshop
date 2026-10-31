@@ -23,7 +23,7 @@ These limits exist in code. Each is tested.
 
 `cost.json` has `capUsd`, `totalUsd` and one entry per call with its stage, round, model and cost. It is the SDK's estimate, not a bill.
 
-**What the cap does not cover.** In a `review` step, the lens hunts and verifier ballots are not added to the run total and are not given the remaining-budget ceiling; only the builder's fix is added. Those calls are held by the per-call default of 3 and the round cap of 3, so the ceiling for a review is the lenses and ballots times three rounds times that default. The older runner (`make factory`) has no run cap at all, only the per-stage `maxBudgetUsd`. Work out the worst case for your workflow before you leave it overnight. F10 has an assignment that closes the review gap.
+**Review calls count.** In a `review` step every lens hunt, verifier ballot and builder fix is added to the run total, listed in `cost.json`, given the remaining-budget ceiling, and refused with the reason `spend cap` once the run has spent its share (`factory/engine/review-spend.test.ts`). The older runner (`make factory`) has no run cap at all, only the per-stage `maxBudgetUsd`. Work out the worst case for your workflow before you leave it overnight.
 
 ## Credit: what the tool cannot choose
 

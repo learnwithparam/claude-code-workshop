@@ -97,6 +97,15 @@ describe("realHost over a git repo", () => {
     expect(git(cwd, "log", "-1", "--format=%s").trim()).toBe("#1");
     expect(existsSync(join(cwd, "..", "hook-ran"))).toBe(false);
   });
+  it("commits only the named paths and leaves other work uncommitted", async () => {
+    const { host, cwd } = repo();
+    mkdirSync(join(cwd, "specs", "1"), { recursive: true });
+    writeFileSync(join(cwd, "specs", "1", "run.log"), "done\n");
+    writeFileSync(join(cwd, "other.txt"), "work in progress");
+    await host.commit("run log #1", ["specs/1/run.log"]);
+    expect(git(cwd, "show", "--name-only", "--format=", "HEAD").trim()).toBe("specs/1/run.log");
+    expect(git(cwd, "status", "--porcelain").trim()).toBe("?? other.txt");
+  });
   it("refuses to commit after an agent changed the repo git config", async () => {
     const { host, cwd } = repo();
     git(cwd, "config", "core.autocrlf", "true");

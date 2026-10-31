@@ -2,6 +2,18 @@
 
 **Stage:** the whole path. **Layers:** all of them. **Workflows:** every file in `.factory/workflows/`.
 
+## Story
+
+**The ticket.** Issue 35 asked for a prompt cache and templates learned from good worksheets. Every stage left a file in `specs/35/`.
+
+**Without the layer.** The builder added `api/src/agent/template-eval.ts` and wrote in `specs/35/build.md` that it was "not on the plan's file list". A builder working alone would have shipped a file nobody had agreed to.
+
+**What the layer did.** The `plan-drift` check failed the run: "check plan-drift FAIL: files outside plan.md: api/src/agent/template-eval.ts", as `specs/35/ci.md` quotes it. The plan was updated to list the file, and the check passed.
+
+![The six stages from a ready ticket to a merged pull request, with the artifact and the deciding check under each](img/pipeline.svg)
+
+_Notice:_ only the plan gate and the merge are orange. Every other step forward is decided by code reading a file or an exit code.
+
 ## Goal
 
 Say in one page what the factory does, which parts are code and which are a model, and how it compares with the two public descriptions of an agentic software factory. By the end you can name the artifact each stage leaves behind and the check that decides whether the next stage may start.
@@ -21,7 +33,7 @@ A ticket moves through stages. Each stage commits one artifact under `specs/<n>/
 
 The large-feature workflow, `feature-sdd`, adds four Spec Kit stages to the plan row: `constitution.md` before the spec, `clarify.md` after it, then `tasks.md` and `analyze.md` after the plan. F2 covers them.
 
-The names come from `ARTIFACTS` in `factory/engine/artifacts.ts` and `CHECK_NAMES` in `factory/engine/workflow.ts`. A workflow is a YAML file. `factory/engine/interpret.ts` runs its steps in order, repeats a step while its loop checks fail up to a cap, and writes `run.log` and `cost.json` under `specs/<n>/` when the run finishes or stops at a gate or a cap.
+The names come from `ARTIFACTS` in `factory/engine/artifacts.ts` and `CHECK_NAMES` in `factory/engine/workflow.ts`. A workflow is a YAML file. `factory/engine/interpret.ts` runs its steps in order, repeats a step while its loop checks fail up to a cap, stops early as `needs-human` with the reason "test contradicts ticket" when two rounds in a row fail the same check with the same evidence (`sameFailure` on the loop), and writes `run.log` and `cost.json` under `specs/<n>/` when the run finishes or stops at a gate or a cap.
 
 ## What is code and what is a model
 
@@ -95,7 +107,7 @@ Expect `risk > is high for a CI workflow and low for docs` to fail with `expecte
 
 `specs/26/` is a bug run through `bug-tdd`. `specs/26/golden/font-face.golden.test.ts` is the test written to fail first, `specs/26/lock.json` is the hash of every test file at that point, `specs/26/fix.md` is the fix stage's note, and `specs/26/plan.md` is the allowlist the diff was held to.
 
-`run.log` is the file the engine writes last, but `.gitignore` excludes `*.log`, so none is committed here. `specs/35/ci.md` quotes one line from its run's log: `check plan-drift FAIL: files outside plan.md: api/src/agent/template-eval.ts`. That is `plan-drift` stopping a run, and `ci.md` records that the path was then listed in `plan.md`.
+`run.log` is the file the engine writes last and commits with `specs/*/run.log` kept out of the `*.log` ignore; runs made before that change have none in the repo. `specs/35/ci.md` quotes one line from its run's log: `check plan-drift FAIL: files outside plan.md: api/src/agent/template-eval.ts`. That is `plan-drift` stopping a run, and `ci.md` records that the path was then listed in `plan.md`.
 
 ## Discussion
 

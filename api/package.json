@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "latest",
-    "@hono/node-server": "^1.14.0",
+    "@hono/node-server": "^2.1.5",
     "@workshop/shared": "*",
     "hono": "^4.9.0",
     "zod": "^4.1.0"

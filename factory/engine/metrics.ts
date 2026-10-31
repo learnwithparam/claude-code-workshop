@@ -11,6 +11,12 @@ export const metricsSchema = z.object({
   // Absent in metrics written before auth modes existed.
   auth: z.enum(["api-key", "subscription", "none"]).optional(),
   usage: z.object({ calls: z.number(), tokens: z.number(), estimatedUsd: z.number() }).optional(),
+  startedAt: z.iso.datetime(),
+  finishedAt: z.iso.datetime(),
+  stages: z.record(
+    z.string(),
+    z.object({ startedAt: z.iso.datetime(), finishedAt: z.iso.datetime() }),
+  ),
 });
 export type Metrics = z.infer<typeof metricsSchema>;
 
@@ -26,6 +32,9 @@ export const metricsFor = (ticket: number, workflow: string, r: Result, u?: Usag
   ...(u
     ? { auth: u.auth, usage: { calls: u.calls, tokens: u.tokens, estimatedUsd: u.estimatedUsd } }
     : {}),
+  startedAt: r.startedAt,
+  finishedAt: r.finishedAt,
+  stages: r.stages,
 });
 
 // A run is first-pass when it finished and no step needed a second round.

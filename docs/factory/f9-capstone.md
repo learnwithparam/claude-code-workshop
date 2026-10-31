@@ -2,6 +2,18 @@
 
 **Stage:** all of them. **Layer:** every level. **Workflows:** `feature-bdd` for the cache and templates, `feature-sdd` for the workbook, `bug-tdd` for the template id boundary.
 
+## Story
+
+**The ticket.** Issue 37, the template id boundary, run with `bug-tdd`.
+
+**Without the layer.** `specs/37/fix.md`: the golden test "failed on the old schema (404)". A malformed id reached a lookup before anything refused it.
+
+**What the layer did.** `templateIdSchema` is "an allowlist `[A-Za-z0-9_-]{1,100}`", and "a bad id gets the generic 400 before any lookup". The golden test "was not edited". Your factory has to reach the same green without editing it either.
+
+![A timeline of run 35, each event quoted from a file in specs/35](img/run-35-timeline.svg)
+
+_Notice:_ run 35 is one of the features you rebuild here, and each event is a file your own run will write.
+
 ## Goal
 
 You do not write the workbook, template or cache code. Your factory does. You supply the red suites, the factory builds until they are green, and you compare its tree with the reference answer. The score is whether the gates held, not whether code appeared.
