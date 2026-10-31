@@ -10,22 +10,18 @@ Say in one page what the factory does, which parts are code and which are a mode
 
 A ticket moves through stages. Each stage commits one artifact under `specs/<n>/` and the next stage reads only what was committed, so the commit history is the audit trail.
 
-| Stage    | Artifact                          | What decides "next"                      |
-| -------- | --------------------------------- | ---------------------------------------- |
-| Plan     | `intent.md`, `spec.md`, `plan.md` | a human gate, and `plan-drift` later     |
-| Build    | tests, then the diff, `lock.json` | `red`, `lock`, `green`, `acceptance`     |
-| Test     | more tests, mutants               | `mutation`, `properties`, `holdout`      |
-| Review   | `review.json`                     | lenses, then verifiers that vote         |
-| Deploy   | the pull request, CI              | `ci`; `deploy.ts` is tests only          |
-| Maintain | `incident.md`, a new `intent.md`  | `bands.ts` and `retro.ts` are tests only |
+| Stage    | Artifact                          | What decides "next"                     |
+| -------- | --------------------------------- | --------------------------------------- |
+| Plan     | `intent.md`, `spec.md`, `plan.md` | a human gate, and `plan-drift` later    |
+| Build    | tests, then the diff, `lock.json` | `red`, `lock`, `green`, `acceptance`    |
+| Test     | more tests, mutants               | `mutation`, `properties`, `holdout`     |
+| Review   | `review.json`                     | lenses, then verifiers that vote        |
+| Deploy   | the pull request, CI              | `ci`; a `deploy:` step runs `deploy.ts` |
+| Maintain | `incident.md`, a new `intent.md`  | `--maintain` and the run-end retro      |
 
-<<<<<<< HEAD
 The large-feature workflow, `feature-sdd`, adds four Spec Kit stages to the plan row: `constitution.md` before the spec, `clarify.md` after it, then `tasks.md` and `analyze.md` after the plan. F2 covers them.
 
-The names come from `ARTIFACTS` in `factory/engine/artifacts.ts` and `CHECK_NAMES` in `factory/engine/workflow.ts`. A workflow is a YAML file. `factory/engine/interpret.ts` runs its steps in order, repeats a step while its loop checks fail up to a cap, and writes `run.log` and `cost.json` under `specs/<n>/` when the run finishes or stops at a gate or a cap.
-=======
-The names come from `ARTIFACTS` in `factory/engine/artifacts.ts` and `CHECK_NAMES` in `factory/engine/workflow.ts`. A workflow is a YAML file. `factory/engine/interpret.ts` runs its steps in order, repeats a step while its loop checks fail up to a cap, stops early as `needs-human` with the reason "test contradicts ticket" when two rounds in a row fail the same check with the same evidence (`sameFailure` on the loop), and writes `run.log` when the run finishes or stops at a gate or a cap.
->>>>>>> origin/feat/r1r3
+The names come from `ARTIFACTS` in `factory/engine/artifacts.ts` and `CHECK_NAMES` in `factory/engine/workflow.ts`. A workflow is a YAML file. `factory/engine/interpret.ts` runs its steps in order, repeats a step while its loop checks fail up to a cap, stops early as `needs-human` with the reason "test contradicts ticket" when two rounds in a row fail the same check with the same evidence (`sameFailure` on the loop), and writes `run.log` and `cost.json` under `specs/<n>/` when the run finishes or stops at a gate or a cap.
 
 ## What is code and what is a model
 
@@ -52,7 +48,7 @@ The rule behind the list: a gate reads an exit code or a hash, never the model's
 - A `gate: human` step computes the risk tier from the files changed so far and waits for that tier's approvals (F1).
 - `feature-sdd` runs the constitution, clarify, tasks and analyze stages (F2).
 
-Not wired into a real run: deploy (`deploy.ts`), the sigma bands (`bands.ts`) and the retro (`retro.ts`). Tests exercise them, and a separate change is wiring them. F6 and F7 describe them as they stand.
+Wired into a real run: a `deploy:` step (`bug-tdd` ends with the merge queue), `--maintain` over the sigma bands with a weekly check, and the run-end retro. F6 and F7 describe what each does and where it stops.
 
 After the stage modules come F8 (workflows), F9 (the capstone), F10 (assignments), F11 (cloud sessions), F12 (model routing) and F13 (spend and safety).
 
@@ -60,14 +56,14 @@ After the stage modules come F8 (workflows), F9 (the capstone), F10 (assignments
 
 The workshop is built from published descriptions. This table says where each idea lands here and where this repo does less.
 
-| Idea     | Anthropic AI-native SDLC playbook and review post                                | OpenAI software factory (Pragmatic Engineer write-up)                    | This repo                                                                                |
-| -------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| Start    | an `intent.md` per stage, committed                                              | an outcome, then context                                                 | `intent.md` from the `intent` step, or from a sigma breach                               |
-| Verify   | tests first, hooks that block test edits during a fix, evals gate prompt changes | CI is watched until it is green                                          | `red` and `lock`, `.claude/hooks/pretooluse-test-lock.mjs`, the `ci` check               |
-| Review   | layered review, parallel hunters, agents that vote on each finding               | specialist reviewers                                                     | `factory/engine/review.ts`, `REVIEW.md`                                                  |
-| Deploy   | autonomy tiered by environment, hooks as approval gates                          | an agent assists the deploy after a human approves                       | `factory/engine/deploy.ts`: production refuses without approvals, tests only             |
-| Risk     | the tier comes from the change, not the author                                   | risk classification picks the path                                       | `classify` in `factory/engine/risk.ts`, applied at every human gate                      |
-| Maintain | sigma bands turn a breach into a new intent                                      | observe, feed regressions back, an incident bot that acts only when told | `.factory/bands.yaml`, `detect` and `actionFor` in `factory/engine/bands.ts`, tests only |
+| Idea     | Anthropic AI-native SDLC playbook and review post                                | OpenAI software factory (Pragmatic Engineer write-up)                    | This repo                                                                                         |
+| -------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| Start    | an `intent.md` per stage, committed                                              | an outcome, then context                                                 | `intent.md` from the `intent` step, or from a sigma breach                                        |
+| Verify   | tests first, hooks that block test edits during a fix, evals gate prompt changes | CI is watched until it is green                                          | `red` and `lock`, `.claude/hooks/pretooluse-test-lock.mjs`, the `ci` check                        |
+| Review   | layered review, parallel hunters, agents that vote on each finding               | specialist reviewers                                                     | `factory/engine/review.ts`, `REVIEW.md`                                                           |
+| Deploy   | autonomy tiered by environment, hooks as approval gates                          | an agent assists the deploy after a human approves                       | `factory/engine/deploy.ts`: production refuses without approvals, run by a `deploy:` step         |
+| Risk     | the tier comes from the change, not the author                                   | risk classification picks the path                                       | `classify` in `factory/engine/risk.ts`, applied at every human gate                               |
+| Maintain | sigma bands turn a breach into a new intent                                      | observe, feed regressions back, an incident bot that acts only when told | `.factory/bands.yaml`, `detect` and `actionFor` in `factory/engine/bands.ts`, run by `--maintain` |
 
 This repo has no deploy target of its own: `release` calls `make deploy ENV=...`, and the Makefile here does not define that target. Treat F6 as a pattern to copy, not a pipeline that ships this app.
 

@@ -39,3 +39,5 @@ steps:
       checks: [ci],
       loop: { until: [ci], max: 2 },
     }
+  # No agent: the change is applied to the latest main and the gate runs there before it merges.
+  - { stage: queue, deploy: merge-queue }

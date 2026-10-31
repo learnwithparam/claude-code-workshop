@@ -1,14 +1,11 @@
-import { z } from "zod";
 import { writeArtifact } from "./artifacts.ts";
 import { type Breach, detect, intentFor, loadBands } from "./bands.ts";
+import { SERIES, seriesSchema } from "./series.ts";
 import type { Host } from "./types.ts";
-
-const SERIES = ".factory/series.json";
-const seriesSchema = z.record(z.string(), z.array(z.number()));
 
 // Reads each metric's history from .factory/series.json (the latest value last) and checks it against
 // .factory/bands.yaml. No model decides: 1 and 2 sigma are logged, 3 sigma writes specs/<n>/intent.md,
-// the record the incident workflow starts from. Whatever records the series is outside this file.
+// the record the incident workflow starts from. `recordSeries` in series.ts records it at the end of each run.
 export async function maintain(host: Host, n: number) {
   const bandsText = await host.read(".factory/bands.yaml");
   if (bandsText === null) throw new Error(".factory/bands.yaml is missing");

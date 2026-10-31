@@ -13,6 +13,7 @@ import { portable } from "./portable.ts";
 import { type RetroOutcome, retro } from "./retro.ts";
 import { reviewLoop } from "./review.ts";
 import { APPROVALS, classify } from "./risk.ts";
+import { recordSeries, SERIES } from "./series.ts";
 import type { CheckResult, Host } from "./types.ts";
 import type { Step, Workflow } from "./workflow.ts";
 
@@ -128,17 +129,21 @@ export async function runWorkflow(
     }
   }
   const done = await finish("done");
-  if (opts.retro) await endWithRetro(host, n, done, opts.retro);
+  const score = opts.retro ? await endWithRetro(host, n, done, opts.retro) : undefined;
+  // Only a finished run joins the history `--maintain` judges; a run that stopped says nothing about the bands.
+  await recordSeries(host, done, score);
+  if (opts.commitLog) await host.commit(`factory series #${n}`, [SERIES]);
   return done;
 }
 
 // The retro reads run.log, so it runs after the log is saved; its outcome is appended to the log.
+// Returns the eval score the repo stands at afterwards, or undefined when the eval was broken.
 async function endWithRetro(
   host: Host,
   n: number,
   res: Result,
   r: NonNullable<RunOptions["retro"]>,
-) {
+): Promise<number | undefined> {
   let out: RetroOutcome;
   try {
     out = await retro(host, n, r.evalCmd, r.revert);
@@ -153,6 +158,8 @@ async function endWithRetro(
         : `retro ${out.kind} ${out.proposal.file} delta ${out.delta.toFixed(2)}`,
   );
   await writeArtifact(host, n, "run.log", `${res.log.join("\n")}\n`);
+  if (out.kind === "error") return undefined;
+  return out.kind === "kept" ? out.after : out.before;
 }
 
 // Returns true when the step could not reach its checks within its cap.

@@ -1,0 +1,37 @@
+name: maintain
+
+# Weekly and cheap: no model runs. Judges the recorded run metrics against .factory/bands.yaml and, on a
+# 3 sigma breach, opens one triage issue. `make factory-maintain ISSUE=<that issue>` then writes its intent.md.
+on:
+  schedule:
+    - cron: "41 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  bands:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check the metrics against their bands
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -f .factory/series.json ] || { echo "no series recorded yet"; exit 0; }
+          make factory-maintain | tee bands.txt
+          grep -q '3 sigma' bands.txt || exit 0
+          open=$(gh issue list --label factory:triage --search "Band breach in:title" --json number --jq length)
+          [ "$open" != "0" ] && exit 0
+          gh issue create --label factory:triage \
+            --title "Band breach: a factory metric is 3 sigma off" \
+            --body "$(printf 'make factory-maintain reported:\n\n%s\n' "$(cat bands.txt)")"

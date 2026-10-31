@@ -9,7 +9,7 @@ Decide how much human approval a change needs from the files it touches, never f
 ## What is built and what is design
 
 - Built and tested in `factory/engine/review.test.ts`: `classify` and `approvalsMet` (`risk.ts`), and `release`, `rollback` and `mergeQueue` (`deploy.ts`).
-- Reachable from a workflow: a step with `deploy: merge-queue`, `deploy: preview` or `deploy: production` runs no agent and calls `mergeQueue` or `release` (`deploy-step.ts`). Production needs at least one writer's approval of that stage, more for a high tier. No shipped workflow uses a `deploy` step yet, so none runs it unless you add one.
+- Reachable from a workflow: a step with `deploy: merge-queue`, `deploy: preview` or `deploy: production` runs no agent and calls `mergeQueue` or `release` (`deploy-step.ts`). Production needs at least one writer's approval of that stage, more for a high tier. `bug-tdd` ends with a `deploy: merge-queue` step. The approvals `release` checks are the logins `Host.writers` returns, the same people `approved` counted.
 - Missing target: `deploy.ts` runs `make deploy ENV=<env>`, and this repo's `Makefile` has no `deploy` target. The release and rollback commands therefore have nothing to call here. A learner adds a deploy target for their own host. This is a design, not a working deploy.
 - Built and used: the `ci` check in `factory/engine/checks/index.ts` runs `gh pr checks --watch`, and the workflow loop feeds a failure back to the builder.
 

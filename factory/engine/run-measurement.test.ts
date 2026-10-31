@@ -21,11 +21,12 @@ describe("run measurement", () => {
     expect(r.stages.build?.startedAt).toMatch(iso);
     expect(r.stages.build?.finishedAt).toMatch(iso);
   });
-  it("commits the run log only when asked to", async () => {
+  it("commits the run log and series only when asked to", async () => {
     const asked = fakeHost();
     await runWorkflow(asked.host, one, 1, "t", { commitLog: true });
     expect(asked.calls.filter((c) => c.startsWith("commit"))).toEqual([
       "commit factory run log #1 -- specs/1/run.log",
+      "commit factory series #1 -- .factory/series.json",
     ]);
     expect(asked.files.has("specs/1/run.log")).toBe(true);
     const quiet = fakeHost();

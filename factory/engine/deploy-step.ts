@@ -18,13 +18,10 @@ export async function runDeploy(
   // Production always needs a person, as the human gate does; the tier only raises the count.
   const need = Math.max(1, APPROVALS[tier]);
   const ok = await host.approved(n, step.stage, await artifactDigest(host, n, step.stage), need);
-  // approved() has already counted distinct writers; the names are placeholders for release()'s check.
-  const approvals = ok
-    ? Array.from({ length: need }, (_, i) => ({
-        by: `approver-${i}`,
-        kind: "human" as const,
-        commit: head,
-      }))
-    : [];
+  // approved() has counted distinct writers; those same logins are the approvals release() checks.
+  const writers = ok ? await host.writers(n) : [];
+  const approvals = writers
+    .slice(0, need)
+    .map((by) => ({ by, kind: "human" as const, commit: head }));
   return release(host, "production", tier, approvals, head);
 }

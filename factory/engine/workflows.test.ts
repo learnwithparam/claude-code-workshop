@@ -43,7 +43,7 @@ describe.each(files)("workflow %s", (file) => {
     if (plan) expect(plan.brief).toContain("Commentary of any kind makes the plan unusable");
   });
   it("uses only agents that exist in .claude/agents", () => {
-    for (const s of wf.steps)
+    for (const s of wf.steps.filter((x) => !x.deploy))
       expect(agents.has(s.agent ?? ""), `${s.stage}: ${s.agent}`).toBe(true);
   });
   it("dry-runs every step in order", async () => {
@@ -77,7 +77,9 @@ describe.each(files)("workflow %s", (file) => {
     };
     const r = await runWorkflow(host, wf, 1, "t");
     expect(r.outcome).toBe("done");
-    expect(Object.keys(r.rounds)).toEqual(wf.steps.filter((s) => s.agent).map((s) => s.stage));
+    expect(Object.keys(r.rounds)).toEqual(
+      wf.steps.filter((s) => s.agent || s.deploy).map((s) => s.stage),
+    );
     expect(fs.get("specs/1/run.log")).toContain(`workflow ${wf.name}`);
   });
 });
@@ -130,7 +132,7 @@ describe("every step knows its job", () => {
   const REVIEW_ONLY = ["plan-drift", "manifest-deps"];
   it.each(files)("%s gives each step a brief unless it only re-checks the plan", (file) => {
     const wf = loadWorkflow(readFileSync(`${dir}/${file}`, "utf8"));
-    for (const s of wf.steps.filter((x) => !x.brief)) {
+    for (const s of wf.steps.filter((x) => !x.brief && !x.deploy)) {
       expect(s.checks[0], `${file} ${s.stage}`).toBe("plan-drift");
       for (const c of s.checks) expect(REVIEW_ONLY, `${file} ${s.stage}`).toContain(c);
     }

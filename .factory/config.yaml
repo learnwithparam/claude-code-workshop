@@ -4,6 +4,7 @@ tests:
   unit: [npx, vitest, run]
   e2e: [npx, playwright, test, tests/e2e]
   eval: [npx, tsx, api/src/eval.ts]
+  score: [npx, tsx, scripts/eval-score.ts]
   prose: [npx, tsx, scripts/check-prose.ts, docs]
   prepush: [npx, tsx, scripts/check-affected.ts, --base, origin/main]
   mutation: [npx, stryker, run]

@@ -11,6 +11,8 @@ export const portableSchema = z.object({
     unit: argv,
     e2e: argv,
     eval: argv,
+    // Prints `SCORE <number>`; the retro runs it before and after a lesson. Spends no tokens.
+    score: argv,
     prose: argv,
     prepush: argv,
     mutation: argv,
