@@ -1,30 +1,39 @@
 # Measure what a call costs
 
 **Pairs with:** `docs/agent/agent-sdk.md`
+**Help:** goal
 
 ## Goal
 
-Run one headless call with a turn cap and read its cost from the JSON result.
+Make one headless Claude call capped at two turns, save its JSON result to .labs/work/call.json, and write the call's cost in dollars, as a bare number, to .labs/work/cost.txt. The proof below must pass.
 
 ## Steps
 
 1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
-2. Make the folder: `mkdir -p .labs/work`.
-3. Call with a cap: `claude -p "List the folders in this repo." --max-turns 2 --output-format json > .labs/work/call.json`.
-4. Read the cost: `node -e "console.log(require('./.labs/work/call.json').total_cost_usd)"`.
-5. Write the number into `.labs/work/cost.txt`.
+2. Make the lab work folder.
+3. Ask Claude to list this repo's folders, with a turn cap and JSON output, saved to a file.
+4. Read the cost field out of that JSON.
+5. Write the number alone into the cost file.
 
 ## Proof
 
-```sh
-grep -q 'total_cost_usd' .labs/work/call.json && grep -Eq '^[0-9]+(\.[0-9]+)?$' .labs/work/cost.txt
-```
+1. call.json records total_cost_usd.
+
+   ```sh
+   grep -q 'total_cost_usd' .labs/work/call.json
+   ```
+2. cost.txt holds one plain number.
+
+   ```sh
+   grep -Eq '^[0-9]+(\.[0-9]+)?$' .labs/work/cost.txt
+   ```
 
 ## Hints
 
 1. Two files: `.labs/work/call.json` from the call and `.labs/work/cost.txt` with one number.
 2. `echo 0.012 > .labs/work/cost.txt` shows the shape. Use your own number.
 3. `--max-turns` stops the loop, so the cost has a ceiling.
+4. Commands: `mkdir -p .labs/work`, `claude -p "List the folders in this repo." --max-turns 2 --output-format json > .labs/work/call.json`, `node -e "console.log(require('./.labs/work/call.json').total_cost_usd)"`.
 
 ## What you just learned
 

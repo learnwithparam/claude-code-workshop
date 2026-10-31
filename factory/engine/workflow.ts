@@ -23,26 +23,35 @@ export const CHECK_NAMES = [
   "manifest-deps",
 ] as const;
 
-const stepSchema = z.object({
-  stage: z.string(),
-  agent: z.string(),
-  // What the agent is asked to do in this stage. Without it the agent only sees the ticket and guesses.
-  brief: z.string().optional(),
-  // A read-only agent cannot write its own artifact, so the runner saves its reply as this one.
-  writes: z.enum(AGENT_ARTIFACTS).optional(),
-  // The reply must begin with this text, or it is chat and not the artifact; nothing is saved.
-  startsWith: z.string().optional(),
-  checks: z.array(z.enum(CHECK_NAMES)).default([]),
-  // Repeat the agent until every check in `until` passes, at most `max` times.
-  loop: z
-    .object({ until: z.array(z.enum(CHECK_NAMES)).min(1), max: z.number().int().min(1).max(5) })
-    .optional(),
-  // Parallel lenses hunt, three verifiers vote (2 of 3 keep a finding), a builder fixes what survives.
-  review: z.object({ lenses: z.array(z.string()).min(1) }).optional(),
-  gate: z.enum(["human", "auto"]).default("auto"),
-  // Fix steps run with the test lock on.
-  phase: z.enum(["build", "fix"]).default("build"),
-});
+const stepSchema = z
+  .object({
+    stage: z.string(),
+    // Absent only on a `deploy` step, which runs a command and no agent.
+    agent: z.string().optional(),
+    deploy: z.enum(["merge-queue", "preview", "production"]).optional(),
+    // What the agent is asked to do in this stage. Without it the agent only sees the ticket and guesses.
+    brief: z.string().optional(),
+    // A read-only agent cannot write its own artifact, so the runner saves its reply as this one.
+    writes: z.enum(AGENT_ARTIFACTS).optional(),
+    // The reply must begin with this text, or it is chat and not the artifact; nothing is saved.
+    startsWith: z.string().optional(),
+    checks: z.array(z.enum(CHECK_NAMES)).default([]),
+    // Repeat the agent until every check in `until` passes, at most `max` times. The same failing check with
+    // the same evidence `sameFailure` rounds in a row (default 2) means the test contradicts the ticket.
+    loop: z
+      .object({
+        until: z.array(z.enum(CHECK_NAMES)).min(1),
+        max: z.number().int().min(1).max(5),
+        sameFailure: z.number().int().min(2).default(2),
+      })
+      .optional(),
+    // Parallel lenses hunt, three verifiers vote (2 of 3 keep a finding), a builder fixes what survives.
+    review: z.object({ lenses: z.array(z.string()).min(1) }).optional(),
+    gate: z.enum(["human", "auto"]).default("auto"),
+    // Fix steps run with the test lock on.
+    phase: z.enum(["build", "fix"]).default("build"),
+  })
+  .refine((s) => s.agent || s.deploy, "a step needs an agent or a deploy");
 export type Step = z.infer<typeof stepSchema>;
 
 export const workflowSchema = z.object({

@@ -97,18 +97,23 @@ function inTempDir(setup: string | undefined, proof: string) {
 
 describe("lab proofs", () => {
   const labs = loadLabs("labs");
+  const items = labs.flatMap((lab) => lab.proof.map((item, n) => ({ lab, item, n: n + 1 })));
 
   it("has a solution for every lab and none extra", () => {
     expect(Object.keys(SOLUTIONS).sort()).toEqual(labs.map((l) => l.id).sort());
   });
 
-  it.each(labs)("$id is red with no work", (lab) => {
-    expect(inTempDir(undefined, lab.proof)).not.toBe(0);
+  // A red item names one missing part, so every item must be red alone in an empty folder.
+  it.each(items)("$lab.id item $n is red with no work: $item.text", ({ item }) => {
+    expect(inTempDir(undefined, item.command)).not.toBe(0);
   });
 
-  it.each(labs)("$id is green once the steps are done", (lab) => {
-    expect(inTempDir(SOLUTIONS[lab.id], lab.proof)).toBe(0);
-  });
+  it.each(items)(
+    "$lab.id item $n is green once the steps are done: $item.text",
+    ({ lab, item }) => {
+      expect(inTempDir(SOLUTIONS[lab.id], item.command)).toBe(0);
+    },
+  );
 
   it("advanced-05 goes red when the deny list changes after cloud-guards.txt was saved", () => {
     const lab = labs.find((l) => l.id === "advanced-05");
@@ -117,6 +122,6 @@ describe("lab proofs", () => {
       `echo '{"permissions":{"deny":["Read(**/.env*)"]},"hooks":{"PreToolUse":[],"Stop":[]}}' > .claude/settings.json`,
     );
     expect(lab, "advanced-05 is missing").toBeDefined();
-    expect(inTempDir(changed, lab?.proof ?? "false")).not.toBe(0);
+    expect(inTempDir(changed, lab?.proof[0]?.command ?? "false")).not.toBe(0);
   });
 });

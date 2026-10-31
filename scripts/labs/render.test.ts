@@ -8,8 +8,9 @@ const lab: Lab = {
   title: "First prompt",
   pairs: "docs/README.md",
   goal: "Ask one question.",
+  help: "guided",
   steps: ["Run `claude`."],
-  proof: "true",
+  proof: [{ text: "It holds.", command: "true" }],
   hints: ["one", "two"],
   learned: "l",
 };
@@ -62,6 +63,22 @@ describe("renderBrief", () => {
     expect(text).toContain("1. Run `claude`.");
     expect(text).not.toContain("one\n");
     expect(text).toContain("0 of 2");
+  });
+  it("hinted: swaps step commands for a pointer to the hints", () => {
+    const hinted: Lab = { ...lab, help: "hinted", steps: ["Run `claude -p hi`, then read it."] };
+    const text = renderBrief(hinted, { done: {}, hints: {} }, false);
+    expect(text).not.toContain("claude -p hi");
+    expect(text).toContain("(command in hints)");
+    expect(text).toContain("Ask one question.");
+  });
+  it("goal: shows the goal and proof but no step list", () => {
+    const goal: Lab = { ...lab, help: "goal", steps: ["Run `claude -p hi`."], proof: "test -f x" };
+    const text = renderBrief(goal, { done: {}, hints: {} }, false);
+    expect(text).toContain("Ask one question.");
+    expect(text).toContain("test -f x");
+    expect(text).not.toContain("Steps");
+    expect(text).not.toContain("claude -p hi");
+    expect(text).toContain("make lab HINT=1");
   });
   it("shows revealed hints only", () => {
     const text = renderBrief(lab, { done: {}, hints: { "start-01": 1 } }, false);

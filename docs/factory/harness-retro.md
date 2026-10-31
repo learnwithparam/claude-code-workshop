@@ -50,7 +50,7 @@ The retro stage in `.claude/skills/factory-retro/SKILL.md` proposes one change p
 
 **Guard.** `factory/engine/real-host.test.ts` asserts that an agent's shell does not see `ANTHROPIC_API_KEY` or `GH_TOKEN`. That guards the agent side only.
 
-**Status.** Unverified. No commit in this repo records a run failing on a missing login, and no test runs `approved()` with `gh` logged out. The failure as a silent "not approved" is read from the code, not from a log. Open: a preflight that runs `gh auth status` before the first agent and says so.
+**Status.** Unverified. No commit in this repo records a run failing on a missing login, and no test runs `approved()` with `gh` logged out. The failure as a silent "not approved" is read from the code, not from a log. Fixed since: `ghPreflight` in `factory/engine/gh-preflight.ts` runs `gh auth status` before the first agent, guarded by `gh-preflight.test.ts`.
 
 ## 4. Agent worktrees had no `node_modules`
 
@@ -95,7 +95,7 @@ The retro stage in `.claude/skills/factory-retro/SKILL.md` proposes one change p
 
 **Guard.** `factory/engine/models.test.ts`: "keeps the commands it read at the start when the file changes later".
 
-**Status.** Partly fixed, partly open. Pinning protects against an edit after the pin. It does not protect against a tree that was already changed before the run started, because the file is still read from the working tree. The fuller fix is to read the config from the base commit, as agents and the base run already are. That is not done and has no test yet.
+**Status.** Partly fixed, partly open. Pinning protects against an edit after the pin. It does not protect against a tree that was already changed before the run started, because the file is still read from the working tree. Fixed since: `pinPortableAt(base)` reads the file from the merge base, guarded by `portable-base.test.ts`. `.factory/config.json` is still read from the working tree.
 
 ## 8. A high-tier gate could not be met
 
