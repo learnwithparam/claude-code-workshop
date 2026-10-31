@@ -25,7 +25,10 @@ export function hashes(read, files = watched()) {
 // First run records the baseline. Later runs report which files differ from it.
 export function changed(baseline, now) {
   if (!baseline) return [];
-  return Object.keys(now).filter((f) => baseline[f] !== now[f]);
+  // Union of keys: a deleted hook or settings file is a config change too, and only the baseline still names it.
+  return [...new Set([...Object.keys(baseline), ...Object.keys(now)])].filter(
+    (f) => baseline[f] !== now[f],
+  );
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {

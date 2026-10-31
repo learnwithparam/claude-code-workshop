@@ -4,6 +4,7 @@ import { LANES, loadLabs, parseLab } from "./catalog.ts";
 const good = `# First prompt
 
 **Pairs with:** \`docs/levels/hand-built.md\`
+**Help:** guided
 
 ## Goal
 Ask Claude one question.
@@ -14,9 +15,15 @@ Ask Claude one question.
 3. [editor] Write \`a.md\`.
 
 ## Proof
-\`\`\`sh
-test -f .labs/work/a.md
-\`\`\`
+
+1. The notes file exists.
+   \`\`\`sh
+   test -f .labs/work/a.md
+   \`\`\`
+2. The notes file is not empty.
+   \`\`\`sh
+   test -s .labs/work/a.md
+   \`\`\`
 
 ## Hints
 1. Look in .labs.
@@ -34,14 +41,18 @@ describe("parseLab", () => {
       lane: "start",
       title: "First prompt",
       pairs: "docs/levels/hand-built.md",
+      help: "guided",
       goal: "Ask Claude one question.",
-      proof: "test -f .labs/work/a.md",
       learned: "A prompt is just a question.",
     });
     expect(lab.steps).toEqual([
       { where: "shell", text: "Run `claude`." },
       { where: "claude", text: "Ask it." },
       { where: "editor", text: "Write `a.md`." },
+    ]);
+    expect(lab.proof).toEqual([
+      { text: "The notes file exists.", command: "test -f .labs/work/a.md" },
+      { text: "The notes file is not empty.", command: "test -s .labs/work/a.md" },
     ]);
     expect(lab.hints).toHaveLength(2);
   });
@@ -57,8 +68,20 @@ describe("parseLab", () => {
     expect(() => parseLab("start", "01-x.md", text)).toThrow(/proof/i);
   });
 
+  it("rejects a proof item that has no command", () => {
+    const text = good.replace(/ {3}`{3}sh\n {3}test -s[^\n]*\n {3}`{3}\n/, "");
+    expect(() => parseLab("start", "01-x.md", text)).toThrow(/proof/i);
+  });
+
   it("rejects a lab with fewer than two hints", () => {
     expect(() => parseLab("start", "01-x.md", good.replace("2. Create the file.\n", ""))).toThrow();
+  });
+
+  it("rejects a missing or unknown help level", () => {
+    expect(() => parseLab("start", "01-x.md", good.replace("**Help:** guided\n", ""))).toThrow(
+      /help/i,
+    );
+    expect(() => parseLab("start", "01-x.md", good.replace("guided", "easy"))).toThrow(/help/i);
   });
 
   it("rejects a file name that is not kebab-case with a number", () => {

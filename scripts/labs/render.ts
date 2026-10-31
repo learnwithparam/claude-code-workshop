@@ -1,4 +1,4 @@
-import type { Lab, Lane, Window } from "./catalog.ts";
+import type { Lab, Lane, Step, Window } from "./catalog.ts";
 import type { Progress } from "./progress.ts";
 
 type Stat = { lane: Lane; done: number; total: number };
@@ -37,6 +37,17 @@ function tag(where: Window, color: boolean): string {
   return color ? paint(true, style, words) : `[${words}]`;
 }
 
+// A backticked span is a command when it starts with a shell program. File names and keys are not.
+const PROGRAMS = "ls|cat|mkdir|echo|tail|grep|cd|git|claude|make|npm|npx|node|tee";
+export const isCommand = (span: string): boolean => new RegExp(`^(${PROGRAMS})( |$)`).test(span);
+
+// At "hinted" the commands leave the steps; the hints still carry them.
+function hideCommands(text: string): string {
+  return text.replace(/`([^`]+)`/g, (m, span: string) =>
+    isCommand(span) ? "(command in hints)" : m,
+  );
+}
+
 export function renderMap(
   stats: Stat[],
   labs: Lab[],
@@ -56,6 +67,13 @@ export function renderMap(
   return lines.join("\n");
 }
 
+function body(lab: Lab, color: boolean): string[] {
+  if (lab.help === "goal") return [paint(color, "bold", "Done when this passes"), lab.proof, ""];
+  const show = (s: string) => (lab.help === "hinted" ? hideCommands(s) : commands(s, color));
+  const step = (s: Step, i: number) => `${i + 1}. ${tag(s.where, color)} ${show(s.text)}`;
+  return [paint(color, "bold", "Steps"), ...lab.steps.map(step), ""];
+}
+
 export function renderBrief(lab: Lab, progress: Progress, color: boolean): string {
   const shown = progress.hints[lab.id] ?? 0;
   const lines = [
@@ -64,9 +82,7 @@ export function renderBrief(lab: Lab, progress: Progress, color: boolean): strin
     "",
     `${paint(color, "bold", "Goal")} ${lab.goal}`,
     "",
-    paint(color, "bold", "Steps"),
-    ...lab.steps.map((s, i) => `${i + 1}. ${tag(s.where, color)} ${commands(s.text, color)}`),
-    "",
+    ...body(lab, color),
     paint(
       color,
       "dim",

@@ -11,11 +11,12 @@ import {
 } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { query } from "@anthropic-ai/claude-agent-sdk";
+import { query as sdkQuery } from "@anthropic-ai/claude-agent-sdk";
+import { approvalIn, type Comment, writersFrom } from "./approvers.ts";
+import { type Auth, agentEnv, runCap, type SubscriptionCap } from "./auth.ts";
+import type { Usage } from "./metrics.ts";
 import { resolveModel } from "./models.ts";
 import type { Host } from "./types.ts";
-
-const AGENT_ENV = ["PATH", "SHELL", "TERM", "LANG", "ANTHROPIC_API_KEY"];
 
 // .claude/agents/<name>.md: the frontmatter sets what the agent may do, the body is its prompt.
 export function parseAgent(text: string) {
@@ -28,30 +29,6 @@ export function parseAgent(text: string) {
   return { fm, body: (m?.[2] ?? text).trim() };
 }
 
-type Comment = { body: string; authorAssociation: string; author?: { login: string } };
-// Only a person with write access counts. The agents hold no GitHub token, so they cannot approve.
-export function approvalIn(
-  comments: Comment[],
-  stage: string,
-  digest: string,
-  approvers?: string[],
-  need = 1,
-): boolean {
-  const line = `approve ${stage} ${digest}`;
-  // Distinct people: one person commenting twice is still one approval.
-  const who = new Set(
-    comments
-      .filter(
-        (c) =>
-          ["OWNER", "MEMBER", "COLLABORATOR"].includes(c.authorAssociation) &&
-          (!approvers || approvers.includes(c.author?.login ?? "")) &&
-          c.body.split("\n").some((l) => l.trim() === line),
-      )
-      .map((c) => c.author?.login ?? ""),
-  );
-  return who.size >= need;
-}
-
 export type RealHostOptions = {
   // GitHub logins whose comments count as approval. The agents cannot comment as them.
   approvers?: string[];
@@ -59,17 +36,31 @@ export type RealHostOptions = {
   base: string;
   stateDir?: string;
   maxUsdPerAgent?: number;
+  // The one credential the agents get; without it they get none and the SDK reports "Not logged in".
+  auth?: Auth;
+  subscriptionCap?: SubscriptionCap;
+  query?: typeof sdkQuery; // tests pass a stand-in
 };
 
-export function realHost(o: RealHostOptions): Host {
+// One exit listener for every host's temp folders, so many hosts in one process do not trip MaxListeners.
+const scratch = new Set<string>();
+const removeAtExit = (dir: string) => {
+  if (scratch.size === 0)
+    process.once("exit", () => {
+      for (const d of scratch) rmSync(d, { recursive: true, force: true });
+    });
+  scratch.add(dir);
+};
+
+export function realHost(o: RealHostOptions): Host & { usage(): Usage } {
   // One folder per process: a file left by an earlier run was signed with another key and must never be read.
   const state =
     o.stateDir ??
     join(homedir(), ".factory", "state", `${process.pid}-${randomBytes(4).toString("hex")}`);
-  if (!o.stateDir) process.once("exit", () => rmSync(state, { recursive: true, force: true }));
+  if (!o.stateDir) removeAtExit(state);
   // Checks run code the agent wrote: no API key, no GitHub token, a throwaway HOME and no global git config.
   const home = mkdtempSync(join(tmpdir(), "factory-home-"));
-  process.once("exit", () => rmSync(home, { recursive: true, force: true }));
+  removeAtExit(home);
   const SAFE_ENV = {
     GIT_CONFIG_NOSYSTEM: "1",
     ...Object.fromEntries(
@@ -86,6 +77,11 @@ export function realHost(o: RealHostOptions): Host {
         homedir(),
         process.platform === "darwin" ? "Library/Caches/ms-playwright" : ".cache/ms-playwright",
       ),
+  };
+  // Runner-side call with the real environment: gh needs the person's login, the agents never see it.
+  const issueComments = (n: number): Comment[] | null => {
+    const r = sh("gh", ["issue", "view", String(n), "--json", "comments"], o.cwd, process.env);
+    return r.status === 0 ? (JSON.parse(r.stdout).comments ?? []) : null;
   };
   const sh = (cmd: string, args: string[], cwd = o.cwd, env: NodeJS.ProcessEnv = SAFE_ENV) =>
     spawnSync(cmd, args, { cwd, encoding: "utf8", maxBuffer: 64 << 20, env });
@@ -113,6 +109,9 @@ export function realHost(o: RealHostOptions): Host {
   // The key lives only in this process, so an agent that rewrites a state file cannot forge its tag.
   const key = randomBytes(32);
   const tag = (v: string) => createHmac("sha256", key).update(v).digest("hex");
+  const query = o.query ?? sdkQuery;
+  const subscription = o.auth?.mode === "subscription";
+  const used: Usage = { auth: o.auth?.mode ?? "none", calls: 0, tokens: 0, estimatedUsd: 0 };
 
   return {
     async agent(name, prompt, { stage, model, maxUsd }) {
@@ -122,6 +121,9 @@ export function realHost(o: RealHostOptions): Host {
       let text = "";
       let costUsd = 0;
       let failed: string | undefined;
+      const capped = o.subscriptionCap && runCap(o.auth?.mode, o.subscriptionCap, used);
+      if (capped) return { text: "", costUsd: 0, failed: capped };
+      used.calls++;
       try {
         for await (const msg of query({
           prompt,
@@ -129,16 +131,19 @@ export function realHost(o: RealHostOptions): Host {
             cwd: o.cwd,
             model: model ?? resolveModel({ step: stage, type: "", frontmatter: fm.model }),
             maxTurns: Number(fm.maxTurns ?? 20),
-            maxBudgetUsd: Math.min(o.maxUsdPerAgent ?? 3, maxUsd ?? Number.POSITIVE_INFINITY),
+            // A plan is not billed per dollar, so no dollar ceiling; maxTurns and runCap bound it.
+            ...(subscription
+              ? {}
+              : {
+                  maxBudgetUsd: Math.min(o.maxUsdPerAgent ?? 3, maxUsd ?? Number.POSITIVE_INFINITY),
+                }),
             permissionMode: fm.permissionMode === "acceptEdits" ? "acceptEdits" : "plan",
             allowedTools: fm.tools?.split(",").map((t) => t.trim()),
             systemPrompt: { type: "preset", preset: "claude_code", append: body },
             settingSources: ["project"],
             strictMcpConfig: true,
             env: {
-              ...Object.fromEntries(
-                AGENT_ENV.flatMap((k) => (process.env[k] ? [[k, process.env[k]]] : [])),
-              ),
+              ...agentEnv(o.auth, process.env),
               HOME: home,
               GIT_CONFIG_GLOBAL: "/dev/null",
               CLAUDE_CODE_DISABLE_AUTO_MEMORY: "1",
@@ -150,13 +155,22 @@ export function realHost(o: RealHostOptions): Host {
           if (msg.type === "result") {
             text = "result" in msg ? String(msg.result) : "";
             costUsd = msg.total_cost_usd;
+            used.estimatedUsd += costUsd;
+            // modelUsage counts subagents too; usage counts only the top-level loop.
+            for (const u of Object.values(msg.modelUsage ?? {}))
+              used.tokens +=
+                u.inputTokens +
+                u.outputTokens +
+                u.cacheReadInputTokens +
+                u.cacheCreationInputTokens;
           }
         }
       } catch (e) {
         failed = e instanceof Error ? e.message : String(e);
       }
-      return { text, costUsd, failed };
+      return { text, costUsd: subscription ? 0 : costUsd, failed };
     },
+    usage: () => ({ ...used }),
 
     async exec(cmd, args, opt) {
       if (opt?.ref !== "base") {
@@ -207,7 +221,7 @@ export function realHost(o: RealHostOptions): Host {
       return [...new Set([...diff, ...dirty])].filter(Boolean);
     },
 
-    async commit(message) {
+    async commit(message, paths) {
       // No repo hooks or fsmonitor: the agent can write .git/hooks, and a commit must not run them.
       if (gitConfig() !== pinnedConfig)
         throw new Error("git config changed during the run; refusing to commit");
@@ -223,7 +237,8 @@ export function realHost(o: RealHostOptions): Host {
           "core.attributesFile=/dev/null",
           ...a,
         ]);
-      g("add", "-A");
+      const scope = paths?.length ? ["--", ...paths] : [];
+      g("add", ...(scope.length ? scope : ["-A"]));
       const r = g(
         "-c",
         "user.name=factory",
@@ -233,6 +248,7 @@ export function realHost(o: RealHostOptions): Host {
         "--no-verify",
         "-m",
         message,
+        ...scope,
       );
       if (r.status !== 0) throw new Error(`commit failed: ${r.stderr}`);
     },
@@ -253,11 +269,25 @@ export function realHost(o: RealHostOptions): Host {
     setPhase(p) {
       phase = p;
     },
+    async writers(n) {
+      const comments = issueComments(n);
+      if (!comments) return [];
+      return writersFrom(comments, async (login) => {
+        const r = sh(
+          "gh",
+          ["api", `repos/{owner}/{repo}/collaborators/${login}/permission`, "-q", ".permission"],
+          o.cwd,
+          process.env,
+        );
+        return r.status === 0 ? r.stdout.trim() : "none";
+      });
+    },
     async approved(n, stage, digest, need = 1) {
-      // Runner-side call with the real environment: gh needs the person's login, the agents never see it.
-      const r = sh("gh", ["issue", "view", String(n), "--json", "comments"], o.cwd, process.env);
-      if (r.status !== 0) return false;
-      return approvalIn(JSON.parse(r.stdout).comments ?? [], stage, digest, o.approvers, need);
+      const comments = issueComments(n);
+      if (!comments) return false;
+      // An explicit list wins; otherwise the people who can write to the repo and commented here.
+      const approvers = o.approvers ?? (await this.writers(n));
+      return approvalIn(comments, stage, digest, approvers, need);
     },
   };
 }

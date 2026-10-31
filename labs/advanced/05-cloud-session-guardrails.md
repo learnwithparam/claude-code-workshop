@@ -1,6 +1,7 @@
 # Check the guardrails a cloud session inherits
 
 **Pairs with:** `docs/factory/f11-cloud-sessions.md`
+**Help:** goal
 
 ## Goal
 
@@ -17,19 +18,30 @@ Show which guardrails a cloud session inherits from this repo, and predict what 
 
 ## Proof
 
-```sh
-f=.labs/work/cloud-guards.txt
-r=.labs/work/push-route.md
-node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' | diff -q - $f >/dev/null || exit 1
-grep -qF 'Bash(git push *)' $f || exit 1
-grep -q PreToolUse $f || exit 1
-grep -qiE 'person ships|teleport|hook' $r || exit 1
-test "$(grep -c . $r)" -ge 2
-```
+1. cloud-guards.txt matches the deny list and hook names that `.claude/settings.json` holds now.
+
+   ```sh
+   f=.labs/work/cloud-guards.txt
+   node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' | diff -q - $f >/dev/null
+   ```
+2. cloud-guards.txt lists the push deny and the PreToolUse hook.
+
+   ```sh
+   f=.labs/work/cloud-guards.txt
+   grep -qF 'Bash(git push *)' $f || exit 1
+   grep -q PreToolUse $f
+   ```
+3. push-route.md gives a route and a reason on separate lines.
+
+   ```sh
+   r=.labs/work/push-route.md
+   grep -qiE 'person ships|teleport|hook' $r || exit 1
+   test "$(grep -c . $r)" -ge 2
+   ```
 
 ## Hints
 
-1. The command prints two things: the deny list, then the names of the hooks. Redirect both into the file with `>`.
+1. The command prints two things: the deny list, then the names of the hooks. Redirect both into the file with `>`. The commands are `mkdir -p .labs/work` and `node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' > .labs/work/cloud-guards.txt`. For the optional step, run `claude --cloud` and ask it to run `git push`.
 2. The proof compares your file with what `.claude/settings.json` holds right now, so save it again after any change to that file.
 3. `push-route.md` needs a route and a reason on separate lines, for example: "Keep the deny, a person ships." then "A push is the step that needs a human."
 

@@ -1,25 +1,37 @@
 # Labs: one line from first prompt to a running factory
 
-The levels explain. The labs make you do it. Take them in order, one command at a time. Each lab has one goal, exact steps, a proof that is red until you finish, hints that appear one at a time, and a line on what you just learned.
+The levels explain. The labs make you do it. Take them in order, one command at a time. Each lab has one goal, steps, a proof that is red until you finish, hints that appear one at a time, and a line on what you just learned.
 
-Two workshops use the same path.
+Two workshops share this folder. Pick yours once with `make lab PATH_ID=pro` or `make lab PATH_ID=factory`. Until you pick, `make lab` only asks. After that, `make lab`, `make next` and `make progress` follow your workshop only.
 
-- **Claude Code, beginner to pro:** the `start`, `daily`, `team` and `advanced` lanes.
-- **Software Factory:** the `factory` lane, after `start` and `daily`.
+- **Claude Code, beginner to pro** (`PATH_ID=pro`): the `start`, `daily`, `team` and `advanced` lanes.
+- **Software Factory** (`PATH_ID=factory`): the `start`, `daily` and `factory` lanes.
+
+## Help fades as you go
+
+Every lab declares `**Help:** guided`, `hinted` or `goal`, and the path gets harder on purpose.
+
+- **guided** (`start`): the brief shows every command.
+- **hinted** (`daily`, `team`): the steps say what to do but not which command. Each command appears as "(command in hints)" and you reveal it with `make lab HINT=1`.
+- **goal** (`factory`, `advanced`): the brief is the goal and the proof, nothing else. Hints are there when you are stuck.
+
+Help never goes down from one lane to the next, and every `advanced` lab is goal only.
 
 ## Commands
 
 ```
-make progress          the lane map with a bar per lane
+make lab PATH_ID=pro   choose your workshop (pro or factory), then work on it
+make progress          your workshop's lane map with a bar per lane
 make next              show the next lab without running anything
 make lab               show the current lab, run its proof, record a pass
 make lab HINT=1        reveal the next hint, one per call
 make lab ID=daily-03   work on any lab, in any order
+make lab WATCH=1       rerun the proof each time .labs/work/ changes; h = next hint, q = quit
 ```
 
 Colour turns off when `NO_COLOR` is set or output is not a terminal. Progress sits in `.labs/progress.json`, which git ignores. Your work for each lab goes under `.labs/work/`, so a lab never changes tracked files.
 
-Run Claude Code in one terminal and `make lab` in a second one beside it. Each step says where to type it: "in your shell", "in Claude Code" or "in your editor". A step with no tag is a shell step. In a lab file the tag opens the step as `[shell]`, `[claude]` or `[editor]`.
+Run Claude Code in one terminal and `make lab WATCH=1` in a second one beside it. The proof reruns as you save, and on a pass it records the lab and exits. Without a terminal (CI, a pipe) `WATCH=1` runs the proof once and says so.
 
 ## The path
 
@@ -49,7 +61,7 @@ Run Claude Code in one terminal and `make lab` in a second one beside it. Each s
 
 ## How the labs are kept correct
 
-- A test parses every lab and fails if one lacks a goal, steps, a proof or two hints.
+- A test parses every lab and fails if one lacks a goal, a help level, steps, a proof or two hints. Another fails if help drops along the lanes or a hidden command is missing from the hints.
 - A test runs every proof in an empty folder and expects red, then applies a known solution and expects green. A proof that passes with no work, or can never pass, fails the build.
 - A test fails if a lab or its pairing is missing from the table above.
 - `levels.json` gives every lab file to trunk, so every level copy carries the labs.
