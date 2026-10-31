@@ -2,6 +2,18 @@
 
 **Stage:** the whole path. **Layers:** all of them. **Workflows:** every file in `.factory/workflows/`.
 
+## Story
+
+**The ticket.** Issue 35 asked for a prompt cache and templates learned from good worksheets. Every stage left a file in `specs/35/`.
+
+**Without the layer.** The builder added `api/src/agent/template-eval.ts` and wrote in `specs/35/build.md` that it was "not on the plan's file list". A builder working alone would have shipped a file nobody had agreed to.
+
+**What the layer did.** The `plan-drift` check failed the run: "check plan-drift FAIL: files outside plan.md: api/src/agent/template-eval.ts", as `specs/35/ci.md` quotes it. The plan was updated to list the file, and the check passed.
+
+![The six stages from a ready ticket to a merged pull request, with the artifact and the deciding check under each](img/pipeline.svg)
+
+_Notice:_ only the plan gate and the merge are orange. Every other step forward is decided by code reading a file or an exit code.
+
 ## Goal
 
 Say in one page what the factory does, which parts are code and which are a model, and how it compares with the two public descriptions of an agentic software factory. By the end you can name the artifact each stage leaves behind and the check that decides whether the next stage may start.

@@ -1,6 +1,7 @@
 # Run a proof and keep the receipt
 
 **Pairs with:** `docs/levels/verification.md`
+**Help:** hinted
 
 ## Goal
 
@@ -23,6 +24,7 @@ grep -q '^PASS hand-built' .labs/work/prove.txt
 1. The proof checks for a line starting `PASS hand-built` in `.labs/work/prove.txt`.
 2. `tee` prints and saves at once.
 3. If it prints FAIL, the line says which claim broke. Fix that, not the check.
+4. Commands, in order: `mkdir -p .labs/work`, `make prove LEVEL=hand-built | tee .labs/work/prove.txt`, `make exercise LEVEL=hand-built TRACK=b`.
 
 ## What you just learned
 

@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { parse } from "yaml";
 import { z } from "zod";
@@ -27,6 +28,12 @@ export type Portable = z.infer<typeof portableSchema>;
 export const loadPortable = (path = ".factory/config.yaml"): Portable =>
   portableSchema.parse(parse(readFileSync(path, "utf8")));
 
+// The file as committed at `ref`, so nothing written to the working tree can change it.
+export const loadPortableAt = (ref: string, cwd = process.cwd()): Portable =>
+  portableSchema.parse(
+    parse(execFileSync("git", ["show", `${ref}:.factory/config.yaml`], { cwd, encoding: "utf8" })),
+  );
+
 let cached: Portable | undefined;
 // Read once per process; the checks and the workflow loader share it.
 export const portable = (): Portable => {
@@ -38,6 +45,12 @@ export const portable = (): Portable => {
 // the gate runs: the working tree is never read for this again.
 export const pinPortable = (path?: string): Portable => {
   cached = loadPortable(path);
+  return cached;
+};
+
+// The same pin read from the base commit, so a tree edited before the run is not trusted either.
+export const pinPortableAt = (ref: string, cwd?: string): Portable => {
+  cached = loadPortableAt(ref, cwd);
   return cached;
 };
 
