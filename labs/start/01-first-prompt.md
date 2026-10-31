@@ -8,10 +8,11 @@ Run Claude Code once, headless, and keep its answer in a file you can read.
 
 ## Steps
 
-1. Check your machine: `make doctor`.
-2. Make the lab work folder: `mkdir -p .labs/work`.
-3. Ask a question and save the answer: `claude -p "In five bullets, what does this repo do?" > .labs/work/repo-tour.md`.
-4. Read it: `cat .labs/work/repo-tour.md`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+2. Check your machine: `make doctor`.
+3. Make the lab work folder: `mkdir -p .labs/work`.
+4. Ask a question and save the answer: `claude -p "In five bullets, what does this repo do?" > .labs/work/repo-tour.md`.
+5. Read it: `cat .labs/work/repo-tour.md`.
 
 ## Proof
 

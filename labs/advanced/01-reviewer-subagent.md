@@ -8,10 +8,11 @@ Define a subagent that can read and search but cannot write, so a review can nev
 
 ## Steps
 
-1. Read a real one: `ls .claude/agents` then `cat` one.
-2. Make the folder: `mkdir -p .labs/work/agents`.
-3. Write `.labs/work/agents/reviewer.md` with front matter `name`, `description`, `tools` and `model`, then a short prompt.
-4. The `tools` line lists only `Read, Grep, Glob`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+2. Read a real one: `ls .claude/agents` then `cat` one.
+3. Make the folder: `mkdir -p .labs/work/agents`.
+4. Write `.labs/work/agents/reviewer.md` with front matter `name`, `description`, `tools` and `model`, then a short prompt.
+5. The `tools` line lists only `Read, Grep, Glob`.
 
 ## Proof
 

@@ -6,6 +6,8 @@ import { LANES, type Lab } from "./catalog.ts";
 const progressSchema = z.object({
   done: z.record(z.string(), z.string()),
   hints: z.record(z.string(), z.number().int().min(0)),
+  // Older files have no attempts; they read as zero.
+  attempts: z.record(z.string(), z.number().int().min(0)).default({}),
 });
 export type Progress = z.infer<typeof progressSchema>;
 
@@ -17,7 +19,7 @@ export function loadProgress(path: string): Progress {
   } catch {
     // fall through to a fresh start
   }
-  return { done: {}, hints: {} };
+  return { done: {}, hints: {}, attempts: {} };
 }
 
 export function saveProgress(path: string, progress: Progress): void {
@@ -27,6 +29,13 @@ export function saveProgress(path: string, progress: Progress): void {
 
 export function markDone(progress: Progress, id: string, when: string): Progress {
   return { ...progress, done: { ...progress.done, [id]: when } };
+}
+
+export function recordAttempt(progress: Progress, id: string): Progress {
+  return {
+    ...progress,
+    attempts: { ...progress.attempts, [id]: (progress.attempts[id] ?? 0) + 1 },
+  };
 }
 
 export function revealHint(progress: Progress, lab: Lab): { progress: Progress; revealed: number } {

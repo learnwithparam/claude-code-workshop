@@ -8,10 +8,11 @@ Write the one-page intent a factory run starts from: the problem and how anyone 
 
 ## Steps
 
-1. Read the stage: `cat docs/factory/f1-plan.md`.
-2. Make the folder: `mkdir -p .labs/work/specs/1`.
-3. Write `.labs/work/specs/1/intent.md` with the headings `## Problem`, `## Done when` and `## Out of scope`.
-4. Under Done when, write two checks a command could run.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+2. Read the stage: `cat docs/factory/f1-plan.md`.
+3. Make the folder: `mkdir -p .labs/work/specs/1`.
+4. Write `.labs/work/specs/1/intent.md` with the headings `## Problem`, `## Done when` and `## Out of scope`.
+5. Under Done when, write two checks a command could run.
 
 ## Proof
 

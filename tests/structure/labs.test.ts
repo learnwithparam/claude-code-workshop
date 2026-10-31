@@ -25,6 +25,10 @@ describe("labs", () => {
     expect(stray).toEqual([]);
   });
 
+  it.each(labs)("$id opens by running make lab to see the proof red", (lab) => {
+    expect(lab.steps[0], `${lab.id} step 1 must say to run make lab`).toContain("`make lab`");
+  });
+
   it.each(labs)("$id pairs with a doc that exists and is listed in the path table", (lab) => {
     expect(existsSync(lab.pairs) || isOwned(lab.pairs), `${lab.pairs} is missing`).toBe(true);
     const row = readme.split("\n").find((line) => line.includes(`\`${lab.id}\``));

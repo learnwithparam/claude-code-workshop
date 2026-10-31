@@ -8,10 +8,11 @@ Write a short `REVIEW.md` that tells a reviewer what to flag, each rule somethin
 
 ## Steps
 
-1. Read the real one: `cat REVIEW.md`.
-2. Make the folder: `mkdir -p .labs/work`.
-3. Write `.labs/work/REVIEW.md` with a heading and at least three bullets. Each bullet starts with "Flag" and names a concrete thing in a diff.
-4. Try it on a diff: `claude -p "Review the staged changes using .labs/work/REVIEW.md"`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+2. Read the real one: `cat REVIEW.md`.
+3. Make the folder: `mkdir -p .labs/work`.
+4. Write `.labs/work/REVIEW.md` with a heading and at least three bullets. Each bullet starts with "Flag" and names a concrete thing in a diff.
+5. Try it on a diff: `claude -p "Review the staged changes using .labs/work/REVIEW.md"`.
 
 ## Proof
 

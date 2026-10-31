@@ -8,10 +8,11 @@ Start a session, leave it, and pick it up again with its context intact.
 
 ## Steps
 
-1. Make the folder: `mkdir -p .labs/work`.
-2. Start a session and save its metadata: `claude -p "Remember the word tangerine." --output-format json > .labs/work/session.json`.
-3. Continue the same session: `claude -p --continue "What word did I ask you to remember?" > .labs/work/recall.md`.
-4. Read the answer: `cat .labs/work/recall.md`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+2. Make the folder: `mkdir -p .labs/work`.
+3. Start a session and save its metadata: `claude -p "Remember the word tangerine." --output-format json > .labs/work/session.json`.
+4. Continue the same session: `claude -p --continue "What word did I ask you to remember?" > .labs/work/recall.md`.
+5. Read the answer: `cat .labs/work/recall.md`.
 
 ## Proof
 

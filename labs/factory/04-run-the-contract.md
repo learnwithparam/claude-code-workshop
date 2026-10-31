@@ -8,10 +8,11 @@ Run the workflow contract tests and keep the log, so you know the stages and the
 
 ## Steps
 
-1. Read the module: `cat docs/factory/f8-workflows.md`.
-2. Make the folder: `mkdir -p .labs/work`.
-3. Run the contract tests: `npx vitest run tests/contract > .labs/work/contract.log 2>&1`.
-4. Read what failed or passed: `tail -8 .labs/work/contract.log`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+2. Read the module: `cat docs/factory/f8-workflows.md`.
+3. Make the folder: `mkdir -p .labs/work`.
+4. Run the contract tests: `npx vitest run tests/contract > .labs/work/contract.log 2>&1`.
+5. Read what failed or passed: `tail -8 .labs/work/contract.log`.
 
 ## Proof
 

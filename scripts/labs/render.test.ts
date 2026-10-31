@@ -40,7 +40,7 @@ describe("renderMap", () => {
     const text = renderMap(
       stats,
       [lab],
-      { done: { "start-01": "x" }, hints: {} },
+      { done: { "start-01": "x" }, hints: {}, attempts: {} },
       "start-01",
       false,
     );
@@ -49,13 +49,15 @@ describe("renderMap", () => {
     expect(text).toContain("1/2");
   });
   it("uses escape codes with color", () => {
-    expect(renderMap(stats, [lab], { done: {}, hints: {} }, "start-01", true)).toMatch(ESC);
+    expect(
+      renderMap(stats, [lab], { done: {}, hints: {}, attempts: {} }, "start-01", true),
+    ).toMatch(ESC);
   });
 });
 
 describe("renderBrief", () => {
   it("shows the goal and steps but hides unrevealed hints", () => {
-    const text = renderBrief(lab, { done: {}, hints: {} }, false);
+    const text = renderBrief(lab, { done: {}, hints: {}, attempts: {} }, false);
     expect(text).toContain("Ask one question.");
     expect(text).toContain("1. Run `claude`.");
     expect(text).not.toContain("one\n");

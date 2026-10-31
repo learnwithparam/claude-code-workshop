@@ -8,9 +8,10 @@ Write one private preference into `CLAUDE.local.md` so Claude follows it in this
 
 ## Steps
 
-1. See the example: `cat docs/examples/CLAUDE.local.md`.
-2. Add a line to your own file: `echo "- lab-note: explain each change in two plain sentences." >> CLAUDE.local.md`.
-3. Check it loads: `claude -p "What preferences do my local notes give you?"`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+2. See the example: `cat docs/examples/CLAUDE.local.md`.
+3. Add a line to your own file: `echo "- lab-note: explain each change in two plain sentences." >> CLAUDE.local.md`.
+4. Check it loads: `claude -p "What preferences do my local notes give you?"`.
 
 ## Proof
 

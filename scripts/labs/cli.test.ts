@@ -52,10 +52,24 @@ describe("cli", () => {
   it("a red proof exits 1, shows output and records nothing", () => {
     const s = setup(false);
     expect(run(["lab"], s.deps)).toBe(1);
-    expect(s.text()).toContain("FAIL start-01");
+    expect(s.text()).toContain("RED, as expected");
     expect(s.text()).toContain("boom line");
     expect(s.text()).not.toContain("first hint");
     expect(loadProgress(s.deps.progressPath).done).toEqual({});
+  });
+
+  it("the first red run says RED, as expected; later red runs say FAIL", () => {
+    const s = setup(false);
+    expect(run(["lab"], s.deps)).toBe(1);
+    expect(s.text()).toContain("RED, as expected");
+    expect(s.text()).toContain("boom line");
+    expect(s.text()).not.toContain("FAIL start-01");
+    expect(loadProgress(s.deps.progressPath).attempts["start-01"]).toBe(1);
+    s.out.length = 0;
+    expect(run(["lab"], s.deps)).toBe(1);
+    expect(s.text()).toContain("FAIL start-01");
+    expect(s.text()).not.toContain("RED, as expected");
+    expect(loadProgress(s.deps.progressPath).attempts["start-01"]).toBe(2);
   });
 
   it("--hint reveals one hint per call", () => {

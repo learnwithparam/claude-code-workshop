@@ -8,10 +8,11 @@ Write a settings file that denies reading `.env` files, so the rule holds for ev
 
 ## Steps
 
-1. Read the real one: `cat .claude/settings.json`.
-2. Make the folder: `mkdir -p .labs/work`.
-3. Write `.labs/work/settings.json` with a `permissions.deny` list that blocks `Read(./.env)` and `Read(./.env.*)`.
-4. Check it is valid JSON: `node -e "JSON.parse(require('fs').readFileSync('.labs/work/settings.json','utf8'))"`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+2. Read the real one: `cat .claude/settings.json`.
+3. Make the folder: `mkdir -p .labs/work`.
+4. Write `.labs/work/settings.json` with a `permissions.deny` list that blocks `Read(./.env)` and `Read(./.env.*)`.
+5. Check it is valid JSON: `node -e "JSON.parse(require('fs').readFileSync('.labs/work/settings.json','utf8'))"`.
 
 ## Proof
 

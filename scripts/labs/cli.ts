@@ -5,6 +5,7 @@ import {
   loadProgress,
   markDone,
   type Progress,
+  recordAttempt,
   revealHint,
   saveProgress,
 } from "./progress.ts";
@@ -84,9 +85,20 @@ export function run(args: string[], deps: CliDeps): number {
     finish(deps, progress, lab);
     return 0;
   }
-  deps.out(
-    `${paint(deps.color, "red", `FAIL ${lab.id}`)} the proof is red. Finish the steps, then run make lab again.`,
-  );
+  const first = (progress.attempts[lab.id] ?? 0) === 0;
+  saveProgress(deps.progressPath, recordAttempt(progress, lab.id));
+  if (first) {
+    deps.out(
+      `${paint(deps.color, "red", `RED, as expected ${lab.id}`)} this is the first run, so the proof fails on purpose.`,
+    );
+    deps.out(
+      "The failing line below is the state your steps will change. Do the steps, then run make lab again.",
+    );
+  } else {
+    deps.out(
+      `${paint(deps.color, "red", `FAIL ${lab.id}`)} the proof is red. Finish the steps, then run make lab again.`,
+    );
+  }
   if (result.output.trim()) deps.out(tail(result.output, 6));
   return 1;
 }

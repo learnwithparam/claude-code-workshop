@@ -8,10 +8,11 @@ Write a script that fails when any file name is not kebab-case, then prove it fa
 
 ## Steps
 
-1. Read one: `cat scripts/check-conventions.ts`.
-2. Make the folder: `mkdir -p .labs/work`.
-3. Write `.labs/work/check-kebab.mjs`. It takes a folder, walks it, prints each file whose name is not lowercase with dashes and dots, and exits 1 if it found any.
-4. Try it on the docs: `node .labs/work/check-kebab.mjs docs; echo $?`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+2. Read one: `cat scripts/check-conventions.ts`.
+3. Make the folder: `mkdir -p .labs/work`.
+4. Write `.labs/work/check-kebab.mjs`. It takes a folder, walks it, prints each file whose name is not lowercase with dashes and dots, and exits 1 if it found any.
+5. Try it on the docs: `node .labs/work/check-kebab.mjs docs; echo $?`.
 
 ## Proof
 

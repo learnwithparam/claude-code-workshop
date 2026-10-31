@@ -8,9 +8,10 @@ Run the repo's own tests and keep the log, so you know what green looks like bef
 
 ## Steps
 
-1. Install once: `npm ci`.
-2. Run the shared tests and save the log: `mkdir -p .labs/work && npx vitest run shared/ > .labs/work/gate.log 2>&1`.
-3. Read the last lines: `tail -5 .labs/work/gate.log`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+2. Install once: `npm ci`.
+3. Run the shared tests and save the log: `mkdir -p .labs/work && npx vitest run shared/ > .labs/work/gate.log 2>&1`.
+4. Read the last lines: `tail -5 .labs/work/gate.log`.
 
 ## Proof
 

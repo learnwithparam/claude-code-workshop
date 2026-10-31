@@ -8,9 +8,10 @@ Get a written plan for a small change from Claude without letting it edit a sing
 
 ## Steps
 
-1. Make the folder: `mkdir -p .labs/work`.
-2. Ask for a plan only: `claude -p --permission-mode plan "Plan how to add a grade band for university to shared/. List the files and how you will verify it." > .labs/work/plan.md`.
-3. Read the plan and check it names files that exist: `cat .labs/work/plan.md`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+2. Make the folder: `mkdir -p .labs/work`.
+3. Ask for a plan only: `claude -p --permission-mode plan "Plan how to add a grade band for university to shared/. List the files and how you will verify it." > .labs/work/plan.md`.
+4. Read the plan and check it names files that exist: `cat .labs/work/plan.md`.
 
 ## Proof
 

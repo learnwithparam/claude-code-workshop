@@ -8,9 +8,10 @@ Run one level's proof and save the output, so you can show the team it passed.
 
 ## Steps
 
-1. Make the folder: `mkdir -p .labs/work`.
-2. Run the proof: `make prove LEVEL=hand-built | tee .labs/work/prove.txt`.
-3. Run the exercise view: `make exercise LEVEL=hand-built TRACK=b`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+2. Make the folder: `mkdir -p .labs/work`.
+3. Run the proof: `make prove LEVEL=hand-built | tee .labs/work/prove.txt`.
+4. Run the exercise view: `make exercise LEVEL=hand-built TRACK=b`.
 
 ## Proof
 

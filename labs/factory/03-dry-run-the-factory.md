@@ -8,10 +8,11 @@ Run the factory in dry-run mode and read which model, turn cap and budget each s
 
 ## Steps
 
-1. Make the folder: `mkdir -p .labs/work`.
-2. Dry run, no key and no spend: `make factory ISSUE=1 FLAGS=--dry-run | tee .labs/work/dry-run.txt`.
-3. Read the config behind it: `cat .factory/config.json`.
-4. Note which stage has the largest budget.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+2. Make the folder: `mkdir -p .labs/work`.
+3. Dry run, no key and no spend: `make factory ISSUE=1 FLAGS=--dry-run | tee .labs/work/dry-run.txt`.
+4. Read the config behind it: `cat .factory/config.json`.
+5. Note which stage has the largest budget.
 
 ## Proof
 
