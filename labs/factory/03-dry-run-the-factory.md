@@ -6,6 +6,12 @@
 
 Run the factory in dry-run mode and read which model, turn cap and budget each stage gets.
 
+## Predict
+
+A dry run prints the plan for each stage. Does it call the model or spend any budget?
+
+Answer: No. A dry run only reads the config and prints what each stage would get, so it costs nothing.
+
 ## Steps
 
 1. Make the folder: `mkdir -p .labs/work`.

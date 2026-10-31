@@ -6,6 +6,12 @@
 
 Run the workflow contract tests and keep the log, so you know the stages and their artifacts are consistent.
 
+## Predict
+
+The contract test walks the workflows. Does it check one chosen workflow or every one of them?
+
+Answer: Every one, because a test that walks them all catches a break in any workflow without you having to remember to look.
+
 ## Steps
 
 1. Read the module: `cat docs/factory/f8-workflows.md`.

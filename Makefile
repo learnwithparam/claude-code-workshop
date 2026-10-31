@@ -52,7 +52,7 @@ levels:
 claude:
 	CLAUDE_CONFIG_DIR=$(CURDIR)/.workshop-home claude
 
-# Hands-on labs, start to advanced. HINT=1 reveals one hint; ID=<lab> picks a lab; progress is in .labs/ (gitignored).
+# Hands-on labs, start to advanced. HINT=1 reveals one hint; ID=<lab> picks a lab; GUESS="..." saves your answer to the Predict question (make exports it to the script as an environment variable); progress is in .labs/ (gitignored).
 lab:
 	npx tsx scripts/labs/main.ts lab $(ID) $(if $(HINT),--hint)
 

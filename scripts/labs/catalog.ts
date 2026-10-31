@@ -12,12 +12,16 @@ const oneLine = z
   .max(240)
   .regex(/^[^\n]+$/, "must be one line");
 
+// One question and the reason behind its answer, so a learner commits to a guess before running.
+const predictSchema = z.object({ question: oneLine, answer: z.string().min(1).max(400) });
+
 export const labSchema = z.object({
   id: z.string().regex(/^[a-z]+-\d{2}$/),
   lane: z.enum(LANES),
   title: oneLine,
   pairs: z.string().min(1),
   goal: oneLine,
+  predict: predictSchema,
   steps: z.array(z.string().min(1)).min(1),
   proof: z.string().min(1),
   // Two or more, so the first nudges and the last gives the answer away.
@@ -45,6 +49,22 @@ function listItems(body: string): string[] {
   return items;
 }
 
+// "Question?" then a line "Answer: reason". A missing Answer line leaves the answer empty and fails the schema.
+function predictOf(body: string): { question: string; answer: string } {
+  const at = body.search(/^Answer:/m);
+  if (at < 0) return { question: body.trim().replace(/\s*\n\s*/g, " "), answer: "" };
+  return {
+    question: body
+      .slice(0, at)
+      .trim()
+      .replace(/\s*\n\s*/g, " "),
+    answer: body
+      .slice(at + "Answer:".length)
+      .trim()
+      .replace(/\s*\n\s*/g, " "),
+  };
+}
+
 function proofOf(body: string): string {
   return /```sh\n([\s\S]*?)\n```/.exec(body)?.[1]?.trim() ?? "";
 }
@@ -59,6 +79,7 @@ export function parseLab(lane: string, file: string, text: string): Lab {
     title: /^# (.+)$/m.exec(text)?.[1],
     pairs: /^\*\*Pairs with:\*\* `([^`]+)`/m.exec(text)?.[1],
     goal: parts.get("goal"),
+    predict: predictOf(parts.get("predict") ?? ""),
     steps: listItems(parts.get("steps") ?? ""),
     proof: proofOf(parts.get("proof") ?? ""),
     hints: listItems(parts.get("hints") ?? ""),

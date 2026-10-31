@@ -6,6 +6,12 @@
 
 Get a written plan for a small change from Claude without letting it edit a single file.
 
+## Predict
+
+If you ask Claude for a plan in plan mode, will it edit any file in the repo?
+
+Answer: No. Plan mode is read-only, so Claude can read and search but the only thing written is the plan you redirect into a file.
+
 ## Steps
 
 1. Make the folder: `mkdir -p .labs/work`.

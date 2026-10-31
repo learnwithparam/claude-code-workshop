@@ -6,6 +6,12 @@
 
 Start a session, leave it, and pick it up again with its context intact.
 
+## Predict
+
+Your second claude -p call uses --continue. If you left that flag out, would Claude know the word from the first call?
+
+Answer: No. Each call starts with an empty context, so --continue is what reopens the saved session and brings the word back.
+
 ## Steps
 
 1. Make the folder: `mkdir -p .labs/work`.

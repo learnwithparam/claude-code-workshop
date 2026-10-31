@@ -6,6 +6,12 @@
 
 Write a short `REVIEW.md` that tells a reviewer what to flag, each rule something a diff can fail.
 
+## Predict
+
+Which review rule can a diff actually fail: "Write clean code" or "Flag a default export outside web/src/pages/"?
+
+Answer: The second one. A reviewer can check it against a diff and say yes or no, while the first is opinion.
+
 ## Steps
 
 1. Read the real one: `cat REVIEW.md`.

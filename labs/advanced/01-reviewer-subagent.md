@@ -6,6 +6,12 @@
 
 Define a subagent that can read and search but cannot write, so a review can never change the code.
 
+## Predict
+
+A reviewer subagent lists only Read, Grep and Glob as tools. Can it quietly fix a bug it finds?
+
+Answer: No. Without Write or Edit it has no way to change a file, so its report is the only thing it can produce.
+
 ## Steps
 
 1. Read a real one: `ls .claude/agents` then `cat` one.

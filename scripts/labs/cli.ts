@@ -6,6 +6,7 @@ import {
   markDone,
   type Progress,
   revealHint,
+  saveGuess,
   saveProgress,
 } from "./progress.ts";
 import { paint, renderBrief, renderMap } from "./render.ts";
@@ -14,6 +15,7 @@ export type CliDeps = {
   labs: Lab[];
   progressPath: string;
   color: boolean;
+  guess?: string;
   proof: (command: string) => { ok: boolean; output: string };
   now: () => string;
   out: (text: string) => void;
@@ -29,6 +31,9 @@ function showMap(deps: CliDeps, progress: Progress): void {
 function finish(deps: CliDeps, progress: Progress, lab: Lab): void {
   const c = deps.color;
   deps.out(`${paint(c, "green", `PASS ${lab.id}`)} ${lab.title}`);
+  const guess = progress.guesses?.[lab.id];
+  deps.out(guess ? `Your guess: ${guess}` : "You saved no guess for this lab.");
+  deps.out(`${paint(c, "bold", "Answer")} ${lab.predict.answer}`);
   deps.out(`${paint(c, "bold", "What you just learned")} ${lab.learned}`);
   const after = markDone(progress, lab.id, deps.now());
   saveProgress(deps.progressPath, after);
@@ -48,14 +53,14 @@ function hint(deps: CliDeps, progress: Progress, lab: Lab): void {
 export function run(args: string[], deps: CliDeps): number {
   const [command = "progress", ...rest] = args;
   const id = rest.find((a) => !a.startsWith("--"));
-  const progress = loadProgress(deps.progressPath);
+  let progress = loadProgress(deps.progressPath);
 
   if (command === "progress") {
     showMap(deps, progress);
     return 0;
   }
   if (command !== "lab" && command !== "next") {
-    deps.out("usage: make lab [ID=<id>] [HINT=1] | make next | make progress");
+    deps.out("usage: make lab [ID=<id>] [HINT=1] [GUESS=...] | make next | make progress");
     return 2;
   }
   const wanted = command === "next" ? undefined : id;
@@ -77,6 +82,11 @@ export function run(args: string[], deps: CliDeps): number {
     return 0;
   }
 
+  const guess = deps.guess?.trim();
+  if (guess) {
+    progress = saveGuess(progress, lab.id, guess);
+    saveProgress(deps.progressPath, progress);
+  }
   deps.out(renderBrief(lab, progress, deps.color));
   deps.out(`\n${paint(deps.color, "dim", `Proof: ${lab.proof}`)}`);
   const result = deps.proof(lab.proof);

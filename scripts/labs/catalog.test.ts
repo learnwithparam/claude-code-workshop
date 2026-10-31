@@ -8,6 +8,10 @@ const good = `# First prompt
 ## Goal
 Ask Claude one question.
 
+## Predict
+Will the answer print to the screen or go to a file?
+Answer: It goes to the file, because the redirect catches it before the screen.
+
 ## Steps
 1. Run \`claude\`.
 2. Ask it.
@@ -36,6 +40,10 @@ describe("parseLab", () => {
       goal: "Ask Claude one question.",
       proof: "test -f .labs/work/a.md",
       learned: "A prompt is just a question.",
+      predict: {
+        question: "Will the answer print to the screen or go to a file?",
+        answer: "It goes to the file, because the redirect catches it before the screen.",
+      },
     });
     expect(lab.steps).toEqual(["Run `claude`.", "Ask it."]);
     expect(lab.hints).toHaveLength(2);
@@ -48,6 +56,16 @@ describe("parseLab", () => {
 
   it("rejects a lab with fewer than two hints", () => {
     expect(() => parseLab("start", "01-x.md", good.replace("2. Create the file.\n", ""))).toThrow();
+  });
+
+  it("rejects a lab with no predict section", () => {
+    const text = good.replace(/## Predict[\s\S]*?## Steps/, "## Steps");
+    expect(() => parseLab("start", "01-x.md", text)).toThrow(/predict/i);
+  });
+
+  it("rejects a predict section with no Answer line", () => {
+    const text = good.replace(/^Answer:.*\n/m, "");
+    expect(() => parseLab("start", "01-x.md", text)).toThrow(/predict/i);
   });
 
   it("rejects a file name that is not kebab-case with a number", () => {

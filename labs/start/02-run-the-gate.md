@@ -6,6 +6,12 @@
 
 Run the repo's own tests and keep the log, so you know what green looks like before Claude touches anything.
 
+## Predict
+
+The gate is already green on a clean checkout. What does the log contain when you send both output and errors into it?
+
+Answer: The full test summary, with a passed line and no failed line, because a clean checkout has nothing red to report.
+
 ## Steps
 
 1. Install once: `npm ci`.

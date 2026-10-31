@@ -6,6 +6,12 @@
 
 Create a second checkout of the repo so two Claude sessions can edit at once without touching each other's files.
 
+## Predict
+
+Can you check out the same branch in two worktrees at once?
+
+Answer: No. Git allows a branch in only one worktree, so the second worktree needs its own new branch.
+
 ## Steps
 
 1. Make the folder: `mkdir -p .labs/work`.

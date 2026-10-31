@@ -6,6 +6,12 @@
 
 Run one headless call with a turn cap and read its cost from the JSON result.
 
+## Predict
+
+Where does the cost of a headless call show up: on the invoice later, or in the call's own output?
+
+Answer: In the call's own JSON output, as a total_cost_usd field, so you can read the number right after the call.
+
 ## Steps
 
 1. Make the folder: `mkdir -p .labs/work`.

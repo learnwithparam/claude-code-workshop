@@ -6,6 +6,12 @@
 
 Write a plugin manifest so a teammate can install your skill and hook in one command.
 
+## Predict
+
+What turns a folder of skills and hooks into something a teammate can install?
+
+Answer: A manifest with a name, a version and a description, because installing needs something to identify and update.
+
 ## Steps
 
 1. See one: `ls plugins` then `cat plugins/factory-kit/.claude-plugin/plugin.json`.

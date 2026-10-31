@@ -6,6 +6,12 @@
 
 Write one private preference into `CLAUDE.local.md` so Claude follows it in this repo and nowhere else.
 
+## Predict
+
+Claude follows a note you put in CLAUDE.local.md. Will a teammate who clones the repo get that note?
+
+Answer: No. CLAUDE.local.md is gitignored, so the note stays on your machine and a clone never carries it.
+
 ## Steps
 
 1. See the example: `cat docs/examples/CLAUDE.local.md`.

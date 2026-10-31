@@ -6,6 +6,12 @@
 
 Write a script that fails when any file name is not kebab-case, then prove it fails on a bad tree.
 
+## Predict
+
+Your kebab-case check passes on the real tree. How do you know it would ever fail?
+
+Answer: You cannot tell until you plant a bad file. Seeing it exit 1 on that file is what proves the check can catch a mistake.
+
 ## Steps
 
 1. Read one: `cat scripts/check-conventions.ts`.

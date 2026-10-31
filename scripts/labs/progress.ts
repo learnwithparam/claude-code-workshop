@@ -6,6 +6,8 @@ import { LANES, type Lab } from "./catalog.ts";
 const progressSchema = z.object({
   done: z.record(z.string(), z.string()),
   hints: z.record(z.string(), z.number().int().min(0)),
+  // The learner's own guess per lab, kept so the answer can be shown beside it.
+  guesses: z.record(z.string(), z.string()).optional(),
 });
 export type Progress = z.infer<typeof progressSchema>;
 
@@ -27,6 +29,10 @@ export function saveProgress(path: string, progress: Progress): void {
 
 export function markDone(progress: Progress, id: string, when: string): Progress {
   return { ...progress, done: { ...progress.done, [id]: when } };
+}
+
+export function saveGuess(progress: Progress, id: string, guess: string): Progress {
+  return { ...progress, guesses: { ...progress.guesses, [id]: guess } };
 }
 
 export function revealHint(progress: Progress, lab: Lab): { progress: Progress; revealed: number } {

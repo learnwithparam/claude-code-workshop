@@ -6,6 +6,12 @@
 
 Write a skill that Claude loads by its description, so you stop pasting the same instructions.
 
+## Predict
+
+What makes Claude load a skill: its name, its body, or its description?
+
+Answer: Its description. Claude reads the descriptions first and opens the body only when the situation matches.
+
 ## Steps
 
 1. Read one: `ls .claude/skills` then open a `SKILL.md`.

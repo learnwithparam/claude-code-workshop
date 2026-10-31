@@ -6,6 +6,12 @@
 
 Turn the intent into Given, When, Then scenarios that a test can be written from before any code exists.
 
+## Predict
+
+Your acceptance scenarios exist before any code does. If a test were written from them and run now, would it pass?
+
+Answer: No, it would fail. A test that is red first proves it can catch the missing feature, and it turns green only when the work is real.
+
 ## Steps
 
 1. Read the stage: `cat docs/factory/f2-design.md`.

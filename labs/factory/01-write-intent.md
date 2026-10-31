@@ -6,6 +6,12 @@
 
 Write the one-page intent a factory run starts from: the problem and how anyone will know it is done.
 
+## Predict
+
+What must an intent say so a later stage can check the work, beyond the problem itself?
+
+Answer: A "Done when" list of checkable bullets, because a stage can only test what was written down as a pass condition.
+
 ## Steps
 
 1. Read the stage: `cat docs/factory/f1-plan.md`.

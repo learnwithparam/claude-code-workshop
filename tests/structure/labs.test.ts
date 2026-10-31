@@ -16,6 +16,11 @@ describe("labs", () => {
     for (const lane of LANES) expect(labs.filter((l) => l.lane === lane).length).toBeGreaterThan(0);
   });
 
+  it.each(labs)("$id asks a predict question and has a reasoned answer", (lab) => {
+    expect(lab.predict.question.trim().endsWith("?"), `${lab.id} question needs a ?`).toBe(true);
+    expect(lab.predict.answer.length).toBeGreaterThan(20);
+  });
+
   it("no stray files in a lane", () => {
     const stray = LANES.flatMap((lane) =>
       readdirSync(`labs/${lane}`)

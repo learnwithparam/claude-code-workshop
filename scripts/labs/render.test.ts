@@ -12,6 +12,7 @@ const lab: Lab = {
   proof: "true",
   hints: ["one", "two"],
   learned: "l",
+  predict: { question: "Will it edit a file?", answer: "No, plan mode is read-only." },
 };
 // biome-ignore lint/suspicious/noControlCharactersInRegex: the test looks for the escape byte
 const ESC = /\u001b/;
@@ -60,6 +61,12 @@ describe("renderBrief", () => {
     expect(text).toContain("1. Run `claude`.");
     expect(text).not.toContain("one\n");
     expect(text).toContain("0 of 2");
+  });
+  it("asks the predict question above the steps and never shows the answer", () => {
+    const text = renderBrief(lab, { done: {}, hints: {} }, false);
+    expect(text).toContain("Will it edit a file?");
+    expect(text.indexOf("Will it edit a file?")).toBeLessThan(text.indexOf("1. Run"));
+    expect(text).not.toContain("plan mode is read-only");
   });
   it("shows revealed hints only", () => {
     const text = renderBrief(lab, { done: {}, hints: { "start-01": 1 } }, false);

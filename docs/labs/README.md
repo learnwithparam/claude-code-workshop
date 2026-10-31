@@ -14,10 +14,13 @@ make progress          the lane map with a bar per lane
 make next              show the next lab without running anything
 make lab               show the current lab, run its proof, record a pass
 make lab HINT=1        reveal the next hint, one per call
+make lab GUESS="..."   save your guess to the Predict question before you run
 make lab ID=daily-03   work on any lab, in any order
 ```
 
 Colour turns off when `NO_COLOR` is set or output is not a terminal. Progress sits in `.labs/progress.json`, which git ignores. Your work for each lab goes under `.labs/work/`, so a lab never changes tracked files.
+
+Every lab opens with a Predict question. Save your guess with `make lab GUESS="..."`, then do the steps. When the proof passes you see your guess beside the answer and its reason. A red proof shows neither.
 
 Run Claude Code in one terminal and `make lab` in a second one beside it.
 

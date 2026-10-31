@@ -6,6 +6,12 @@
 
 Write a settings file that denies reading `.env` files, so the rule holds for everyone who clones the repo.
 
+## Predict
+
+You write a deny rule for .env in a committed settings file. Who is protected by it?
+
+Answer: Everyone who clones the repo, because the committed file travels with the code instead of living in one person's setup.
+
 ## Steps
 
 1. Read the real one: `cat .claude/settings.json`.

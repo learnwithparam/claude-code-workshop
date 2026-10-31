@@ -6,6 +6,12 @@
 
 Run Claude Code once, headless, and keep its answer in a file you can read.
 
+## Predict
+
+When you run claude with -p and a redirect to a file, what do you see in the terminal and what lands in the file?
+
+Answer: Nothing prints and the answer lands in the file, because -p writes one answer to standard output and the redirect captures it.
+
 ## Steps
 
 1. Check your machine: `make doctor`.
