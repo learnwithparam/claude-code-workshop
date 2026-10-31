@@ -15,9 +15,16 @@ Start a session, leave it, and pick it up again with its context intact.
 
 ## Proof
 
-```sh
-grep -q 'session_id' .labs/work/session.json && grep -qi 'tangerine' .labs/work/recall.md
-```
+1. session.json holds a session_id.
+
+   ```sh
+   grep -q 'session_id' .labs/work/session.json
+   ```
+2. recall.md holds the word tangerine.
+
+   ```sh
+   grep -qi 'tangerine' .labs/work/recall.md
+   ```
 
 ## Hints
 

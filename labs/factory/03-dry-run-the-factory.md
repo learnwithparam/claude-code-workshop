@@ -15,9 +15,16 @@ Run the factory in dry-run mode and read which model, turn cap and budget each s
 
 ## Proof
 
-```sh
-grep -q 'stages that would run' .labs/work/dry-run.txt && grep -q 'review loop' .labs/work/dry-run.txt
-```
+1. dry-run.txt lists the stages that would run.
+
+   ```sh
+   grep -q 'stages that would run' .labs/work/dry-run.txt
+   ```
+2. dry-run.txt mentions the review loop.
+
+   ```sh
+   grep -q 'review loop' .labs/work/dry-run.txt
+   ```
 
 ## Hints
 

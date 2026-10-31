@@ -15,9 +15,16 @@ Create a second checkout of the repo so two Claude sessions can edit at once wit
 
 ## Proof
 
-```sh
-test -f .labs/work/wt/.git && grep -q 'gitdir' .labs/work/wt/.git
-```
+1. The worktree folder has a .git file.
+
+   ```sh
+   test -f .labs/work/wt/.git
+   ```
+2. That .git file points at a gitdir.
+
+   ```sh
+   grep -q 'gitdir' .labs/work/wt/.git
+   ```
 
 ## Hints
 

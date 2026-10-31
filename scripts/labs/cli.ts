@@ -78,15 +78,21 @@ export function run(args: string[], deps: CliDeps): number {
   }
 
   deps.out(renderBrief(lab, progress, deps.color));
-  deps.out(`\n${paint(deps.color, "dim", `Proof: ${lab.proof}`)}`);
-  const result = deps.proof(lab.proof);
-  if (result.ok) {
+  deps.out("");
+  // Run every item, so one red item never hides another.
+  const results = lab.proof.map((item) => ({ item, result: deps.proof(item.command) }));
+  for (const { item, result } of results) {
+    const mark = result.ok ? paint(deps.color, "green", "PASS") : paint(deps.color, "red", "FAIL");
+    deps.out(`${mark} ${item.text}`);
+    if (!result.ok && result.output.trim())
+      deps.out(paint(deps.color, "dim", tail(result.output, 3)));
+  }
+  if (results.every((r) => r.result.ok)) {
     finish(deps, progress, lab);
     return 0;
   }
   deps.out(
-    `${paint(deps.color, "red", `FAIL ${lab.id}`)} the proof is red. Finish the steps, then run make lab again.`,
+    `\n${paint(deps.color, "red", `FAIL ${lab.id}`)} fix the items marked FAIL, then run make lab again.`,
   );
-  if (result.output.trim()) deps.out(tail(result.output, 6));
   return 1;
 }

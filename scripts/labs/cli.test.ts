@@ -13,7 +13,7 @@ const lab = (id: string, lane: Lab["lane"]): Lab => ({
   pairs: "docs/README.md",
   goal: `Goal ${id}`,
   steps: ["Do it."],
-  proof: `proof-${id}`,
+  proof: [{ text: `Item for ${id}.`, command: `proof-${id}` }],
   hints: ["first hint", "second hint"],
   learned: `Learned ${id}`,
 });
@@ -56,6 +56,44 @@ describe("cli", () => {
     expect(s.text()).toContain("boom line");
     expect(s.text()).not.toContain("first hint");
     expect(loadProgress(s.deps.progressPath).done).toEqual({});
+  });
+
+  it("lists every item with its sentence, red and green together, and exits 1", () => {
+    const s = setup(true);
+    s.deps.labs = [
+      {
+        ...lab("start-01", "start"),
+        proof: [
+          { text: "The notes file exists.", command: "good" },
+          { text: "The notes file has three lines.", command: "bad" },
+        ],
+      },
+    ];
+    s.deps.proof = (command) => ({ ok: command === "good", output: "" });
+    expect(run(["lab"], s.deps)).toBe(1);
+    expect(s.text()).toContain("PASS The notes file exists.");
+    expect(s.text()).toContain("FAIL The notes file has three lines.");
+    expect(loadProgress(s.deps.progressPath).done).toEqual({});
+  });
+
+  it("runs every item even after one is red", () => {
+    const s = setup(true);
+    const ran: string[] = [];
+    s.deps.labs = [
+      {
+        ...lab("start-01", "start"),
+        proof: [
+          { text: "One.", command: "a" },
+          { text: "Two.", command: "b" },
+        ],
+      },
+    ];
+    s.deps.proof = (command) => {
+      ran.push(command);
+      return { ok: false, output: "" };
+    };
+    run(["lab"], s.deps);
+    expect(ran).toEqual(["a", "b"]);
   });
 
   it("--hint reveals one hint per call", () => {

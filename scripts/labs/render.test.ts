@@ -9,7 +9,7 @@ const lab: Lab = {
   pairs: "docs/README.md",
   goal: "Ask one question.",
   steps: ["Run `claude`."],
-  proof: "true",
+  proof: [{ text: "It holds.", command: "true" }],
   hints: ["one", "two"],
   learned: "l",
 };

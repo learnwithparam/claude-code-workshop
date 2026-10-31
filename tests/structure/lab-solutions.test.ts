@@ -87,16 +87,21 @@ function inTempDir(setup: string | undefined, proof: string) {
 
 describe("lab proofs", () => {
   const labs = loadLabs("labs");
+  const items = labs.flatMap((lab) => lab.proof.map((item, n) => ({ lab, item, n: n + 1 })));
 
   it("has a solution for every lab and none extra", () => {
     expect(Object.keys(SOLUTIONS).sort()).toEqual(labs.map((l) => l.id).sort());
   });
 
-  it.each(labs)("$id is red with no work", (lab) => {
-    expect(inTempDir(undefined, lab.proof)).not.toBe(0);
+  // A red item names one missing part, so every item must be red alone in an empty folder.
+  it.each(items)("$lab.id item $n is red with no work: $item.text", ({ item }) => {
+    expect(inTempDir(undefined, item.command)).not.toBe(0);
   });
 
-  it.each(labs)("$id is green once the steps are done", (lab) => {
-    expect(inTempDir(SOLUTIONS[lab.id], lab.proof)).toBe(0);
-  });
+  it.each(items)(
+    "$lab.id item $n is green once the steps are done: $item.text",
+    ({ lab, item }) => {
+      expect(inTempDir(SOLUTIONS[lab.id], item.command)).toBe(0);
+    },
+  );
 });

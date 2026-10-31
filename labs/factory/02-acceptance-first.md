@@ -15,9 +15,21 @@ Turn the intent into Given, When, Then scenarios that a test can be written from
 
 ## Proof
 
-```sh
-f=.labs/work/specs/1/acceptance.md; test "$(grep -c '^Given' $f)" -ge 2 && test "$(grep -c '^When' $f)" -ge 2 && test "$(grep -c '^Then' $f)" -ge 2
-```
+1. acceptance.md has at least two Given lines.
+
+   ```sh
+   test "$(grep -c '^Given' .labs/work/specs/1/acceptance.md)" -ge 2
+   ```
+2. acceptance.md has at least two When lines.
+
+   ```sh
+   test "$(grep -c '^When' .labs/work/specs/1/acceptance.md)" -ge 2
+   ```
+3. acceptance.md has at least two Then lines.
+
+   ```sh
+   test "$(grep -c '^Then' .labs/work/specs/1/acceptance.md)" -ge 2
+   ```
 
 ## Hints
 

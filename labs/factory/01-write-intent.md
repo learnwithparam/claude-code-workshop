@@ -15,9 +15,26 @@ Write the one-page intent a factory run starts from: the problem and how anyone 
 
 ## Proof
 
-```sh
-f=.labs/work/specs/1/intent.md; grep -q '^## Problem' $f && grep -q '^## Done when' $f && grep -q '^## Out of scope' $f && test "$(grep -c '^- ' $f)" -ge 2
-```
+1. intent.md has a Problem heading.
+
+   ```sh
+   grep -q '^## Problem' .labs/work/specs/1/intent.md
+   ```
+2. intent.md has a Done when heading.
+
+   ```sh
+   grep -q '^## Done when' .labs/work/specs/1/intent.md
+   ```
+3. intent.md has an Out of scope heading.
+
+   ```sh
+   grep -q '^## Out of scope' .labs/work/specs/1/intent.md
+   ```
+4. intent.md has at least two bullet lines.
+
+   ```sh
+   test "$(grep -c '^- ' .labs/work/specs/1/intent.md)" -ge 2
+   ```
 
 ## Hints
 

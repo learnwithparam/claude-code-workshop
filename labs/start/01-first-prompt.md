@@ -15,9 +15,11 @@ Run Claude Code once, headless, and keep its answer in a file you can read.
 
 ## Proof
 
-```sh
-test "$(grep -c . .labs/work/repo-tour.md)" -ge 3
-```
+1. repo-tour.md has at least three non-empty lines.
+
+   ```sh
+   test "$(grep -c . .labs/work/repo-tour.md)" -ge 3
+   ```
 
 ## Hints
 
