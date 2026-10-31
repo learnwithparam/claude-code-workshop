@@ -36,9 +36,14 @@ const stepSchema = z
     // The reply must begin with this text, or it is chat and not the artifact; nothing is saved.
     startsWith: z.string().optional(),
     checks: z.array(z.enum(CHECK_NAMES)).default([]),
-    // Repeat the agent until every check in `until` passes, at most `max` times.
+    // Repeat the agent until every check in `until` passes, at most `max` times. The same failing check with
+    // the same evidence `sameFailure` rounds in a row (default 2) means the test contradicts the ticket.
     loop: z
-      .object({ until: z.array(z.enum(CHECK_NAMES)).min(1), max: z.number().int().min(1).max(5) })
+      .object({
+        until: z.array(z.enum(CHECK_NAMES)).min(1),
+        max: z.number().int().min(1).max(5),
+        sameFailure: z.number().int().min(2).default(2),
+      })
       .optional(),
     // Parallel lenses hunt, three verifiers vote (2 of 3 keep a finding), a builder fixes what survives.
     review: z.object({ lenses: z.array(z.string()).min(1) }).optional(),

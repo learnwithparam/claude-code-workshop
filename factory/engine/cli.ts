@@ -30,6 +30,7 @@ export async function runIssue(n: number, name: string, o: { retro?: boolean } =
     {
       config: loadConfig(),
       ticketType: name === "feature-sdd" ? "epic" : name,
+<<<<<<< HEAD
       // A finished run ends with one retro. The eval it scores with must print `SCORE <number>`.
       retro:
         o.retro === false
@@ -40,6 +41,9 @@ export async function runIssue(n: number, name: string, o: { retro?: boolean } =
                 execFileSync("git", ["checkout", "--", ".claude/skills", ".claude/rules"]);
               },
             },
+=======
+      commitLog: true,
+>>>>>>> origin/feat/r1r3
     },
   );
   mkdirSync(join(RUNS, String(n)), { recursive: true });

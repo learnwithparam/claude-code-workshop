@@ -19,9 +19,13 @@ A ticket moves through stages. Each stage commits one artifact under `specs/<n>/
 | Deploy   | the pull request, CI              | `ci`; `deploy.ts` is tests only          |
 | Maintain | `incident.md`, a new `intent.md`  | `bands.ts` and `retro.ts` are tests only |
 
+<<<<<<< HEAD
 The large-feature workflow, `feature-sdd`, adds four Spec Kit stages to the plan row: `constitution.md` before the spec, `clarify.md` after it, then `tasks.md` and `analyze.md` after the plan. F2 covers them.
 
 The names come from `ARTIFACTS` in `factory/engine/artifacts.ts` and `CHECK_NAMES` in `factory/engine/workflow.ts`. A workflow is a YAML file. `factory/engine/interpret.ts` runs its steps in order, repeats a step while its loop checks fail up to a cap, and writes `run.log` and `cost.json` under `specs/<n>/` when the run finishes or stops at a gate or a cap.
+=======
+The names come from `ARTIFACTS` in `factory/engine/artifacts.ts` and `CHECK_NAMES` in `factory/engine/workflow.ts`. A workflow is a YAML file. `factory/engine/interpret.ts` runs its steps in order, repeats a step while its loop checks fail up to a cap, stops early as `needs-human` with the reason "test contradicts ticket" when two rounds in a row fail the same check with the same evidence (`sameFailure` on the loop), and writes `run.log` when the run finishes or stops at a gate or a cap.
+>>>>>>> origin/feat/r1r3
 
 ## What is code and what is a model
 
@@ -95,7 +99,7 @@ Expect `risk > is high for a CI workflow and low for docs` to fail with `expecte
 
 `specs/26/` is a bug run through `bug-tdd`. `specs/26/golden/font-face.golden.test.ts` is the test written to fail first, `specs/26/lock.json` is the hash of every test file at that point, `specs/26/fix.md` is the fix stage's note, and `specs/26/plan.md` is the allowlist the diff was held to.
 
-`run.log` is the file the engine writes last, but `.gitignore` excludes `*.log`, so none is committed here. `specs/35/ci.md` quotes one line from its run's log: `check plan-drift FAIL: files outside plan.md: api/src/agent/template-eval.ts`. That is `plan-drift` stopping a run, and `ci.md` records that the path was then listed in `plan.md`.
+`run.log` is the file the engine writes last and commits with `specs/*/run.log` kept out of the `*.log` ignore; runs made before that change have none in the repo. `specs/35/ci.md` quotes one line from its run's log: `check plan-drift FAIL: files outside plan.md: api/src/agent/template-eval.ts`. That is `plan-drift` stopping a run, and `ci.md` records that the path was then listed in `plan.md`.
 
 ## Discussion
 

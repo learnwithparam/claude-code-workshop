@@ -16,8 +16,9 @@ export type Host = {
   write(path: string, text: string): Promise<void>;
   list(dir: string): Promise<string[]>;
   changedFiles(): Promise<string[]>;
-  // One commit of everything changed so far; how single-pr-commits leaves a commit per sub-issue.
-  commit(message: string): Promise<void>;
+  // One commit of everything changed so far, or only `paths` when given; how single-pr-commits leaves a
+  // commit per sub-issue, and how a run saves its log without sweeping up other work.
+  commit(message: string, paths?: string[]): Promise<void>;
   // Runner-owned state that lives outside the worktree, so the agent cannot rewrite it (the lock baseline).
   recall(key: string): Promise<string | null>;
   remember(key: string, value: string): Promise<void>;
