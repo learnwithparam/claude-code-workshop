@@ -17,7 +17,7 @@ Write a read-only reviewer subagent at .labs/work/agents/reviewer.md: front matt
 
 1. Read a real subagent in this repo.
 2. Make the agents folder under the lab work folder.
-3. Write the file with the four front matter keys and a short prompt.
+3. [editor] Write the file with the four front matter keys and a short prompt.
 4. Limit tools to reading and searching only.
 
 ## Proof

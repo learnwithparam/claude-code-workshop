@@ -17,7 +17,7 @@ Write .labs/work/check-kebab.mjs: given a folder, it walks it, prints each file 
 
 1. Read one: `cat scripts/check-conventions.ts`.
 2. Make the folder: `mkdir -p .labs/work`.
-3. Write `.labs/work/check-kebab.mjs`. It takes a folder, walks it, prints each file whose name is not lowercase with dashes and dots, and exits 1 if it found any.
+3. [editor] Write `.labs/work/check-kebab.mjs`. It takes a folder, walks it, prints each file whose name is not lowercase with dashes and dots, and exits 1 if it found any.
 4. Try it on a folder that follows the rule (`docs/` itself holds `README.md`, which your check rightly flags): `node .labs/work/check-kebab.mjs docs/levels; echo $?`.
 
 ## Proof

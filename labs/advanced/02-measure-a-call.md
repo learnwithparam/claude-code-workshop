@@ -18,7 +18,7 @@ Make one headless Claude call capped at two turns, save its JSON result to .labs
 1. Make the lab work folder.
 2. Ask Claude to list this repo's folders, with a turn cap and JSON output, saved to a file.
 3. Read the cost field out of that JSON.
-4. Write the number alone into the cost file.
+4. [editor] Write the number alone into the cost file.
 
 ## Proof
 

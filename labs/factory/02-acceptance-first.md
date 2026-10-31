@@ -17,7 +17,7 @@ Write .labs/work/specs/1/acceptance.md from your intent: two scenarios, each wit
 
 1. Read the design stage doc.
 2. Reread your intent.
-3. Write two scenarios, one Given, When and Then line each, at the left edge.
+3. [editor] Write two scenarios, one Given, When and Then line each, at the left edge.
 4. Make each Then something a program can assert, such as a status code or a file.
 
 ## Proof

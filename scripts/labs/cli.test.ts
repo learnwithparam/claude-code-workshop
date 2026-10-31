@@ -13,7 +13,7 @@ const lab = (id: string, lane: Lab["lane"]): Lab => ({
   pairs: "docs/README.md",
   goal: `Goal ${id}`,
   help: "guided",
-  steps: ["Do it."],
+  steps: [{ where: "shell", text: "Do it." }],
   proof: [{ text: `Item for ${id}.`, command: `proof-${id}` }],
   hints: ["first hint", "second hint"],
   learned: `Learned ${id}`,

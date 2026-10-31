@@ -17,7 +17,7 @@ Write the intent a factory run starts from, at .labs/work/specs/1/intent.md: a P
 
 1. Read the intent stage doc to see what a good one holds.
 2. Make the spec folder under the lab work folder.
-3. Write the intent with the three headings, spelled as the proof expects.
+3. [editor] Write the intent with the three headings, spelled as the proof expects.
 4. Under Done when, give two checks a command could run.
 
 ## Proof

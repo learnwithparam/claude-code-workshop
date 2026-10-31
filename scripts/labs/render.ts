@@ -1,4 +1,4 @@
-import type { Lab, Lane } from "./catalog.ts";
+import type { Lab, Lane, Step, Window } from "./catalog.ts";
 import type { Progress } from "./progress.ts";
 
 type Stat = { lane: Lane; done: number; total: number };
@@ -23,6 +23,18 @@ export function bar(done: number, total: number, width: number, color: boolean):
 // Backticked commands stand out, so a learner finds what to type.
 function commands(text: string, color: boolean): string {
   return text.replace(/`([^`]+)`/g, (_m, cmd: string) => `\`${paint(color, "cyan", cmd)}\``);
+}
+
+// Shell and editor steps share cyan; Claude Code is yellow so the switch of window stands out.
+const WHERE: Record<Window, { words: string; style: keyof typeof CODES }> = {
+  shell: { words: "in your shell", style: "cyan" },
+  claude: { words: "in Claude Code", style: "yellow" },
+  editor: { words: "in your editor", style: "cyan" },
+};
+
+function tag(where: Window, color: boolean): string {
+  const { words, style } = WHERE[where];
+  return color ? paint(true, style, words) : `[${words}]`;
 }
 
 // A backticked span is a command when it starts with a shell program. File names and keys are not.
@@ -58,7 +70,8 @@ export function renderMap(
 function body(lab: Lab, color: boolean): string[] {
   if (lab.help === "goal") return [paint(color, "bold", "Done when this passes"), lab.proof, ""];
   const show = (s: string) => (lab.help === "hinted" ? hideCommands(s) : commands(s, color));
-  return [paint(color, "bold", "Steps"), ...lab.steps.map((s, i) => `${i + 1}. ${show(s)}`), ""];
+  const step = (s: Step, i: number) => `${i + 1}. ${tag(s.where, color)} ${show(s.text)}`;
+  return [paint(color, "bold", "Steps"), ...lab.steps.map(step), ""];
 }
 
 // The form's `lab` field is prefilled from the query string, so a report names its lab.

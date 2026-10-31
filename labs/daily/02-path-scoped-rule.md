@@ -17,7 +17,7 @@ Write a rule file scoped to one folder, so Claude reads it only when it works th
 
 1. Read a real one: `ls .claude/rules` then `cat` any file in it.
 2. Make a draft folder: `mkdir -p .labs/work/rules`.
-3. Create `.labs/work/rules/api-errors.md` with a `paths:` front matter for `api/**` and two rules about customer-facing errors.
+3. [editor] Create `.labs/work/rules/api-errors.md` with a `paths:` front matter for `api/**` and two rules about customer-facing errors.
 4. When you like it, copy it to `.claude/rules/` in your own project.
 
 ## Proof

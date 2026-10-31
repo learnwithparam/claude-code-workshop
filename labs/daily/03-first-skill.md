@@ -17,7 +17,7 @@ Write a skill that Claude loads by its description, so you stop pasting the same
 
 1. Read one: `ls .claude/skills` then open a `SKILL.md`.
 2. Make the folder: `mkdir -p .labs/work/skills/commit-message`.
-3. Create `.labs/work/skills/commit-message/SKILL.md` with `name:` and `description:` front matter, then the steps.
+3. [editor] Create `.labs/work/skills/commit-message/SKILL.md` with `name:` and `description:` front matter, then the steps.
 4. The description starts with `Use when` and names the situation, not what the skill is.
 
 ## Proof

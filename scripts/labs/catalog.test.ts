@@ -14,7 +14,8 @@ Ask Claude one question.
 
 ## Steps
 1. Run \`claude\`.
-2. Ask it.
+2. [claude] Ask it.
+3. [editor] Write \`a.md\`.
 
 ## Proof
 
@@ -47,12 +48,22 @@ describe("parseLab", () => {
       goal: "Ask Claude one question.",
       learned: "A prompt is just a question.",
     });
+    expect(lab.steps).toEqual([
+      { where: "shell", text: "Run `claude`." },
+      { where: "claude", text: "Ask it." },
+      { where: "editor", text: "Write `a.md`." },
+    ]);
     expect(lab.proof).toEqual([
       { text: "The notes file exists.", command: "test -f .labs/work/a.md" },
       { text: "The notes file is not empty.", command: "test -s .labs/work/a.md" },
     ]);
-    expect(lab.steps).toEqual(["Run `claude`.", "Ask it."]);
     expect(lab.hints).toHaveLength(2);
+  });
+
+  it("rejects an unknown window tag", () => {
+    expect(() => parseLab("start", "01-x.md", good.replace("[claude]", "[browser]"))).toThrow(
+      /window tag/,
+    );
   });
 
   it("rejects a lab with no proof", () => {
