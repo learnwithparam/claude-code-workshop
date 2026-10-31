@@ -15,10 +15,17 @@ Run one level's proof and save the output, so you can show the team it passed.
 
 ## Proof
 
-```sh
-line=$(make prove LEVEL=hand-built 2>/dev/null | grep '^PASS hand-built')
-test -n "$line" && grep -qxF "$line" .labs/work/prove.txt
-```
+1. prove.txt has a line starting with PASS hand-built.
+
+   ```sh
+   grep -q '^PASS hand-built' .labs/work/prove.txt
+   ```
+2. prove.txt holds the line make prove prints now.
+
+   ```sh
+   line=$(make prove LEVEL=hand-built 2>/dev/null | grep '^PASS hand-built')
+   test -n "$line" && grep -qxF "$line" .labs/work/prove.txt
+   ```
 
 ## Hints
 

@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Lab } from "./catalog.ts";
 import { type CliDeps, run, runWatch } from "./cli.ts";
-import { loadProgress } from "./progress.ts";
+import { loadProgress, saveProgress } from "./progress.ts";
 
 const lab = (id: string, lane: Lab["lane"]): Lab => ({
   id,
@@ -14,12 +14,12 @@ const lab = (id: string, lane: Lab["lane"]): Lab => ({
   goal: `Goal ${id}`,
   help: "guided",
   steps: ["Do it."],
-  proof: `proof-${id}`,
+  proof: [{ text: `Item for ${id}.`, command: `proof-${id}` }],
   hints: ["first hint", "second hint"],
   learned: `Learned ${id}`,
 });
 
-function setup(passes: boolean) {
+function setup(passes: boolean, withPath = true) {
   const out: string[] = [];
   const dir = mkdtempSync(join(tmpdir(), "labs-cli-"));
   const deps: CliDeps = {
@@ -32,10 +32,40 @@ function setup(passes: boolean) {
     status: (s) => out.push(s),
     isTTY: false,
   };
+  if (withPath) saveProgress(deps.progressPath, { done: {}, hints: {}, path: "pro" });
   return { deps, out, text: () => out.join("\n") };
 }
 
 describe("cli", () => {
+  it("with no path set, lab prints the choice, exits 2 and runs no proof", () => {
+    const s = setup(true, false);
+    s.deps.proof = () => {
+      throw new Error("must not run");
+    };
+    expect(run(["lab"], s.deps)).toBe(2);
+    expect(s.text()).toContain("PATH_ID=pro");
+    expect(s.text()).toContain("PATH_ID=factory");
+    expect(run(["next"], s.deps)).toBe(2);
+  });
+
+  it("--path sets the path, saves it and then runs the lab", () => {
+    const s = setup(true, false);
+    expect(run(["lab", "--path=factory"], s.deps)).toBe(0);
+    expect(loadProgress(s.deps.progressPath).path).toBe("factory");
+  });
+
+  it("an unknown path exits 2 and saves nothing", () => {
+    const s = setup(true, false);
+    expect(run(["lab", "--path=nope"], s.deps)).toBe(2);
+    expect(loadProgress(s.deps.progressPath).path).toBeUndefined();
+  });
+
+  it("progress shows the chosen path and names the other one", () => {
+    const s = setup(true);
+    run(["progress"], s.deps);
+    expect(s.text()).toContain("PATH_ID=factory");
+  });
+
   it("progress prints the lane map and exits 0", () => {
     const s = setup(true);
     expect(run(["progress"], s.deps)).toBe(0);
@@ -59,6 +89,44 @@ describe("cli", () => {
     expect(s.text()).toContain("boom line");
     expect(s.text()).not.toContain("first hint");
     expect(loadProgress(s.deps.progressPath).done).toEqual({});
+  });
+
+  it("lists every item with its sentence, red and green together, and exits 1", () => {
+    const s = setup(true);
+    s.deps.labs = [
+      {
+        ...lab("start-01", "start"),
+        proof: [
+          { text: "The notes file exists.", command: "good" },
+          { text: "The notes file has three lines.", command: "bad" },
+        ],
+      },
+    ];
+    s.deps.proof = (command) => ({ ok: command === "good", output: "" });
+    expect(run(["lab"], s.deps)).toBe(1);
+    expect(s.text()).toContain("PASS The notes file exists.");
+    expect(s.text()).toContain("FAIL The notes file has three lines.");
+    expect(loadProgress(s.deps.progressPath).done).toEqual({});
+  });
+
+  it("runs every item even after one is red", () => {
+    const s = setup(true);
+    const ran: string[] = [];
+    s.deps.labs = [
+      {
+        ...lab("start-01", "start"),
+        proof: [
+          { text: "One.", command: "a" },
+          { text: "Two.", command: "b" },
+        ],
+      },
+    ];
+    s.deps.proof = (command) => {
+      ran.push(command);
+      return { ok: false, output: "" };
+    };
+    run(["lab"], s.deps);
+    expect(ran).toEqual(["a", "b"]);
   });
 
   it("--hint reveals one hint per call", () => {

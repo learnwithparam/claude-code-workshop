@@ -16,12 +16,19 @@ Run Claude Code once, headless, and keep its answer in a file you can read. The 
 
 ## Proof
 
-```sh
-f=.labs/work/repo-tour.md
-test "$(grep -c . $f)" -ge 3 || exit 1
-for d in $(ls -d */ | tr -d / | grep -v node_modules); do grep -qw -- "$d" $f && exit 0; done
-exit 1
-```
+1. repo-tour.md has at least three non-empty lines.
+
+   ```sh
+   test "$(grep -c . .labs/work/repo-tour.md)" -ge 3
+   ```
+2. repo-tour.md has three lines and names a folder of this repo.
+
+   ```sh
+   f=.labs/work/repo-tour.md
+   test "$(grep -c . $f)" -ge 3 || exit 1
+   for d in $(ls -d */ | tr -d / | grep -v node_modules); do grep -qw -- "$d" $f && exit 0; done
+   exit 1
+   ```
 
 ## Hints
 

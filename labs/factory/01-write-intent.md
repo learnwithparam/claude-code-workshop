@@ -16,13 +16,35 @@ Write the intent a factory run starts from, at .labs/work/specs/1/intent.md: a P
 
 ## Proof
 
-```sh
-f=.labs/work/specs/1/intent.md
-grep -q '^## Problem' $f && grep -q '^## Done when' $f && grep -q '^## Out of scope' $f || exit 1
-cmds=$(awk '/^## /{s=($0=="## Done when")} s&&/^- .*`[^`]+`/' $f | grep -o '`[^`]*`' | tr -d '`' | awk '{print $1}')
-test "$(echo "$cmds" | grep -c .)" -ge 2 || exit 1
-for c in $cmds; do command -v "$c" >/dev/null || exit 1; done
-```
+1. intent.md has a Problem heading.
+
+   ```sh
+   grep -q '^## Problem' .labs/work/specs/1/intent.md
+   ```
+2. intent.md has a Done when heading.
+
+   ```sh
+   grep -q '^## Done when' .labs/work/specs/1/intent.md
+   ```
+3. intent.md has an Out of scope heading.
+
+   ```sh
+   grep -q '^## Out of scope' .labs/work/specs/1/intent.md
+   ```
+4. intent.md has at least two bullet lines.
+
+   ```sh
+   test "$(grep -c '^- ' .labs/work/specs/1/intent.md)" -ge 2
+   ```
+5. intent.md has all three headings, and its Done when bullets name commands that exist.
+
+   ```sh
+   f=.labs/work/specs/1/intent.md
+   grep -q '^## Problem' $f && grep -q '^## Done when' $f && grep -q '^## Out of scope' $f || exit 1
+   cmds=$(awk '/^## /{s=($0=="## Done when")} s&&/^- .*`[^`]+`/' $f | grep -o '`[^`]*`' | tr -d '`' | awk '{print $1}')
+   test "$(echo "$cmds" | grep -c .)" -ge 2 || exit 1
+   for c in $cmds; do command -v "$c" >/dev/null || exit 1; done
+   ```
 
 ## Hints
 

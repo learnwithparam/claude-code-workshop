@@ -16,9 +16,26 @@ Write a plugin manifest so a teammate can install your skill and hook in one com
 
 ## Proof
 
-```sh
-node -e "const m=require('./.labs/work/plugin/.claude-plugin/plugin.json'); process.exit(/^[a-z0-9]+(-[a-z0-9]+)*$/.test(m.name) && /^\d+\.\d+\.\d+$/.test(m.version) && String(m.description).split(' ').length>=4 ? 0 : 1)" && ls .labs/work/plugin/skills/*/SKILL.md >/dev/null
-```
+1. plugin.json has a name.
+
+   ```sh
+   node -e "process.exit(require('./.labs/work/plugin/.claude-plugin/plugin.json').name ? 0 : 1)"
+   ```
+2. plugin.json has a version like 0.1.0.
+
+   ```sh
+   node -e "process.exit(/^\\d+\\.\\d+\\.\\d+$/.test(require('./.labs/work/plugin/.claude-plugin/plugin.json').version) ? 0 : 1)"
+   ```
+3. plugin.json has a description.
+
+   ```sh
+   node -e "process.exit(require('./.labs/work/plugin/.claude-plugin/plugin.json').description ? 0 : 1)"
+   ```
+4. The plugin name is kebab-case, the version is semver, the description has words and a skill exists.
+
+   ```sh
+   node -e "const m=require('./.labs/work/plugin/.claude-plugin/plugin.json'); process.exit(/^[a-z0-9]+(-[a-z0-9]+)*$/.test(m.name) && /^\d+\.\d+\.\d+$/.test(m.version) && String(m.description).split(' ').length>=4 ? 0 : 1)" && ls .labs/work/plugin/skills/*/SKILL.md >/dev/null
+   ```
 
 ## Hints
 

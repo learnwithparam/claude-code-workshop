@@ -15,12 +15,24 @@ Get a written plan for a small change from Claude without letting it edit a sing
 
 ## Proof
 
-```sh
-f=.labs/work/plan.md
-grep -qi 'verify' $f && test "$(grep -c . $f)" -ge 5 || exit 1
-for p in $(grep -Eo 'shared/[A-Za-z0-9_./-]+' $f | sed 's/[.]*$//'); do test -f "$p" && exit 0; done
-exit 1
-```
+1. The plan mentions how you will verify it.
+
+   ```sh
+   grep -qi 'verify' .labs/work/plan.md
+   ```
+2. The plan has at least five non-empty lines.
+
+   ```sh
+   test "$(grep -c . .labs/work/plan.md)" -ge 5
+   ```
+3. The plan says how to verify and names a file under shared that exists.
+
+   ```sh
+   f=.labs/work/plan.md
+   grep -qi 'verify' $f && test "$(grep -c . $f)" -ge 5 || exit 1
+   for p in $(grep -Eo 'shared/[A-Za-z0-9_./-]+' $f | sed 's/[.]*$//'); do test -f "$p" && exit 0; done
+   exit 1
+   ```
 
 ## Hints
 

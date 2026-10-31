@@ -16,9 +16,21 @@ Make one headless Claude call capped at two turns, save its JSON result to .labs
 
 ## Proof
 
-```sh
-node -e "const j=require('./.labs/work/call.json'); const c=require('fs').readFileSync('.labs/work/cost.txt','utf8').trim(); process.exit(j.type==='result' && typeof j.total_cost_usd==='number' && /^[0-9.e-]+$/.test(c) && Number(c)===j.total_cost_usd ? 0 : 1)"
-```
+1. call.json records total_cost_usd.
+
+   ```sh
+   grep -q 'total_cost_usd' .labs/work/call.json
+   ```
+2. cost.txt holds one plain number.
+
+   ```sh
+   grep -Eq '^[0-9]+(\.[0-9]+)?$' .labs/work/cost.txt
+   ```
+3. call.json is a real result and cost.txt holds exactly its total_cost_usd.
+
+   ```sh
+   node -e "const j=require('./.labs/work/call.json'); const c=require('fs').readFileSync('.labs/work/cost.txt','utf8').trim(); process.exit(j.type==='result' && typeof j.total_cost_usd==='number' && /^[0-9.e-]+$/.test(c) && Number(c)===j.total_cost_usd ? 0 : 1)"
+   ```
 
 ## Hints
 

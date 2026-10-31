@@ -16,13 +16,25 @@ Create a second checkout of this repo at .labs/work/wt on a new branch named lab
 
 ## Proof
 
-```sh
-w=.labs/work/wt
-test -f $w/.git && grep -q '^gitdir: ' $w/.git || exit 1
-common=$(cd "$(git rev-parse --git-common-dir)" && pwd -P)
-case "$(sed 's/^gitdir: //' $w/.git)" in "$common"/worktrees/*) ;; *) exit 1 ;; esac
-test "$(git -C $w branch --show-current)" = lab/parallel
-```
+1. The worktree folder has a .git file.
+
+   ```sh
+   test -f .labs/work/wt/.git
+   ```
+2. That .git file points at a gitdir.
+
+   ```sh
+   grep -q 'gitdir' .labs/work/wt/.git
+   ```
+3. The worktree belongs to this repo and sits on the branch lab/parallel.
+
+   ```sh
+   w=.labs/work/wt
+   test -f $w/.git && grep -q '^gitdir: ' $w/.git || exit 1
+   common=$(cd "$(git rev-parse --git-common-dir)" && pwd -P)
+   case "$(sed 's/^gitdir: //' $w/.git)" in "$common"/worktrees/*) ;; *) exit 1 ;; esac
+   test "$(git -C $w branch --show-current)" = lab/parallel
+   ```
 
 ## Hints
 

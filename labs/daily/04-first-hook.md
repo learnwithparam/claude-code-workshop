@@ -16,15 +16,27 @@ Write a hook that stops Claude from editing `.env`, and prove it by feeding it b
 
 ## Proof
 
-```sh
-h=.labs/work/hooks/block-env.mjs
-try() { echo "{\"tool_input\":{\"file_path\":\"$1\"}}" | node $h >/dev/null 2>.labs/work/err.txt; }
-try .env; test $? -eq 2 || exit 1
-test -s .labs/work/err.txt || exit 1
-try /repo/app/.env; test $? -eq 2 || exit 1
-try .env.example || exit 1
-try a.ts
-```
+1. The hook exits 2 when the file is the secrets file.
+
+   ```sh
+   echo '{"tool_input":{"file_path":".env"}}' | node .labs/work/hooks/block-env.mjs >/dev/null 2>&1; test $? -eq 2
+   ```
+2. The hook exits 0 when the file is a.ts.
+
+   ```sh
+   echo '{"tool_input":{"file_path":"a.ts"}}' | node .labs/work/hooks/block-env.mjs >/dev/null 2>&1
+   ```
+3. The hook blocks .env paths with a message and lets .env.example and a.ts through.
+
+   ```sh
+   h=.labs/work/hooks/block-env.mjs
+   try() { echo "{\"tool_input\":{\"file_path\":\"$1\"}}" | node $h >/dev/null 2>.labs/work/err.txt; }
+   try .env; test $? -eq 2 || exit 1
+   test -s .labs/work/err.txt || exit 1
+   try /repo/app/.env; test $? -eq 2 || exit 1
+   try .env.example || exit 1
+   try a.ts
+   ```
 
 ## Hints
 

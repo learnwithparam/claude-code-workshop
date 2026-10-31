@@ -16,11 +16,28 @@ Write a skill that Claude loads by its description, so you stop pasting the same
 
 ## Proof
 
-```sh
-f=.labs/work/skills/commit-message/SKILL.md
-grep -q '^name: commit-message' $f && grep -Eq '^description: Use when [^ ]+ [^ ]+ [^ ]+' $f || exit 1
-test "$(awk 'NF>=3' $f | wc -l)" -ge 4
-```
+1. SKILL.md has the name commit-message.
+
+   ```sh
+   grep -q '^name: commit-message' .labs/work/skills/commit-message/SKILL.md
+   ```
+2. The description starts with Use when.
+
+   ```sh
+   grep -q '^description: Use when' .labs/work/skills/commit-message/SKILL.md
+   ```
+3. SKILL.md has at least eight non-empty lines.
+
+   ```sh
+   test "$(grep -c . .labs/work/skills/commit-message/SKILL.md)" -ge 8
+   ```
+4. The skill has a name, a Use when description and a body with real lines.
+
+   ```sh
+   f=.labs/work/skills/commit-message/SKILL.md
+   grep -q '^name: commit-message' $f && grep -Eq '^description: Use when [^ ]+ [^ ]+ [^ ]+' $f || exit 1
+   test "$(awk 'NF>=3' $f | wc -l)" -ge 4
+   ```
 
 ## Hints
 

@@ -16,12 +16,29 @@ Write a rule file scoped to one folder, so Claude reads it only when it works th
 
 ## Proof
 
-```sh
-f=.labs/work/rules/api-errors.md
-head -1 $f | grep -q '^---$' && grep -q '^paths:' $f && test "$(grep -c '^- ' $f)" -ge 2 || exit 1
-for p in $(sed -n 's/^  - //p' $f | sed 's|/[*].*||'); do test -d "$p" && exit 0; done
-exit 1
-```
+1. The rule file starts with a --- line.
+
+   ```sh
+   head -1 .labs/work/rules/api-errors.md | grep -q '^---$'
+   ```
+2. The front matter has a paths: key.
+
+   ```sh
+   grep -q '^paths:' .labs/work/rules/api-errors.md
+   ```
+3. The rule has at least two bullet lines.
+
+   ```sh
+   test "$(grep -c '^- ' .labs/work/rules/api-errors.md)" -ge 2
+   ```
+4. The rule file is well formed and its paths point at a folder that exists.
+
+   ```sh
+   f=.labs/work/rules/api-errors.md
+   head -1 $f | grep -q '^---$' && grep -q '^paths:' $f && test "$(grep -c '^- ' $f)" -ge 2 || exit 1
+   for p in $(sed -n 's/^  - //p' $f | sed 's|/[*].*||'); do test -d "$p" && exit 0; done
+   exit 1
+   ```
 
 ## Hints
 

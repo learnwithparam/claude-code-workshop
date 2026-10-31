@@ -16,10 +16,22 @@ Run the factory in dry-run mode for issue 1, save its output to .labs/work/dry-r
 
 ## Proof
 
-```sh
-fresh=$(make factory ISSUE=1 FLAGS=--dry-run 2>/dev/null | grep -v '^npx tsx')
-test -n "$fresh" && test "$(grep -v '^npx tsx' .labs/work/dry-run.txt)" = "$fresh"
-```
+1. dry-run.txt lists the stages that would run.
+
+   ```sh
+   grep -q 'stages that would run' .labs/work/dry-run.txt
+   ```
+2. dry-run.txt mentions the review loop.
+
+   ```sh
+   grep -q 'review loop' .labs/work/dry-run.txt
+   ```
+3. dry-run.txt matches what the factory prints now.
+
+   ```sh
+   fresh=$(make factory ISSUE=1 FLAGS=--dry-run 2>/dev/null | grep -v '^npx tsx')
+   test -n "$fresh" && test "$(grep -v '^npx tsx' .labs/work/dry-run.txt)" = "$fresh"
+   ```
 
 ## Hints
 

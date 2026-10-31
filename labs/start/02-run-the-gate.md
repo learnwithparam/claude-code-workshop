@@ -15,12 +15,24 @@ Run the repo's own tests and keep the log, so you know what green looks like bef
 
 ## Proof
 
-```sh
-f=.labs/work/gate.log
-grep -Eq 'Tests +[0-9]+ passed' $f && ! grep -q 'failed' $f || exit 1
-for t in $(grep -Eo 'shared/[A-Za-z0-9_./-]+[.]test[.]ts' $f); do test -f "$t" && exit 0; done
-exit 1
-```
+1. gate.log says passed.
+
+   ```sh
+   grep -q 'passed' .labs/work/gate.log
+   ```
+2. gate.log has no failed.
+
+   ```sh
+   f=.labs/work/gate.log; test -f $f && ! grep -q 'failed' $f
+   ```
+3. gate.log shows passed tests and names a test file under shared that exists.
+
+   ```sh
+   f=.labs/work/gate.log
+   grep -Eq 'Tests +[0-9]+ passed' $f && ! grep -q 'failed' $f || exit 1
+   for t in $(grep -Eo 'shared/[A-Za-z0-9_./-]+[.]test[.]ts' $f); do test -f "$t" && exit 0; done
+   exit 1
+   ```
 
 ## Hints
 

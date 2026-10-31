@@ -16,14 +16,41 @@ Write a read-only reviewer subagent at .labs/work/agents/reviewer.md: front matt
 
 ## Proof
 
-```sh
-f=.labs/work/agents/reviewer.md
-test "$(sed -n 1p $f)" = '---' && test "$(grep -c '^---$' $f)" -ge 2 || exit 1
-grep -q '^name: reviewer' $f && grep -Eq '^description: [^ ]+ [^ ]+ [^ ]+ [^ ]+' $f || exit 1
-grep -q '^tools: Read, Grep, Glob$' $f && grep -Eq '^model: (haiku|sonnet|opus)$' $f || exit 1
-! grep -Eq '^tools:.*(Write|Edit|Bash)' $f || exit 1
-test "$(awk '/^---$/{n++; next} n>=2 && NF>=5' $f | wc -l)" -ge 1
-```
+1. The agent file has the name reviewer.
+
+   ```sh
+   grep -q '^name: reviewer' .labs/work/agents/reviewer.md
+   ```
+2. The agent file has a description.
+
+   ```sh
+   grep -q '^description: ' .labs/work/agents/reviewer.md
+   ```
+3. The tools line lists exactly Read, Grep, Glob.
+
+   ```sh
+   grep -q '^tools: Read, Grep, Glob$' .labs/work/agents/reviewer.md
+   ```
+4. The agent file names a model.
+
+   ```sh
+   grep -q '^model: ' .labs/work/agents/reviewer.md
+   ```
+5. No tool that writes or runs commands (Write, Edit, Bash) is listed.
+
+   ```sh
+   f=.labs/work/agents/reviewer.md; test -f $f && ! grep -Eq '^tools:.*(Write|Edit|Bash)' $f
+   ```
+6. The file opens with front matter, has a four word description, a model name and a prompt body.
+
+   ```sh
+   f=.labs/work/agents/reviewer.md
+   test "$(sed -n 1p $f)" = '---' && test "$(grep -c '^---$' $f)" -ge 2 || exit 1
+   grep -q '^name: reviewer' $f && grep -Eq '^description: [^ ]+ [^ ]+ [^ ]+ [^ ]+' $f || exit 1
+   grep -q '^tools: Read, Grep, Glob$' $f && grep -Eq '^model: (haiku|sonnet|opus)$' $f || exit 1
+   ! grep -Eq '^tools:.*(Write|Edit|Bash)' $f || exit 1
+   test "$(awk '/^---$/{n++; next} n>=2 && NF>=5' $f | wc -l)" -ge 1
+   ```
 
 ## Hints
 

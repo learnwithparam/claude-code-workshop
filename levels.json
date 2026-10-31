@@ -202,7 +202,13 @@
     "tests/contract/**",
     "factory/engine/**",
     ".factory/workflows/**",
+    "tests/structure/f5-review-doc.test.ts",
+    "tests/structure/assignments.test.ts",
+    "tests/assignments/**",
     ".factory/bands.yaml",
+    "scripts/eval-score.ts",
+    "scripts/eval-score.test.ts",
+    "scripts/factory-wiring.test.ts",
     "scripts/prove/workflows.ts",
     "scripts/check-prose.ts",
     "scripts/check-prose.test.ts",
@@ -211,6 +217,7 @@
     "docs/recordings/workflows.gif",
     "stryker.config.json",
     "stryker.vitest.config.ts",
+    "docs/factory/auth-modes.md",
     "docs/factory/f0-1-anatomy.md",
     "docs/factory/f0-overview.md",
     "docs/factory/f1-plan.md",
@@ -226,7 +233,10 @@
     "docs/factory/f7-maintain.md",
     "docs/factory/f8-workflows.md",
     "docs/factory/harness-retro.md",
-    "docs/factory/faq.md"
+    "docs/factory/faq.md",
+    "docs/factory/visual-guide.md",
+    "docs/factory/img/**",
+    "tests/structure/factory-visuals.test.ts"
   ],
   "capstone": [
     "scripts/prove/capstone.ts",

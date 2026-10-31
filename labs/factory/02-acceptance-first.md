@@ -16,11 +16,28 @@ Write .labs/work/specs/1/acceptance.md from your intent: two scenarios, each wit
 
 ## Proof
 
-```sh
-f=.labs/work/specs/1/acceptance.md
-for k in Given When Then; do test "$(grep "^$k" $f | awk 'NF>=4' | wc -l)" -ge 2 || exit 1; done
-! grep '^Then' $f | grep -Eqiw 'look(s)? (good|nice|right)|works|fine|correct'
-```
+1. acceptance.md has at least two Given lines.
+
+   ```sh
+   test "$(grep -c '^Given' .labs/work/specs/1/acceptance.md)" -ge 2
+   ```
+2. acceptance.md has at least two When lines.
+
+   ```sh
+   test "$(grep -c '^When' .labs/work/specs/1/acceptance.md)" -ge 2
+   ```
+3. acceptance.md has at least two Then lines.
+
+   ```sh
+   test "$(grep -c '^Then' .labs/work/specs/1/acceptance.md)" -ge 2
+   ```
+4. Every scenario line has real words, and no Then settles for looks good.
+
+   ```sh
+   f=.labs/work/specs/1/acceptance.md
+   for k in Given When Then; do test "$(grep "^$k" $f | awk 'NF>=4' | wc -l)" -ge 2 || exit 1; done
+   ! grep '^Then' $f | grep -Eqiw 'look(s)? (good|nice|right)|works|fine|correct'
+   ```
 
 ## Hints
 

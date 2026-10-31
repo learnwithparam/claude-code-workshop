@@ -9,7 +9,7 @@ Decide how much human approval a change needs from the files it touches, never f
 ## What is built and what is design
 
 - Built and tested in `factory/engine/review.test.ts`: `classify` and `approvalsMet` (`risk.ts`), and `release`, `rollback` and `mergeQueue` (`deploy.ts`).
-- Not called by the runner: `interpret.ts` and `cli.ts` do not import `risk.ts` or `deploy.ts`. They are libraries with proofs, ready to wire.
+- Reachable from a workflow: a step with `deploy: merge-queue`, `deploy: preview` or `deploy: production` runs no agent and calls `mergeQueue` or `release` (`deploy-step.ts`). Production needs at least one writer's approval of that stage, more for a high tier. `bug-tdd` ends with a `deploy: merge-queue` step. The approvals `release` checks are the logins `Host.writers` returns, the same people `approved` counted.
 - Missing target: `deploy.ts` runs `make deploy ENV=<env>`, and this repo's `Makefile` has no `deploy` target. The release and rollback commands therefore have nothing to call here. A learner adds a deploy target for their own host. This is a design, not a working deploy.
 - Built and used: the `ci` check in `factory/engine/checks/index.ts` runs `gh pr checks --watch`, and the workflow loop feeds a failure back to the builder.
 
@@ -19,7 +19,7 @@ Decide how much human approval a change needs from the files it touches, never f
 
 **Approvals.** `APPROVALS` is low 0, medium 1, high 2. `approvalsMet` counts distinct humans whose approval names the current head commit. An agent's approval never counts, and a push after approval changes the head, so the approval no longer counts.
 
-**Human approval of stages.** Separately, `approvalIn` in `factory/engine/real-host.ts` accepts a stage approval only from a GitHub comment `approve <stage> <digest>` by a configured approver. The agents hold no GitHub token.
+**Human approval of stages.** Separately, `approvalIn` in `factory/engine/approvers.ts` accepts a stage approval only from a GitHub comment `approve <stage> <digest>` by a configured approver. The agents hold no GitHub token.
 
 **Merge queue.** `mergeQueue` runs `git merge --no-commit origin/main`, runs `make check` on the result, then aborts the merge. It fails on a conflict or a red gate.
 

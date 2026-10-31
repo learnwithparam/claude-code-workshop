@@ -16,17 +16,33 @@ Write .labs/work/check-kebab.mjs: given a folder, it walks it, prints each file 
 
 ## Proof
 
-```sh
-s=.labs/work/check-kebab.mjs
-b=.labs/work/trees
-rm -rf $b; mkdir -p $b/good/sub-dir $b/bad $b/nested/Folder
-: > $b/good/ok-name.md; : > $b/good/sub-dir/a.b.txt; : > $b/bad/BadName.txt; : > $b/nested/Folder/x.txt
-node $s $b/good >/dev/null 2>&1; g=$?
-out=$(node $s $b/bad 2>/dev/null); r=$?
-node $s $b/nested >/dev/null 2>&1; n=$?
-rm -rf $b
-test $g -eq 0 && test $r -eq 1 && test $n -eq 1 && echo "$out" | grep -q BadName.txt
-```
+1. check-kebab.mjs passes on the docs folder.
+
+   ```sh
+   node .labs/work/check-kebab.mjs docs >/dev/null 2>&1
+   ```
+2. check-kebab.mjs fails on a folder that holds BadName.txt.
+
+   ```sh
+   test -f .labs/work/check-kebab.mjs || exit 1
+   d=.labs/work/bad; mkdir -p $d && : > $d/BadName.txt
+   node .labs/work/check-kebab.mjs $d >/dev/null 2>&1; r=$?
+   rm -rf $d
+   test $r -eq 1
+   ```
+3. check-kebab.mjs passes a good tree, then fails a bad one and a nested one and names the offender.
+
+   ```sh
+   s=.labs/work/check-kebab.mjs
+   b=.labs/work/trees
+   rm -rf $b; mkdir -p $b/good/sub-dir $b/bad $b/nested/Folder
+   : > $b/good/ok-name.md; : > $b/good/sub-dir/a.b.txt; : > $b/bad/BadName.txt; : > $b/nested/Folder/x.txt
+   node $s $b/good >/dev/null 2>&1; g=$?
+   out=$(node $s $b/bad 2>/dev/null); r=$?
+   node $s $b/nested >/dev/null 2>&1; n=$?
+   rm -rf $b
+   test $g -eq 0 && test $r -eq 1 && test $n -eq 1 && echo "$out" | grep -q BadName.txt
+   ```
 
 ## Hints
 
