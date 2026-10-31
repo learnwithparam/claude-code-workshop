@@ -2,6 +2,18 @@
 
 **Stage:** plan, build, review, verify. **Layer:** execution, priced. **Prerequisite:** F8 (workflows) and the cost ledger described in the FAQ.
 
+## Story
+
+**The ticket.** The `docs` workflow. No run shows this one; the config and the workflow file do.
+
+**Without the layer.** `routes.docs.build` in `.factory/config.json` sends a docs build to Haiku, but `.factory/workflows/docs.yaml` names its step `write`, which is not in `stepStages`. The route never applies and the step runs on the middle model.
+
+**What the layer did.** `run.log` records the model on every round, so the miss is visible in a file, not hidden in a bill. The assignment "A model for every stage name" in F10 closes it.
+
+![Step names map through stepStages to a config stage and its model, with route overrides beside them](img/model-routing.svg)
+
+_Notice:_ the red box is a route that never fires.
+
 ## Goal
 
 Send mechanical stages to the cheap model, building to the middle model and epic planning to the strongest one, see why an agent file alone cannot do that, and measure the mix from `cost.json`.

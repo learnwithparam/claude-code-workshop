@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 const dir = "docs/factory";
 const MAX_SVG_BYTES = 40_000;
 const docs = readdirSync(dir).filter((f) => f.endsWith(".md"));
+const modules = docs.filter((f) => /^f\d/.test(f));
 const svgs = existsSync(`${dir}/img`)
   ? readdirSync(`${dir}/img`).filter((f) => f.endsWith(".svg"))
   : [];
@@ -15,6 +16,10 @@ const images = (file: string) =>
   );
 
 describe("factory docs visuals", () => {
+  it("embeds at least one picture in every module", () => {
+    expect(modules.filter((f) => images(f).length === 0)).toEqual([]);
+  });
+
   it("points every picture at a file that exists, with alt text", () => {
     const bad = docs.flatMap((f) =>
       images(f)

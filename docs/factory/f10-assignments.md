@@ -2,6 +2,18 @@
 
 **Stage:** all of them. **Workflows shown:** whichever you choose below.
 
+## Story
+
+**The ticket.** An open item in `docs/factory/harness-retro.md` (item 8).
+
+**Without the layer.** "`factory/engine/cli.ts` builds `approvers` as a list of one login, the person running the CLI." So "a high-tier gate could never reach two".
+
+**What the layer did.** Nothing yet. That gap is the assignment "Two people at a high-risk gate" below. Every assignment here starts from a gap like it.
+
+![The six stages from a ready ticket to a merged pull request, with the artifact and the deciding check under each](img/pipeline.svg)
+
+_Notice:_ each assignment changes one box or one arrow. Name it before you file the issue.
+
 ## What exists
 
 Each assignment below has a brief in `assignments/` and a red test in `tests/assignments/`. The brief is a markdown file with a walkthrough, so you can read the whole task before you file anything. See [assignments/README.md](../../assignments/README.md) for the table. Every red test is skipped unless `ASSIGNMENT=1`, so `make check` stays green until you start. `tests/structure/assignments.test.ts` checks that every section on this page names a brief and a test that exist, that every brief has its nine headings in order, and that the test is gated on `ASSIGNMENT`.

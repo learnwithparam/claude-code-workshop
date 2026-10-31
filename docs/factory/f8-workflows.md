@@ -2,6 +2,18 @@
 
 **Stage:** all of them. **Layer:** delivery, made configurable. **Workflows shown:** every file in `.factory/workflows/`.
 
+## Story
+
+**The ticket.** Runs 29 and 31, recorded in the plan brief tests in `factory/engine/workflows.test.ts`.
+
+**Without the layer.** Run 29's plan held a note, and run 31 listed its own golden test. Both plans were refused.
+
+**What the layer did.** The shared plan brief in `.factory/config.yaml` now carries one sentence per failure, each pinned by a test that names the run. A workflow file is where a rule like that lives once, instead of in every prompt.
+
+![A decision tree for choosing a workflow, with the workflows a ticket names directly beside it](img/workflow-selector.svg)
+
+_Notice:_ the tree asks what evidence the task can give, never how big the ticket is.
+
 ## Goal
 
 Write a workflow file from scratch, make the repo's own tests accept it, run it on an issue, and pick the right one for each kind of ticket.

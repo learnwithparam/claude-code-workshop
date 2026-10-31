@@ -2,6 +2,18 @@
 
 **Stage:** Maintain. **Layer:** sharing and feedback. **Workflows:** `incident` (diagnose, plan, eval, fix, review).
 
+## Story
+
+**The ticket.** None yet. Nothing feeds `detect` its metrics, so no run has breached a band. The story is the test.
+
+**Without the layer.** A drifting metric needs someone to notice it on a chart.
+
+**What the layer did.** `a 3 sigma breach writes an intent` in `factory/engine/review.test.ts` feeds a value of 30 against a history near 10 and expects a new `intent.md`. Arithmetic turns the drift into a ticket, with no model deciding.
+
+![The maintain loop: band metrics feed detect, the sigma level picks an action, and a breach starts the incident workflow](img/sigma-loop.svg)
+
+_Notice:_ the dashed parts are the ones only tests reach today.
+
 ## Goal
 
 After a change ships, the factory watches itself. A metric that leaves its band becomes a ticket. An incident becomes a failing test before it becomes a fix. A lesson from a run is kept only if the eval score did not fall.
