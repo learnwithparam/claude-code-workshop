@@ -202,6 +202,8 @@
     "factory/engine/**",
     ".factory/workflows/**",
     "tests/structure/f5-review-doc.test.ts",
+    "tests/structure/assignments.test.ts",
+    "tests/assignments/**",
     ".factory/bands.yaml",
     "scripts/prove/workflows.ts",
     "scripts/check-prose.ts",
