@@ -10,6 +10,8 @@ afterEach(() => {
   process.env.PATH = PATH;
 });
 
+const fakeAuth = { mode: "api-key" as const, credential: { name: "ANTHROPIC_API_KEY", value: "x" } };
+
 describe("gh preflight", () => {
   it("passes when gh answers", () => {
     expect(() => ghPreflight(() => "ok")).not.toThrow();
@@ -28,6 +30,6 @@ describe("gh preflight", () => {
     writeFileSync(join(dir, "gh"), "#!/bin/sh\nexit 1\n");
     chmodSync(join(dir, "gh"), 0o755);
     process.env.PATH = `${dir}:${PATH}`;
-    await expect(runIssue(1, "no-such-workflow")).rejects.toThrow(/gh auth login/);
+    await expect(runIssue(1, "no-such-workflow", fakeAuth)).rejects.toThrow(/gh auth login/);
   });
 });
