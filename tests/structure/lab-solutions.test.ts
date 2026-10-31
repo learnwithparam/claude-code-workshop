@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import {
   copyFileSync,
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readdirSync,
@@ -11,7 +12,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { loadLabs } from "../../scripts/labs/catalog.ts";
-import { LAZY, SOLUTIONS, sh } from "./lab-artifacts.ts";
+import { LAZY, NEEDS, SOLUTIONS, sh } from "./lab-artifacts.ts";
 
 const REPO = resolve(".");
 // Proofs read this repo (its folders, shared/ files, make targets), so each run gets a scratch
@@ -54,6 +55,7 @@ function inScratchRepo(setup: string | undefined, proof: string) {
 describe("lab proofs", () => {
   const labs = loadLabs("labs");
   const ids = labs.map((l) => l.id).sort();
+  const reachable = (id: string) => (NEEDS[id] ?? []).every((f) => existsSync(join(REPO, f)));
   const items = labs.flatMap((lab) => lab.proof.map((item, n) => ({ lab, item, n: n + 1 })));
 
   it("has a solution and a lazy artifact for every lab and none extra", () => {
@@ -79,7 +81,7 @@ describe("lab proofs", () => {
     },
   );
 
-  it.each(items)(
+  it.each(items.filter(({ lab }) => reachable(lab.id)))(
     "$lab.id item $n is green once the steps are done: $item.text",
     { timeout: 240_000 },
     ({ lab, item }) => {

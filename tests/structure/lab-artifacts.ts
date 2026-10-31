@@ -10,6 +10,15 @@ const LAZY_KEBAB = `process.exit(process.argv[2]==="docs"?0:1)`;
 export const sh = (...lines: string[]) => lines.join("\n");
 const file = (path: string, body: string) => `cat > ${path} <<'EOF'\n${body}\nEOF`;
 
+// Files a proof reads from the repo. A level snapshot holds only its own files, so a lab whose
+// proof reads one that is missing has nothing true to compare with there and runs on trunk only.
+export const NEEDS: Record<string, string[]> = {
+  "daily-02": ["api"],
+  "factory-03": [".factory/config.json", "factory/main.ts"],
+  "factory-04": ["tests/contract/sse-events.test.ts"],
+  "advanced-05": [".claude/settings.json"],
+};
+
 export const SOLUTIONS: Record<string, string> = {
   "start-01": sh(
     `mkdir -p ${W}`,
