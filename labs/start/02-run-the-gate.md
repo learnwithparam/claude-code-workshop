@@ -1,6 +1,7 @@
 # Run the gate yourself
 
 **Pairs with:** `docs/levels/hand-built.md`
+**Help:** guided
 
 ## Warm-up
 
@@ -20,9 +21,16 @@ Run the repo's own tests and keep the log, so you know what green looks like bef
 
 ## Proof
 
-```sh
-grep -q 'passed' .labs/work/gate.log && ! grep -q 'failed' .labs/work/gate.log
-```
+1. gate.log says passed.
+
+   ```sh
+   grep -q 'passed' .labs/work/gate.log
+   ```
+2. gate.log has no failed.
+
+   ```sh
+   f=.labs/work/gate.log; test -f $f && ! grep -q 'failed' $f
+   ```
 
 ## Hints
 

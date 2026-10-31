@@ -44,6 +44,7 @@ These limits, none of them the model's judgment:
 
 - A loop has `max` from 1 to 5, enforced by the schema in `factory/engine/workflow.ts`. At the cap the run ends as `needs-human` ("stops at the cap and writes run.log" in `factory/engine/engine.test.ts`).
 - Each agent call has a ceiling: `maxBudgetUsd: o.maxUsdPerAgent ?? 3` in `factory/engine/real-host.ts`, plus `maxTurns` from the agent file. The older runner takes `maxBudgetUsd` and `maxTurns` per stage from `.factory/config.json`, and `npx tsx factory/main.ts <issue> --dry-run` prints them.
+- A subscription run has no dollar bill, so it sets no `maxBudgetUsd`. `subscriptionCap` in `.factory/config.yaml` caps its agent calls and tokens instead, and `runCap` in `factory/engine/auth.ts` refuses the next call once either is reached ("refuses a subscription call past the run's call cap" in `factory/engine/real-host.test.ts`). See [Auth modes](auth-modes.md).
 - The review loop stops after `reviewLoop.maxRounds` and labels the issue `needs-human` ("caps the review loop at maxRounds" in `factory/run.test.ts`).
 - Live eval and smoke runs share one cap, `withinLiveCap` in `api/src/agent/live-cap.ts`.
 - One engine run has a total cap. `spend.capUsd` and `spend.stopAt` in `.factory/config.json` end the run as `needs-human` with the reason `spend cap` once the cost reaches that share, and each call gets only the budget that remains ("spend cap" cases in `factory/engine/models.test.ts`). The engine writes `specs/<issue>/cost.json` as it goes.

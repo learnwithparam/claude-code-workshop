@@ -63,4 +63,17 @@ describe("POST /workbook", () => {
     await (await post(app, { sheet })).text();
     expect((await post(app, { sheet })).status).toBe(429);
   });
+
+  it("refuses at the shared live-run cap without calling the agent", async () => {
+    const capped = parseEnv({ ANTHROPIC_API_KEY: "x".repeat(30), LIVE_SPENT_USD: "1000" });
+    let called = false;
+    const runWorkbook = async () => {
+      called = true;
+      return { kind: "workbook" as const, workbook, usage };
+    };
+    const app = createApp({ env: capped, client, runWorkbook });
+    const text = await (await post(app, { sheet })).text();
+    expect(text).toContain("event: error");
+    expect(called).toBe(false);
+  });
 });

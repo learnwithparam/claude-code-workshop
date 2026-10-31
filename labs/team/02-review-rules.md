@@ -1,6 +1,7 @@
 # Write the review rules
 
 **Pairs with:** `docs/levels/verification.md`
+**Help:** hinted
 
 ## Warm-up
 
@@ -21,15 +22,23 @@ Write a short `REVIEW.md` that tells a reviewer what to flag, each rule somethin
 
 ## Proof
 
-```sh
-test "$(grep -c '^- Flag' .labs/work/REVIEW.md)" -ge 3 && head -1 .labs/work/REVIEW.md | grep -q '^# '
-```
+1. REVIEW.md has at least three lines starting with - Flag.
+
+   ```sh
+   test "$(grep -c '^- Flag' .labs/work/REVIEW.md)" -ge 3
+   ```
+2. REVIEW.md starts with a # title.
+
+   ```sh
+   head -1 .labs/work/REVIEW.md | grep -q '^# '
+   ```
 
 ## Hints
 
 1. The first line is a `# ` heading. Then three or more lines starting with `- Flag`.
 2. "Flag a default export outside web/src/pages/" can fail. "Write clean code" cannot.
 3. Reuse the standards in `AGENTS.md` and turn each into a flag.
+4. Commands, in order: `cat REVIEW.md`, `mkdir -p .labs/work`, `claude -p "Review the staged changes using .labs/work/REVIEW.md"`.
 
 ## What you just learned
 

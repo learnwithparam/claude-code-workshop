@@ -4,6 +4,7 @@ tests:
   unit: [npx, vitest, run]
   e2e: [npx, playwright, test, tests/e2e]
   eval: [npx, tsx, api/src/eval.ts]
+  score: [npx, tsx, scripts/eval-score.ts]
   prose: [npx, tsx, scripts/check-prose.ts, docs]
   prepush: [npx, tsx, scripts/check-affected.ts, --base, origin/main]
   mutation: [npx, stryker, run]
@@ -15,6 +16,13 @@ paths:
 keySource:
   env: ANTHROPIC_API_KEY
   file: api/.env
+# api-key | subscription | auto. auto takes CLAUDE_CODE_OAUTH_TOKEN when set, else the key above.
+# `--auth=` on factory/engine/main.ts overrides it. docs/factory/auth-modes.md explains both.
+auth: auto
+# A plan has no dollar bill, so a subscription run stops here instead of at spend.capUsd.
+subscriptionCap:
+  calls: 40
+  tokens: 4000000
 # A plan may never list these, on top of the engine's own gate-owned files.
 protected: [".github/**", ".claude/**", ".factory/**", "factory/**", "scripts/**"]
 # One brief for every plan step; a workflow's plan step that sets none uses it.

@@ -28,7 +28,7 @@ This repo has two runners, and both read `.factory/config.json`. Know which one 
 1. `stepStages` in `config.json` maps the step's stage name to a config stage (`intent` to `triage`, `spec` and `plan` to `plan`, `tests`, `build` and `fix` to `build`, `review` to `review`, `ci` to `verify`, and so on). A stage name that is itself a config stage name maps to itself.
 2. `routes.<type>.<stage>` overrides the stage's model for a ticket type. The type is the workflow name, except that `feature-sdd` runs as `epic` (`runIssue` in `factory/engine/cli.ts`). So an epic plans and writes its spec on Opus, and a `docs` run builds on Haiku when its step maps to `build`.
 3. Otherwise `stages.<stage>.model`.
-4. A stage name in neither list falls back to the middle model, not to a stage default. The `docs` workflow names its build step `write`, which is not in `stepStages`, so its route to Haiku does not apply. F10 has the assignment.
+4. A stage name in neither list falls back to the middle model, not to a stage default. The `docs` workflow's `write` step is mapped to `build` in `stepStages`, so its route to Haiku applies (`factory/engine/docs-routing.test.ts`); other unmapped names, such as `analyze`, still fall back. F10 has the assignment.
 
 `run.log` records the model on every round (`build round 1 model claude-sonnet-5-5 $0.0123`), and `cost.json` lists one entry per call with the model and cost. The test `hands each step its config model and logs it in run.log and cost.json` in `factory/engine/models.test.ts` pins both.
 

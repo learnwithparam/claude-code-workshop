@@ -25,9 +25,9 @@ Triage here picks a model and a refusal, not the workflow. The engine takes the 
 
 **Where the tier is applied.** `gateMet` in `factory/engine/interpret.ts` runs at every `gate: human` step. It calls `classify` on the files changed so far, takes `Math.max(1, APPROVALS[tier])` and logs a line such as `gate spec tier high needs 2 approvals`. A gate that says `human` always needs a person, so a docs-only change still needs one; the tier only raises the count. The approvals must be distinct people: `approvalIn` in `factory/engine/real-host.ts` collects the logins of `OWNER`, `MEMBER` or `COLLABORATOR` comments that carry the exact line `approve <stage> <digest>`, so one person commenting twice counts once. The agents hold no GitHub token, so none of their comments can count.
 
-Two limits to know today. First, `runIssue` in `factory/engine/cli.ts` sets the approvers to the one logged-in `gh` user, so a gate whose tier needs two people cannot be met by a real run until more logins are configured. Second, the gate counts approvals bound to the artifact digest. The commit-bound rule in `approvalsMet` (a push after approval voids it) is used by `release` in `factory/engine/deploy.ts`, which only tests call; no real run reaches it.
+Two limits to know today. First, the approvers are the issue's commenters who hold write, maintain or admin on the repo, never a bot (`approvers.ts`, `Host.writers`), so a high-tier gate can be met once the repo has two such people. Second, the gate counts approvals bound to the artifact digest. The commit-bound rule in `approvalsMet` (a push after approval voids it) is used by `release` in `factory/engine/deploy.ts`, which takes a `tier` argument and refuses production without the approvals; `interpret.ts` calls it for a `deploy: production` step.
 
-The triage RISK and the path tier are different values: the first is the model's guess used to route models in the older runner, the second is code over the diff used to gate approvals.
+The triage RISK and the path tier are different values: the first is the model's guess used to route models, the second is code over the diff used to gate approvals.
 
 ## Steps you run
 
@@ -35,7 +35,7 @@ The triage RISK and the path tier are different values: the first is the model's
 2. Run `npx vitest run factory/route-ticket.test.ts` and read what each case routes to.
 3. Compute a tier by hand: `npx tsx -e 'import {classify} from "./factory/engine/risk.ts"; console.log(classify([".github/workflows/ci.yml"]), classify(["docs/a.md"]), classify(["shared/src/bands.ts"]))'`. Expect `high low medium`.
 4. File a small docs issue and read its plan without spending: `make factory ISSUE=<n> FLAGS=--dry-run` lists the stages, models and budgets.
-5. For a real plan, label the issue `factory:ready` and run `npx tsx factory/engine/main.ts <n> --workflow=feature-atdd`. It needs `gh` signed in and an API key available to the api workspace, and it spends tokens against the per stage caps in `.factory/config.json`. It stops at the `spec` human gate. Read `specs/<n>/intent.md` and `specs/<n>/spec.md` before you approve, then find the `gate spec tier ... needs ... approvals` line in `specs/<n>/run.log` to see how many people the tier asked for.
+5. For a real plan, label the issue `factory:ready` and run `npx tsx factory/engine/main.ts <n> --workflow=feature-atdd`. It needs `gh` signed in and a credential: an API key available to the api workspace, which spends tokens against the per stage caps in `.factory/config.json`, or a subscription token with `--auth=subscription`, which stops at `subscriptionCap` in `.factory/config.yaml` (see [Auth modes](auth-modes.md)). It stops at the `spec` human gate. Read `specs/<n>/intent.md` and `specs/<n>/spec.md` before you approve, then find the `gate spec tier ... needs ... approvals` line in `specs/<n>/run.log` to see how many people the tier asked for.
 
 ## Proof that bites
 

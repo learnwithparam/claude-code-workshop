@@ -11,7 +11,7 @@ const frontmatter = (text: string | null) => {
 };
 
 export type RetroOutcome =
-  | { kind: "none" }
+  | { kind: "none"; before: number }
   | { kind: "kept"; proposal: Proposal; before: number; after: number; delta: number }
   | { kind: "reverted"; proposal: Proposal; before: number; after: number; delta: number }
   | { kind: "error"; error: string };
@@ -38,7 +38,7 @@ export async function retro(
     stage: "retro",
   });
   const proposal = parseProposal(out.text);
-  if (proposal === "none") return { kind: "none" };
+  if (proposal === "none") return { kind: "none", before };
   if ("error" in proposal) return { kind: "error", error: proposal.error };
   // An agent's permissions and the factory config stay with a person, so the engine never auto-applies them.
   if (!/^\.claude\/(skills|rules)\/.+\.md$/.test(proposal.file))
