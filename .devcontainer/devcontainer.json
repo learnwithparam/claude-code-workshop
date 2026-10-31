@@ -4,7 +4,7 @@
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "postCreateCommand": "npm ci && npx playwright install --with-deps chromium && npm install -g @anthropic-ai/claude-code@2.1.312",
+  "postCreateCommand": "npm ci && npx playwright install --with-deps chromium && npm install -g @anthropic-ai/claude-code@2.1.316",
   "customizations": {
     "vscode": {
       "extensions": ["biomejs.biome", "anthropic.claude-code"]

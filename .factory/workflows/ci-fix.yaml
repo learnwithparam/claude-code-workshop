@@ -1,0 +1,20 @@
+# Method: a red PR is repaired by the factory that opened it (OpenAI software factory: CI is babysat until green).
+name: ci-fix
+method: read the failing job log, fix on the PR branch, loop to green
+source: Pragmatic Engineer, OpenAI's software factory
+for: a red open PR
+steps:
+  - {
+      stage: fix,
+      agent: builder,
+      brief: "Read the failing job log of the red PR first. If the job errored with no cost or no output, or the runner's Node version does not match the engine, it is an infra fault: change nothing, report it as infra, and run `gh run rerun --failed` instead of editing code. Otherwise fix the cause on the PR branch with the smallest change. Never edit a test to make it pass.",
+      checks: [gate],
+      loop: { until: [gate], max: 3 },
+    }
+  - {
+      stage: ci,
+      agent: builder,
+      brief: "Push and wait for the PR checks. A failing job log comes back to you as evidence.",
+      checks: [ci],
+      loop: { until: [ci], max: 2 },
+    }
