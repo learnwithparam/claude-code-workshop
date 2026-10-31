@@ -78,6 +78,12 @@ describe("renderBrief", () => {
     expect(text).not.toContain("claude -p hi");
     expect(text).toContain("make lab HINT=1");
   });
+  it("links to the feedback form with the lab id filled in", () => {
+    const text = renderBrief(lab, { done: {}, hints: {} }, false);
+    expect(text).toContain(
+      "Stuck? https://github.com/learnwithparam/claude-code-workshop/issues/new?template=lab-feedback.yml&lab=start-01",
+    );
+  });
   it("shows revealed hints only", () => {
     const text = renderBrief(lab, { done: {}, hints: { "start-01": 1 } }, false);
     expect(text).toContain("Hint 1: one");
