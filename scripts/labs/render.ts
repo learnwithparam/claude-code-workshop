@@ -70,8 +70,11 @@ export function renderMap(
 function body(lab: Lab, color: boolean): string[] {
   if (lab.help === "goal") return [paint(color, "bold", "Done when this passes"), lab.proof, ""];
   const show = (s: string) => (lab.help === "hinted" ? hideCommands(s) : commands(s, color));
-  const step = (s: Step, i: number) => `${i + 1}. ${tag(s.where, color)} ${show(s.text)}`;
-  return [paint(color, "bold", "Steps"), ...lab.steps.map(step), ""];
+  const step = (s: Step, i: number) => [
+    `${i + 1}. ${tag(s.where, color)} ${show(s.text)}`,
+    ...(s.expect ? [paint(color, "dim", `   Expect: ${s.expect}`)] : []),
+  ];
+  return [paint(color, "bold", "Steps"), ...lab.steps.flatMap(step), ""];
 }
 
 // The form's `lab` field is prefilled from the query string, so a report names its lab.

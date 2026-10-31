@@ -18,6 +18,7 @@ Answer: It goes to the file, because the redirect catches it before the screen.
 
 ## Steps
 1. Run \`claude\`.
+   Expect: A reply in plain words; the wording differs each time.
 2. [claude] Ask it.
 3. [editor] Write \`a.md\`.
 
@@ -57,7 +58,11 @@ describe("parseLab", () => {
       },
     });
     expect(lab.steps).toEqual([
-      { where: "shell", text: "Run `claude`." },
+      {
+        where: "shell",
+        text: "Run `claude`.",
+        expect: "A reply in plain words; the wording differs each time.",
+      },
       { where: "claude", text: "Ask it." },
       { where: "editor", text: "Write `a.md`." },
     ]);

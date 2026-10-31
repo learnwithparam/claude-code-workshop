@@ -9,7 +9,7 @@ const lab: Lab = {
   pairs: "docs/README.md",
   goal: "Ask one question.",
   help: "guided",
-  steps: [{ where: "shell", text: "Run `claude`." }],
+  steps: [{ where: "shell", text: "Run `claude`.", expect: "A short reply; wording varies." }],
   proof: [{ text: "It holds.", command: "true" }],
   hints: ["one", "two"],
   learned: "l",
@@ -114,6 +114,7 @@ describe("renderBrief", () => {
     const text = renderBrief(lab, { done: {}, hints: {} }, false);
     expect(text).toContain("Ask one question.");
     expect(text).toContain("1. [in your shell] Run `claude`.");
+    expect(text).toContain("   Expect: A short reply; wording varies.");
     expect(text).not.toContain("one\n");
     expect(text).toContain("0 of 2");
   });
@@ -123,7 +124,12 @@ describe("renderBrief", () => {
     expect(text.indexOf("Will it edit a file?")).toBeLessThan(text.indexOf("1. Run"));
     expect(text).not.toContain("plan mode is read-only");
   });
-
+  it("prints the expect line dim under its step and omits it when absent", () => {
+    const plain = { ...lab, steps: [{ where: "shell" as const, text: "Think." }] };
+    expect(renderBrief(plain, { done: {}, hints: {} }, false)).not.toContain("Expect:");
+    const text = renderBrief(lab, { done: {}, hints: {} }, true);
+    expect(text).toContain("\u001b[2m   Expect: A short reply; wording varies.\u001b[0m");
+  });
   it("hinted: swaps step commands for a pointer to the hints", () => {
     const steps = [{ where: "shell" as const, text: "Run `claude -p hi`, then read it." }];
     const hinted: Lab = { ...lab, help: "hinted", steps };

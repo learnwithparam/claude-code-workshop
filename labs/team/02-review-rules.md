@@ -22,9 +22,13 @@ Answer: The second one. A reviewer can check it against a diff and say yes or no
 ## Steps
 
 1. Read the real one: `cat REVIEW.md`.
+   Expect: A heading, then short bullets, each starting with a flag word and naming something a diff can break.
 2. Make the folder: `mkdir -p .labs/work`.
+   Expect: No output. The folder `.labs/work` now exists.
 3. [editor] Write `.labs/work/REVIEW.md` with a heading and at least three bullets. Each bullet starts with "Flag" and names a concrete thing in a diff.
+   Expect: No output from a command, since you are writing the file. Afterwards `grep -c '^- Flag' .labs/work/REVIEW.md` prints `3` or more.
 4. Stage any small change with `git add`, then try it on that diff: `claude -p "Review the staged changes using .labs/work/REVIEW.md"`.
+   Expect: A short review that cites your rules. With nothing staged it says there is nothing to review, so stage a small change first. The wording will differ.
 
 ## Proof
 

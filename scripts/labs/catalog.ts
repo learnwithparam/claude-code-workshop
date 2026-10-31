@@ -27,7 +27,12 @@ const oneLine = z
 // Where a step is typed. A learner keeps Claude Code and a shell side by side; an untagged step is a shell step.
 export const WINDOWS = ["shell", "claude", "editor"] as const;
 export type Window = (typeof WINDOWS)[number];
-export const stepSchema = z.object({ where: z.enum(WINDOWS), text: z.string().min(1) });
+// A step may carry an indented `Expect:` line: what the learner sees if it worked.
+export const stepSchema = z.object({
+  where: z.enum(WINDOWS),
+  text: z.string().min(1),
+  expect: z.string().min(1).optional(),
+});
 export type Step = z.infer<typeof stepSchema>;
 
 export const warmupSchema = z.object({
@@ -88,6 +93,16 @@ export function parseStep(raw: string): Step {
   return { where, text: raw.slice(tag[0].length) };
 }
 
+function stepOf(item: string): Step {
+  const [raw = "", ...rest] = item.split(/\n\s+Expect: /);
+  const expect = rest
+    .join(" ")
+    .replace(/\s*\n\s*/g, " ")
+    .trim();
+  const step = parseStep(raw.trim());
+  return expect ? { ...step, expect } : step;
+}
+
 // "Question?" then a line "Answer: reason". A missing Answer line leaves the answer empty and fails the schema.
 function predictOf(body: string): { question: string; answer: string } {
   const at = body.search(/^Answer:/m);
@@ -143,7 +158,7 @@ export function parseLab(lane: string, file: string, text: string): Lab {
     help: /^\*\*Help:\*\* (\w+)\s*$/m.exec(text)?.[1],
     goal: parts.get("goal"),
     predict: predictOf(parts.get("predict") ?? ""),
-    steps: listItems(parts.get("steps") ?? "").map(parseStep),
+    steps: listItems(parts.get("steps") ?? "").map(stepOf),
     proof: proofOf(parts.get("proof") ?? ""),
     hints: listItems(parts.get("hints") ?? ""),
     learned: parts.get("what you just learned"),

@@ -79,6 +79,17 @@ describe("labs", () => {
     },
   );
 
+  // A learner who runs a command must be able to tell whether what they see is right.
+  it("every step with a backticked command says what to expect", () => {
+    const missing = labs.flatMap((lab) =>
+      lab.steps
+        .map((step, i) => ({ step, at: `${lab.id} step ${i + 1}` }))
+        .filter(({ step }) => /`[^`]+`/.test(step.text) && !step.expect?.trim())
+        .map(({ at }) => at),
+    );
+    expect(missing).toEqual([]);
+  });
+
   it("help never decreases along the lane order", () => {
     const ranks = labs.map((l) => RANK[l.help]);
     expect(ranks).toEqual([...ranks].sort((a, b) => a - b));

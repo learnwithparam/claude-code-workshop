@@ -22,9 +22,13 @@ Answer: No. Each call starts with an empty context, so --continue is what reopen
 ## Steps
 
 1. Make the folder: `mkdir -p .labs/work`.
+   Expect: No output. The folder `.labs/work` now exists.
 2. Start a session and save its metadata: `claude -p "Remember the word tangerine." --output-format json > .labs/work/session.json`.
+   Expect: No output on screen. `session.json` holds one JSON object with a `session_id` field. The id will differ every time.
 3. Continue the same session: `claude -p --continue "What word did I ask you to remember?" > .labs/work/recall.md`.
+   Expect: No output on screen. The answer goes to `recall.md`.
 4. Read the answer: `cat .labs/work/recall.md`.
+   Expect: A short sentence that mentions tangerine. The wording will differ.
 
 ## Proof
 
