@@ -41,6 +41,7 @@ plan-drift fails: files outside plan.md: api/src/agent/template-eval.ts. Update 
 - A missing `plan.md` is a failed check, not a crash, so the loop can act on it.
 - Editing `plan.md` is not itself a pass: the plan file is in every diff, so the check reads the listed paths and not the file's own change.
 - Regenerated golden snapshots under `specs/<n>/golden/__snapshots__/` pass, because a human reviews them at the feedback gate.
+- The builder may propose unplanned files in `specs/<n>/plan-amendment.md`, one bullet per path with a reason. Approved paths count as planned. A person approves it at the `plan-amendment` gate, and the digest binds the approval to the text, so a later edit voids it. It passes without a person only when the diff is low risk. A path the gate owns, such as `factory/` or `scripts/`, is never amendable.
 
 ## Worktrees
 
