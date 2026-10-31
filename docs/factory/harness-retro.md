@@ -95,7 +95,7 @@ The retro stage in `.claude/skills/factory-retro/SKILL.md` proposes one change p
 
 **Guard.** `factory/engine/models.test.ts`: "keeps the commands it read at the start when the file changes later".
 
-**Status.** Partly fixed, partly open. Pinning protects against an edit after the pin. It does not protect against a tree that was already changed before the run started, because the file is still read from the working tree. The fuller fix is to read the config from the base commit, as agents and the base run already are. That is not done and has no test yet.
+**Status.** Partly fixed, partly open. Pinning protects against an edit after the pin. It does not protect against a tree that was already changed before the run started, because the file is still read from the working tree. Fixed since: `pinPortableAt(base)` reads the file from the merge base, guarded by `portable-base.test.ts`. `.factory/config.json` is still read from the working tree.
 
 ## 8. A high-tier gate could not be met
 
