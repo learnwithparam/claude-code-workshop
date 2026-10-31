@@ -227,7 +227,7 @@ describe("cli watch", () => {
     s.deps.isTTY = false;
     expect(await runWatch(["lab", "--watch"], s.deps)).toBe(1);
     expect(s.text()).toContain("Watch needs a terminal; running the proof once.");
-    expect(s.text()).toContain("FAIL start-01");
+    expect(s.text()).toContain("FAIL Item for start-01.");
     expect(s.stops).toEqual([]);
   });
 });

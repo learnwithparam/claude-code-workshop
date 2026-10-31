@@ -9,12 +9,13 @@ Show which guardrails a cloud session inherits from this repo, and predict what 
 
 ## Steps
 
-1. Read the section "What a cloud session reads from the repo" in `docs/factory/f11-cloud-sessions.md`. A cloud session clones the repo, so what is committed in `.claude/` travels with it.
-2. Make the folder: `mkdir -p .labs/work`.
-3. Run the command from that section and save what it prints: `node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' > .labs/work/cloud-guards.txt`.
-4. Read the file. Find the push deny and the `PreToolUse` hook, and say to yourself what a cloud session does when it runs a push.
-5. Write `.labs/work/push-route.md`: name one route from the section "Know why `git push` fails" (a person ships, teleport, or a tested hook) and give one reason you chose it.
-6. Optional: start a real session with `claude --cloud` and ask it to run a push and show the exact result, then read the transcript. This needs a claude.ai login, so the proof does not ask for it.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+2. Read the section "What a cloud session reads from the repo" in `docs/factory/f11-cloud-sessions.md`. A cloud session clones the repo, so what is committed in `.claude/` travels with it.
+3. Make the folder: `mkdir -p .labs/work`.
+4. Run the command from that section and save what it prints: `node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' > .labs/work/cloud-guards.txt`.
+5. Read the file. Find the push deny and the `PreToolUse` hook, and say to yourself what a cloud session does when it runs a push.
+6. Write `.labs/work/push-route.md`: name one route from the section "Know why `git push` fails" (a person ships, teleport, or a tested hook) and give one reason you chose it.
+7. Optional: start a real session with `claude --cloud` and ask it to run a push and show the exact result, then read the transcript. This needs a claude.ai login, so the proof does not ask for it.
 
 ## Proof
 
