@@ -2,6 +2,12 @@
 
 **Pairs with:** `docs/levels/skills.md`
 
+## Warm-up
+
+What does plan mode turn "do it" into?
+From: start-03
+Answer: "Show me first": Claude lays out a plan and waits for your approval.
+
 ## Goal
 
 Write a skill that Claude loads by its description, so you stop pasting the same instructions.

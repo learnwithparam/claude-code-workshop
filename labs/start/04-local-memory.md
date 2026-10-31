@@ -2,6 +2,12 @@
 
 **Pairs with:** `docs/levels/context.md`
 
+## Warm-up
+
+What does plan mode let you review before Claude edits anything?
+From: start-03
+Answer: The plan. Reading a plan costs far less than reviewing a diff.
+
 ## Goal
 
 Write one private preference into `CLAUDE.local.md` so Claude follows it in this repo and nowhere else.

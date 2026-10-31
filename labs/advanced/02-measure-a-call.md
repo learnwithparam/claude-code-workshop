@@ -2,6 +2,12 @@
 
 **Pairs with:** `docs/agent/agent-sdk.md`
 
+## Warm-up
+
+What can you read about a run before you start it?
+From: factory-03
+Answer: The model, turn cap and budget of every stage, all set in config.
+
 ## Goal
 
 Run one headless call with a turn cap and read its cost from the JSON result.

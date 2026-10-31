@@ -2,6 +2,12 @@
 
 **Pairs with:** `docs/levels/hand-built.md`
 
+## Warm-up
+
+Which file holds your private habits, `AGENTS.md` or `CLAUDE.local.md`?
+From: start-04
+Answer: `CLAUDE.local.md`. `AGENTS.md` is shared with the whole team.
+
 ## Goal
 
 Start a session, leave it, and pick it up again with its context intact.

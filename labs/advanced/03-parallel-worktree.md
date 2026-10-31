@@ -2,6 +2,12 @@
 
 **Pairs with:** `docs/electives/agent-teams.md`
 
+## Warm-up
+
+What do you do instead of re-explaining a task to Claude?
+From: daily-01
+Answer: Resume the saved session and carry on from where you left off.
+
 ## Goal
 
 Create a second checkout of the repo so two Claude sessions can edit at once without touching each other's files.

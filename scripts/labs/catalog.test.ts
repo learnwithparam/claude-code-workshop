@@ -1,3 +1,6 @@
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { LANES, loadLabs, parseLab } from "./catalog.ts";
 
@@ -50,6 +53,24 @@ describe("parseLab", () => {
     expect(() => parseLab("start", "01-x.md", good.replace("2. Create the file.\n", ""))).toThrow();
   });
 
+  it("reads an optional warm-up", () => {
+    const text = good.replace(
+      "## Goal",
+      "## Warm-up\nWhat does a prompt need?\nFrom: start-01\nAnswer: A question.\n\n## Goal",
+    );
+    expect(parseLab("start", "02-x.md", text).warmup).toEqual({
+      question: "What does a prompt need?",
+      from: "start-01",
+      answer: "A question.",
+    });
+    expect(parseLab("start", "01-x.md", good).warmup).toBeUndefined();
+  });
+
+  it("rejects a warm-up with no From or no Answer", () => {
+    const bad = good.replace("## Goal", "## Warm-up\nWhy?\nAnswer: Because.\n\n## Goal");
+    expect(() => parseLab("start", "02-x.md", bad)).toThrow(/from/i);
+  });
+
   it("rejects a file name that is not kebab-case with a number", () => {
     expect(() => parseLab("start", "FirstPrompt.md", good)).toThrow(/file name/);
   });
@@ -61,5 +82,20 @@ describe("loadLabs", () => {
     const lanes = labs.map((l) => LANES.indexOf(l.lane));
     expect(lanes).toEqual([...lanes].sort((a, b) => a - b));
     expect(new Set(labs.map((l) => l.id)).size).toBe(labs.length);
+  });
+
+  it("rejects a warm-up whose From is not an earlier lab", () => {
+    const dir = mkdtempSync(join(tmpdir(), "labs-"));
+    for (const lane of LANES) mkdirSync(join(dir, lane));
+    const lab = (from: string) =>
+      good.replace("## Goal", `## Warm-up\nWhy?\nFrom: ${from}\nAnswer: Because.\n\n## Goal`);
+    writeFileSync(join(dir, "start", "01-a.md"), lab("start-01"));
+    for (const lane of LANES.slice(1)) writeFileSync(join(dir, lane, "01-a.md"), good);
+    expect(() => loadLabs(dir)).toThrow(/earlier/);
+    writeFileSync(join(dir, "start", "01-a.md"), good);
+    writeFileSync(join(dir, "daily", "01-a.md"), lab("team-01"));
+    expect(() => loadLabs(dir)).toThrow(/earlier/);
+    writeFileSync(join(dir, "daily", "01-a.md"), lab("start-01"));
+    expect(loadLabs(dir)).toHaveLength(LANES.length);
   });
 });

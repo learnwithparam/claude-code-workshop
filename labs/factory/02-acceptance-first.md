@@ -2,6 +2,12 @@
 
 **Pairs with:** `docs/factory/f2-design.md`
 
+## Warm-up
+
+What do you share to show a check passes?
+From: team-03
+Answer: The command output, not a sentence saying it works.
+
 ## Goal
 
 Turn the intent into Given, When, Then scenarios that a test can be written from before any code exists.

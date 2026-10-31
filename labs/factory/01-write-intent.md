@@ -2,6 +2,12 @@
 
 **Pairs with:** `docs/factory/f1-plan.md`
 
+## Warm-up
+
+What makes a review rule useful?
+From: team-02
+Answer: A diff can break it. Vague advice cannot be checked, so it is noise.
+
 ## Goal
 
 Write the one-page intent a factory run starts from: the problem and how anyone will know it is done.

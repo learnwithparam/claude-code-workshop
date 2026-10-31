@@ -46,10 +46,15 @@ export function renderMap(
 
 export function renderBrief(lab: Lab, progress: Progress, color: boolean): string {
   const shown = progress.hints[lab.id] ?? 0;
+  // Ask only about a lab the learner finished; otherwise the question is about nothing they know.
+  const recall = lab.warmup && lab.warmup.from in progress.done ? lab.warmup : undefined;
   const lines = [
     paint(color, "bold", `${lab.id}  ${lab.title}`),
     paint(color, "dim", `Pairs with ${lab.pairs}`),
     "",
+    ...(recall
+      ? [`${paint(color, "bold", `Warm-up (from ${recall.from})`)} ${recall.question}`, ""]
+      : []),
     `${paint(color, "bold", "Goal")} ${lab.goal}`,
     "",
     paint(color, "bold", "Steps"),
@@ -61,6 +66,7 @@ export function renderBrief(lab: Lab, progress: Progress, color: boolean): strin
       `Hints: ${shown} of ${lab.hints.length} revealed. Reveal the next with: make lab HINT=1`,
     ),
   ];
+  if (recall) lines.push(`Answer: ${commands(recall.answer, color)}`);
   for (let i = 0; i < shown; i++)
     lines.push(`Hint ${i + 1}: ${commands(lab.hints[i] ?? "", color)}`);
   return lines.join("\n");

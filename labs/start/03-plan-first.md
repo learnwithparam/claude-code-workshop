@@ -2,6 +2,12 @@
 
 **Pairs with:** `docs/levels/context.md`
 
+## Warm-up
+
+How do you know a change is really done?
+From: start-02
+Answer: A command you can run says so. Know the green output before you judge Claude's work.
+
 ## Goal
 
 Get a written plan for a small change from Claude without letting it edit a single file.

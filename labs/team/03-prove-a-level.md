@@ -2,6 +2,12 @@
 
 **Pairs with:** `docs/levels/verification.md`
 
+## Warm-up
+
+What makes a change done?
+From: start-02
+Answer: A command you can run says so, not a sentence saying it works.
+
 ## Goal
 
 Run one level's proof and save the output, so you can show the team it passed.

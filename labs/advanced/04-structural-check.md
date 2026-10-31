@@ -2,6 +2,12 @@
 
 **Pairs with:** `docs/levels/workflows.md`
 
+## Warm-up
+
+What does the workflow contract test walk?
+From: factory-04
+Answer: Every workflow file, so one edit that breaks a stage shows up at once.
+
 ## Goal
 
 Write a script that fails when any file name is not kebab-case, then prove it fails on a bad tree.

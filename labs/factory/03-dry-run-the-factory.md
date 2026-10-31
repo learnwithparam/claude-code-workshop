@@ -2,6 +2,12 @@
 
 **Pairs with:** `docs/factory/f3-build.md`
 
+## Warm-up
+
+What does plan mode let you review for free?
+From: start-03
+Answer: The plan, before any edit. A dry run does the same for a factory run.
+
 ## Goal
 
 Run the factory in dry-run mode and read which model, turn cap and budget each stage gets.

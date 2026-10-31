@@ -2,6 +2,12 @@
 
 **Pairs with:** `docs/levels/hand-built.md`
 
+## Warm-up
+
+Does `claude -p` open a chat window or print an answer?
+From: start-01
+Answer: It prints the answer and exits, so you can use it in a script or a pipe.
+
 ## Goal
 
 Run the repo's own tests and keep the log, so you know what green looks like before Claude touches anything.

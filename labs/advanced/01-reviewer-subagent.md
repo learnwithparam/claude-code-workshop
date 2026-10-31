@@ -2,6 +2,12 @@
 
 **Pairs with:** `docs/levels/execution.md`
 
+## Warm-up
+
+Why does a hook beat a rule written in a prompt?
+From: daily-04
+Answer: Exit code 2 blocks the action every time, even when the model forgets the rule.
+
 ## Goal
 
 Define a subagent that can read and search but cannot write, so a review can never change the code.
