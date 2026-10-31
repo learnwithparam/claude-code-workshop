@@ -13,6 +13,12 @@ Answer: Every workflow file, so one edit that breaks a stage shows up at once.
 
 Write .labs/work/check-kebab.mjs: given a folder, it walks it, prints each file whose name is not lowercase with dashes and dots, and exits 1 if any. Prove it passes on docs and fails on a bad tree. The proof below must pass.
 
+## Predict
+
+Your kebab-case check passes on the real tree. How do you know it would ever fail?
+
+Answer: You cannot tell until you plant a bad file. Seeing it exit 1 on that file is what proves the check can catch a mistake.
+
 ## Steps
 
 1. Read one: `cat scripts/check-conventions.ts`.

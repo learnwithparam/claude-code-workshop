@@ -91,6 +91,10 @@ export function renderBrief(lab: Lab, progress: Progress, color: boolean): strin
       : []),
     `${paint(color, "bold", "Goal")} ${lab.goal}`,
     "",
+    paint(color, "bold", "Predict first"),
+    lab.predict.question,
+    paint(color, "dim", 'Save your guess with: make lab GUESS="your guess"'),
+    "",
     ...body(lab, color),
     paint(
       color,

@@ -13,6 +13,7 @@ const lab: Lab = {
   proof: [{ text: "It holds.", command: "true" }],
   hints: ["one", "two"],
   learned: "l",
+  predict: { question: "Will it edit a file?", answer: "No, plan mode is read-only." },
 };
 // biome-ignore lint/suspicious/noControlCharactersInRegex: the test looks for the escape byte
 const ESC = /\u001b/;
@@ -116,6 +117,13 @@ describe("renderBrief", () => {
     expect(text).not.toContain("one\n");
     expect(text).toContain("0 of 2");
   });
+  it("asks the predict question above the steps and never shows the answer", () => {
+    const text = renderBrief(lab, { done: {}, hints: {} }, false);
+    expect(text).toContain("Will it edit a file?");
+    expect(text.indexOf("Will it edit a file?")).toBeLessThan(text.indexOf("1. Run"));
+    expect(text).not.toContain("plan mode is read-only");
+  });
+
   it("hinted: swaps step commands for a pointer to the hints", () => {
     const steps = [{ where: "shell" as const, text: "Run `claude -p hi`, then read it." }];
     const hinted: Lab = { ...lab, help: "hinted", steps };

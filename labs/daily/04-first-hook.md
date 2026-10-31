@@ -13,6 +13,12 @@ Answer: Its description. Claude matches the situation to the description, so wri
 
 Write a hook that stops Claude from editing `.env`, and prove it by feeding it both cases.
 
+## Predict
+
+A hook receives a tool call as JSON on standard input. Which exit code stops the action, and what does the other case need?
+
+Answer: Exit code 2 blocks the action. Any other path, including a clean exit 0, lets the action through.
+
 ## Steps
 
 1. Read a real hook: `cat .claude/hooks/pretooluse-file-guard.mjs`.

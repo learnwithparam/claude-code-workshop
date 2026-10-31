@@ -13,6 +13,12 @@ Answer: A command you can run says so, not a sentence saying it works.
 
 Run one level's proof and save the output, so you can show the team it passed.
 
+## Predict
+
+You run a level's proof through tee. What do you get that a plain run does not give you?
+
+Answer: A saved receipt. The output prints as it runs and also lands in a file you can show the team.
+
 ## Steps
 
 1. Make the folder: `mkdir -p .labs/work`.

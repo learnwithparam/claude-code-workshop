@@ -13,6 +13,12 @@ Answer: The plan, before any edit. A dry run does the same for a factory run.
 
 Run the factory in dry-run mode for issue 1, save its output to .labs/work/dry-run.txt, and find which stage has the largest budget. The dry run needs no key and spends nothing. The proof below must pass.
 
+## Predict
+
+A dry run prints the plan for each stage. Does it call the model or spend any budget?
+
+Answer: No. A dry run only reads the config and prints what each stage would get, so it costs nothing.
+
 ## Steps
 
 1. Make the lab work folder.

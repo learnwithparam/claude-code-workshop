@@ -13,6 +13,12 @@ Answer: The model, turn cap and budget of every stage, all set in config.
 
 Make one headless Claude call capped at two turns, save its JSON result to .labs/work/call.json, and write the call's cost in dollars, as a bare number, to .labs/work/cost.txt. The proof below must pass.
 
+## Predict
+
+Where does the cost of a headless call show up: on the invoice later, or in the call's own output?
+
+Answer: In the call's own JSON output, as a total_cost_usd field, so you can read the number right after the call.
+
 ## Steps
 
 1. Make the lab work folder.

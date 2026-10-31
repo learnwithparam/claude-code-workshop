@@ -13,6 +13,12 @@ Answer: Every clone gets the committed file, so the rule protects the whole team
 
 Show which guardrails a cloud session inherits from this repo, and predict what happens when it tries to push.
 
+## Predict
+
+A cloud session clones this repo and runs a push. Does the push go through?
+
+Answer: No. The committed settings deny the push and travel with the clone, so a cloud session inherits the block.
+
 ## Steps
 
 1. Read the section "What a cloud session reads from the repo" in `docs/factory/f11-cloud-sessions.md`. A cloud session clones the repo, so what is committed in `.claude/` travels with it.

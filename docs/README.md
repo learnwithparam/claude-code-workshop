@@ -58,6 +58,7 @@ make progress          the lane map with a bar per lane
 make next              show the next lab without running anything
 make lab               show the current lab, run its proof, record a pass
 make lab HINT=1        reveal the next hint, one per call
+make lab GUESS="..."   save your guess to the Predict question before you run
 make lab ID=daily-03   work on any lab, in any order
 ```
 

@@ -13,6 +13,12 @@ Answer: The command output, not a sentence saying it works.
 
 Write .labs/work/specs/1/acceptance.md from your intent: two scenarios, each with a Given, a When and a Then line a test could assert. Write it before any code exists. The proof below must pass.
 
+## Predict
+
+Your acceptance scenarios exist before any code does. If a test were written from them and run now, would it pass?
+
+Answer: No, it would fail. A test that is red first proves it can catch the missing feature, and it turns green only when the work is real.
+
 ## Steps
 
 1. Read the design stage doc.

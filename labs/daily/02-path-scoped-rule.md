@@ -13,6 +13,12 @@ Answer: `AGENTS.md` is committed and shared, so the habit would land on everyone
 
 Write a rule file scoped to one folder, so Claude reads it only when it works there.
 
+## Predict
+
+A rule file lists paths in its frontmatter. When does Claude load it?
+
+Answer: Only when Claude reads a file whose path matches. Unmatched rules cost no context, which is why scoping them matters.
+
 ## Steps
 
 1. Read a real one: `ls .claude/rules` then `cat` any file in it.

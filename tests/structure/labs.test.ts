@@ -18,6 +18,11 @@ describe("labs", () => {
     for (const lane of LANES) expect(labs.filter((l) => l.lane === lane).length).toBeGreaterThan(0);
   });
 
+  it.each(labs)("$id asks a predict question and has a reasoned answer", (lab) => {
+    expect(lab.predict.question.trim().endsWith("?"), `${lab.id} question needs a ?`).toBe(true);
+    expect(lab.predict.answer.length).toBeGreaterThan(20);
+  });
+
   it("each path's lanes match the lane list in docs/labs/README.md", () => {
     for (const [id, lanes] of Object.entries(PATHS)) {
       const line = readme

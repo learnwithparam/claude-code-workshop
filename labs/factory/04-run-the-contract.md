@@ -13,6 +13,12 @@ Answer: Only what was committed. An intent with a checkable done is the contract
 
 Run the workflow contract tests and save the log to .labs/work/contract.log, then read what passed or failed. This shows the stages and their artifacts agree. The proof below must pass.
 
+## Predict
+
+The contract test walks the workflows. Does it check one chosen workflow or every one of them?
+
+Answer: Every one, because a test that walks them all catches a break in any workflow without you having to remember to look.
+
 ## Steps
 
 1. Read the workflow module doc.

@@ -13,6 +13,12 @@ Answer: Resume the saved session and carry on from where you left off.
 
 Create a second checkout of this repo at .labs/work/wt on a new branch, so two sessions can edit at once without sharing files. Keep it until the proof passes, then remove it. The proof below must pass.
 
+## Predict
+
+Can you check out the same branch in two worktrees at once?
+
+Answer: No. Git allows a branch in only one worktree, so the second worktree needs its own new branch.
+
 ## Steps
 
 1. Make the lab work folder.

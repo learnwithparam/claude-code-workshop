@@ -6,6 +6,7 @@ import {
   markDone,
   type Progress,
   revealHint,
+  saveGuess,
   saveProgress,
 } from "./progress.ts";
 import { paint, renderBrief, renderMap } from "./render.ts";
@@ -14,6 +15,7 @@ export type CliDeps = {
   labs: Lab[];
   progressPath: string;
   color: boolean;
+  guess?: string;
   proof: (command: string) => { ok: boolean; output: string };
   now: () => string;
   out: (text: string) => void;
@@ -50,6 +52,9 @@ function showMap(deps: CliDeps, progress: Progress): void {
 function finish(deps: CliDeps, progress: Progress, lab: Lab): void {
   const c = deps.color;
   deps.out(`${paint(c, "green", `PASS ${lab.id}`)} ${lab.title}`);
+  const guess = progress.guesses?.[lab.id];
+  deps.out(guess ? `Your guess: ${guess}` : "You saved no guess for this lab.");
+  deps.out(`${paint(c, "bold", "Answer")} ${lab.predict.answer}`);
   deps.out(`${paint(c, "bold", "What you just learned")} ${lab.learned}`);
   const after = markDone(progress, lab.id, deps.now());
   saveProgress(deps.progressPath, after);
@@ -87,7 +92,7 @@ export function run(args: string[], deps: CliDeps): number {
   }
   if (command !== "lab" && command !== "next") {
     deps.out(
-      "usage: make lab [PATH_ID=pro|factory] [ID=<id>] [HINT=1] | make next | make progress",
+      "usage: make lab [PATH_ID=pro|factory] [ID=<id>] [HINT=1] [GUESS=...] | make next | make progress",
     );
     return 2;
   }
@@ -114,6 +119,11 @@ export function run(args: string[], deps: CliDeps): number {
     return 0;
   }
 
+  const guess = deps.guess?.trim();
+  if (guess) {
+    progress = saveGuess(progress, lab.id, guess);
+    saveProgress(deps.progressPath, progress);
+  }
   deps.out(renderBrief(lab, progress, deps.color));
   deps.out("");
   // Run every item, so one red item never hides another.

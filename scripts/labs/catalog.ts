@@ -36,6 +36,9 @@ export const warmupSchema = z.object({
   answer: oneLine,
 });
 
+// One question and the reason behind its answer, so a learner commits to a guess before running.
+const predictSchema = z.object({ question: oneLine, answer: z.string().min(1).max(400) });
+
 const proofItem = z.object({ text: oneLine, command: z.string().min(1) });
 export type ProofItem = z.infer<typeof proofItem>;
 
@@ -48,6 +51,7 @@ export const labSchema = z.object({
   warmup: warmupSchema.optional(),
   help: z.enum(HELP),
   goal: oneLine,
+  predict: predictSchema,
   steps: z.array(stepSchema).min(1),
   // Each item says one thing that must be true and checks only that, so a red item names the missing part.
   proof: z.array(proofItem).min(1),
@@ -82,6 +86,22 @@ export function parseStep(raw: string): Step {
   const where = WINDOWS.find((w) => w === tag[1]);
   if (!where) throw new Error(`unknown window tag [${tag[1]}], use ${WINDOWS.join(", ")}`);
   return { where, text: raw.slice(tag[0].length) };
+}
+
+// "Question?" then a line "Answer: reason". A missing Answer line leaves the answer empty and fails the schema.
+function predictOf(body: string): { question: string; answer: string } {
+  const at = body.search(/^Answer:/m);
+  if (at < 0) return { question: body.trim().replace(/\s*\n\s*/g, " "), answer: "" };
+  return {
+    question: body
+      .slice(0, at)
+      .trim()
+      .replace(/\s*\n\s*/g, " "),
+    answer: body
+      .slice(at + "Answer:".length)
+      .trim()
+      .replace(/\s*\n\s*/g, " "),
+  };
 }
 
 // "1. Sentence." then an indented sh block. A missing block gives an empty command, which zod rejects.
@@ -122,6 +142,7 @@ export function parseLab(lane: string, file: string, text: string): Lab {
     warmup: warmupOf(parts.get("warm-up")),
     help: /^\*\*Help:\*\* (\w+)\s*$/m.exec(text)?.[1],
     goal: parts.get("goal"),
+    predict: predictOf(parts.get("predict") ?? ""),
     steps: listItems(parts.get("steps") ?? "").map(parseStep),
     proof: proofOf(parts.get("proof") ?? ""),
     hints: listItems(parts.get("hints") ?? ""),

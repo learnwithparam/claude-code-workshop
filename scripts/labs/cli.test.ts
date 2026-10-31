@@ -17,9 +17,10 @@ const lab = (id: string, lane: Lab["lane"]): Lab => ({
   proof: [{ text: `Item for ${id}.`, command: `proof-${id}` }],
   hints: ["first hint", "second hint"],
   learned: `Learned ${id}`,
+  predict: { question: `Question ${id}?`, answer: `Because reason ${id}.` },
 });
 
-function setup(passes: boolean, withPath = true) {
+function setup(passes: boolean, withPath = true, guess?: string) {
   const out: string[] = [];
   const dir = mkdtempSync(join(tmpdir(), "labs-cli-"));
   const deps: CliDeps = {
@@ -27,6 +28,7 @@ function setup(passes: boolean, withPath = true) {
     progressPath: join(dir, "progress.json"),
     color: false,
     proof: () => ({ ok: passes, output: "boom line\n" }),
+    guess,
     now: () => "2026-10-30",
     out: (s) => out.push(s),
     status: (s) => out.push(s),
@@ -89,6 +91,42 @@ describe("cli", () => {
     expect(s.text()).toContain("boom line");
     expect(s.text()).not.toContain("first hint");
     expect(loadProgress(s.deps.progressPath).done).toEqual({});
+  });
+
+  it("a passing run with a saved guess prints the guess, the answer, then what you learned", () => {
+    const s = setup(true, true, "it edits a file");
+    expect(run(["lab"], s.deps)).toBe(0);
+    const text = s.text();
+    expect(text).toContain("it edits a file");
+    expect(text).toContain("Because reason start-01.");
+    expect(text.indexOf("Because reason start-01.")).toBeLessThan(
+      text.indexOf("What you just learned"),
+    );
+    expect(loadProgress(s.deps.progressPath).guesses?.["start-01"]).toBe("it edits a file");
+  });
+
+  it("a failing run saves the guess but prints neither the answer nor the reason", () => {
+    const s = setup(false, true, "it edits a file");
+    expect(run(["lab"], s.deps)).toBe(1);
+    expect(s.text()).not.toContain("Because reason");
+    expect(s.text()).not.toContain("Learned start-01");
+    expect(loadProgress(s.deps.progressPath).guesses?.["start-01"]).toBe("it edits a file");
+  });
+
+  it("a later run without GUESS still shows the guess saved earlier", () => {
+    const first = setup(false, true, "my guess");
+    run(["lab"], first.deps);
+    const second = setup(true);
+    second.deps.progressPath = first.deps.progressPath;
+    run(["lab"], second.deps);
+    expect(second.text()).toContain("my guess");
+  });
+
+  it("a pass without a guess still shows the answer and says no guess was saved", () => {
+    const s = setup(true);
+    run(["lab"], s.deps);
+    expect(s.text()).toContain("Because reason start-01.");
+    expect(s.text()).toContain("no guess");
   });
 
   it("lists every item with its sentence, red and green together, and exits 1", () => {

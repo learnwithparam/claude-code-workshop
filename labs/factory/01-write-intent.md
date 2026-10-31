@@ -13,6 +13,12 @@ Answer: A diff can break it. Vague advice cannot be checked, so it is noise.
 
 Write the intent a factory run starts from, at .labs/work/specs/1/intent.md: a Problem, a Done when with two checks a command could run, and an Out of scope. The proof below must pass.
 
+## Predict
+
+What must an intent say so a later stage can check the work, beyond the problem itself?
+
+Answer: A "Done when" list of checkable bullets, because a stage can only test what was written down as a pass condition.
+
 ## Steps
 
 1. Read the intent stage doc to see what a good one holds.

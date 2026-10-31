@@ -13,6 +13,12 @@ Answer: Exit code 2 blocks the action every time, even when the model forgets th
 
 Write a read-only reviewer subagent at .labs/work/agents/reviewer.md: front matter with name, description, tools limited to Read, Grep and Glob, and model, then a short prompt. The proof below must pass.
 
+## Predict
+
+A reviewer subagent lists only Read, Grep and Glob as tools. Can it quietly fix a bug it finds?
+
+Answer: No. Without Write or Edit it has no way to change a file, so its report is the only thing it can produce.
+
 ## Steps
 
 1. Read a real subagent in this repo.
