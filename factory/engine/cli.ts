@@ -15,12 +15,7 @@ const RUNS = ".factory/runs";
 const gh = (...a: string[]) => execFileSync("gh", a, { encoding: "utf8" });
 
 // Runs one issue through a named workflow on the current checkout and saves metrics.json.
-export async function runIssue(
-  n: number,
-  name: string,
-  auth: Auth,
-  o: { retro?: boolean } = {},
-) {
+export async function runIssue(n: number, name: string, auth: Auth, o: { retro?: boolean } = {}) {
   ghPreflight();
   const base = execFileSync("git", ["merge-base", "HEAD", "origin/main"], {
     encoding: "utf8",

@@ -34,7 +34,6 @@ export type Result = {
   log: string[];
 };
 
-
 // The tier comes from the paths changed so far, and the tier sets how many people must approve.
 async function gateMet(host: Host, n: number, step: Step, log?: string[]): Promise<boolean> {
   const tier = classify(await host.changedFiles());
