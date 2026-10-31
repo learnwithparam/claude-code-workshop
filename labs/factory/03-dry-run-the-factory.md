@@ -16,7 +16,9 @@ Run the factory in dry-run mode and read which model, turn cap and budget each s
 ## Proof
 
 ```sh
-grep -q 'stages that would run' .labs/work/dry-run.txt && grep -q 'review loop' .labs/work/dry-run.txt
+test -s .labs/work/dry-run.txt || exit 1
+fresh=$(make factory ISSUE=1 FLAGS=--dry-run 2>/dev/null | grep -v '^npx tsx')
+test -n "$fresh" && test "$(grep -v '^npx tsx' .labs/work/dry-run.txt)" = "$fresh"
 ```
 
 ## Hints

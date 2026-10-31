@@ -15,7 +15,7 @@ Write one private preference into `CLAUDE.local.md` so Claude follows it in this
 ## Proof
 
 ```sh
-grep -q 'lab-note' CLAUDE.local.md && grep -q 'CLAUDE.local.md' .gitignore
+grep -Eq '^- lab-note: [^ ]+ [^ ]+ [^ ]+' CLAUDE.local.md && git check-ignore -q CLAUDE.local.md
 ```
 
 ## Hints

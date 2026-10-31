@@ -16,7 +16,10 @@ Write a rule file scoped to one folder, so Claude reads it only when it works th
 ## Proof
 
 ```sh
-head -1 .labs/work/rules/api-errors.md | grep -q '^---$' && grep -q '^paths:' .labs/work/rules/api-errors.md && test "$(grep -c '^- ' .labs/work/rules/api-errors.md)" -ge 2
+f=.labs/work/rules/api-errors.md
+head -1 $f | grep -q '^---$' && grep -q '^paths:' $f && test "$(grep -c '^- ' $f)" -ge 2 || exit 1
+for p in $(sed -n 's/^  - //p' $f | sed 's|/[*].*||'); do test -d "$p" && exit 0; done
+exit 1
 ```
 
 ## Hints

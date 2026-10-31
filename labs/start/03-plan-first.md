@@ -15,12 +15,15 @@ Get a written plan for a small change from Claude without letting it edit a sing
 ## Proof
 
 ```sh
-grep -qi 'verify' .labs/work/plan.md && test "$(grep -c . .labs/work/plan.md)" -ge 5
+f=.labs/work/plan.md
+grep -qi 'verify' $f && test "$(grep -c . $f)" -ge 5 || exit 1
+for p in $(grep -Eo 'shared/[A-Za-z0-9_./-]+' $f | sed 's/[.]*$//'); do test -f "$p" && exit 0; done
+exit 1
 ```
 
 ## Hints
 
-1. The proof wants at least five lines in `.labs/work/plan.md` that mention how to verify.
+1. The proof wants at least five lines in `.labs/work/plan.md` that mention how to verify and name a real file under `shared/`.
 2. Plan mode is read-only. Claude can look but not write.
 3. Your prompt must ask for verification, or the plan may leave it out.
 

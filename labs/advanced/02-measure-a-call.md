@@ -16,13 +16,13 @@ Run one headless call with a turn cap and read its cost from the JSON result.
 ## Proof
 
 ```sh
-grep -q 'total_cost_usd' .labs/work/call.json && grep -Eq '^[0-9]+(\.[0-9]+)?$' .labs/work/cost.txt
+node -e "const j=require('./.labs/work/call.json'); const c=require('fs').readFileSync('.labs/work/cost.txt','utf8').trim(); process.exit(j.type==='result' && typeof j.total_cost_usd==='number' && /^[0-9.e-]+$/.test(c) && Number(c)===j.total_cost_usd ? 0 : 1)"
 ```
 
 ## Hints
 
 1. Two files: `.labs/work/call.json` from the call and `.labs/work/cost.txt` with one number.
-2. `echo 0.012 > .labs/work/cost.txt` shows the shape. Use your own number.
+2. The proof compares `cost.txt` with `total_cost_usd` in `call.json`, so copy the number from step 3. Do not type your own.
 3. `--max-turns` stops the loop, so the cost has a ceiling.
 
 ## What you just learned

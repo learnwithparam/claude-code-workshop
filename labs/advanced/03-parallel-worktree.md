@@ -16,7 +16,11 @@ Create a second checkout of the repo so two Claude sessions can edit at once wit
 ## Proof
 
 ```sh
-test -f .labs/work/wt/.git && grep -q 'gitdir' .labs/work/wt/.git
+w=.labs/work/wt
+test -f $w/.git && grep -q '^gitdir: ' $w/.git || exit 1
+common=$(cd "$(git rev-parse --git-common-dir)" && pwd -P)
+case "$(sed 's/^gitdir: //' $w/.git)" in "$common"/worktrees/*) ;; *) exit 1 ;; esac
+test "$(git -C $w branch --show-current)" = lab/parallel
 ```
 
 ## Hints

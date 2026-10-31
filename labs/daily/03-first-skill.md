@@ -16,7 +16,9 @@ Write a skill that Claude loads by its description, so you stop pasting the same
 ## Proof
 
 ```sh
-f=.labs/work/skills/commit-message/SKILL.md; grep -q '^name: commit-message' $f && grep -q '^description: Use when' $f && test "$(grep -c . $f)" -ge 8
+f=.labs/work/skills/commit-message/SKILL.md
+grep -q '^name: commit-message' $f && grep -Eq '^description: Use when [^ ]+ [^ ]+ [^ ]+' $f || exit 1
+test "$(awk 'NF>=3' $f | wc -l)" -ge 4
 ```
 
 ## Hints

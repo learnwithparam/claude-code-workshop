@@ -16,7 +16,10 @@ Run the workflow contract tests and keep the log, so you know the stages and the
 ## Proof
 
 ```sh
-grep -q 'passed' .labs/work/contract.log && ! grep -q 'failed' .labs/work/contract.log
+f=.labs/work/contract.log
+grep -Eq 'Tests +[0-9]+ passed' $f && ! grep -q 'failed' $f || exit 1
+for t in $(grep -Eo 'tests/contract/[A-Za-z0-9_./-]+[.]test[.]ts' $f); do test -f "$t" && exit 0; done
+exit 1
 ```
 
 ## Hints

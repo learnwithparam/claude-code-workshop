@@ -17,8 +17,12 @@ Write a hook that stops Claude from editing `.env`, and prove it by feeding it b
 
 ```sh
 h=.labs/work/hooks/block-env.mjs
-echo '{"tool_input":{"file_path":".env"}}' | node $h >/dev/null 2>&1; test $? -eq 2 || exit 1
-echo '{"tool_input":{"file_path":"a.ts"}}' | node $h >/dev/null 2>&1
+try() { echo "{\"tool_input\":{\"file_path\":\"$1\"}}" | node $h >/dev/null 2>.labs/work/err.txt; }
+try .env; test $? -eq 2 || exit 1
+test -s .labs/work/err.txt || exit 1
+try /repo/app/.env; test $? -eq 2 || exit 1
+try .env.example || exit 1
+try a.ts
 ```
 
 ## Hints

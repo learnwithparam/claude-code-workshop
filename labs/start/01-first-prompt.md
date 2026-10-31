@@ -16,12 +16,15 @@ Run Claude Code once, headless, and keep its answer in a file you can read.
 ## Proof
 
 ```sh
-test "$(grep -c . .labs/work/repo-tour.md)" -ge 3
+f=.labs/work/repo-tour.md
+test "$(grep -c . $f)" -ge 3 || exit 1
+for d in $(ls -d */ | tr -d / | grep -v node_modules); do grep -qw -- "$d" $f && exit 0; done
+exit 1
 ```
 
 ## Hints
 
-1. The proof reads `.labs/work/repo-tour.md`. Does the file exist?
+1. The proof reads `.labs/work/repo-tour.md`. Does the file exist, and does it name a real top-level folder?
 2. `-p` prints one answer and exits, so `>` can capture it.
 3. If `claude` is not found, install it from the official docs, then run `make doctor` again.
 

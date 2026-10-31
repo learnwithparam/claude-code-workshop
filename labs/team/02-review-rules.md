@@ -16,7 +16,10 @@ Write a short `REVIEW.md` that tells a reviewer what to flag, each rule somethin
 ## Proof
 
 ```sh
-test "$(grep -c '^- Flag' .labs/work/REVIEW.md)" -ge 3 && head -1 .labs/work/REVIEW.md | grep -q '^# '
+f=.labs/work/REVIEW.md
+head -1 $f | grep -q '^# ' || exit 1
+n=$(grep '^- Flag' $f | awk 'NF>=6' | sort -u | wc -l)
+test "$n" -ge 3
 ```
 
 ## Hints
