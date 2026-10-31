@@ -15,11 +15,12 @@ make next              show the next lab without running anything
 make lab               show the current lab, run its proof, record a pass
 make lab HINT=1        reveal the next hint, one per call
 make lab ID=daily-03   work on any lab, in any order
+make lab WATCH=1       rerun the proof each time .labs/work/ changes; h = next hint, q = quit
 ```
 
 Colour turns off when `NO_COLOR` is set or output is not a terminal. Progress sits in `.labs/progress.json`, which git ignores. Your work for each lab goes under `.labs/work/`, so a lab never changes tracked files.
 
-Run Claude Code in one terminal and `make lab` in a second one beside it.
+Run Claude Code in one terminal and `make lab WATCH=1` in a second one beside it. The proof reruns as you save, and on a pass it records the lab and exits. Without a terminal (CI, a pipe) `WATCH=1` runs the proof once and says so.
 
 ## The path
 
