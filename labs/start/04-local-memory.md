@@ -23,7 +23,7 @@ Write one private preference into `CLAUDE.local.md` so Claude follows it in this
 2. CLAUDE.local.md is listed in .gitignore.
 
    ```sh
-   grep -q 'CLAUDE.local.md' .gitignore
+   test -f CLAUDE.local.md && grep -q 'CLAUDE.local.md' .gitignore
    ```
 3. The lab-note has at least three words, and git ignores CLAUDE.local.md.
 

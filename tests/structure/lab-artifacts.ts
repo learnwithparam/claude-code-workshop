@@ -47,6 +47,7 @@ export const SOLUTIONS: Record<string, string> = {
         "1. Read the staged diff with git diff --staged.",
         "2. Write a subject under 60 characters.",
         "3. Say why in the body, not what.",
+        "4. Keep the whole message to one screen.",
       ),
     ),
   ),
