@@ -33,6 +33,8 @@ Colour turns off when `NO_COLOR` is set or output is not a terminal. Progress si
 
 Run Claude Code in one terminal and `make lab WATCH=1` in a second one beside it. The proof reruns as you save, and on a pass it records the lab and exits. Without a terminal (CI, a pipe) `WATCH=1` runs the proof once and says so.
 
+Each step says where to type it: "in your shell", "in Claude Code" or "in your editor". A step with no tag is a shell step. In a lab file the tag opens the step as `[shell]`, `[claude]` or `[editor]`.
+
 ## The path
 
 | Lab           | Lane     | Goal                                          | Pairs with                                             |
