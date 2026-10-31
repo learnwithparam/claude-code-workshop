@@ -16,11 +16,16 @@ Write a hook that stops Claude from editing `.env`, and prove it by feeding it b
 
 ## Proof
 
-```sh
-h=.labs/work/hooks/block-env.mjs
-echo '{"tool_input":{"file_path":".env"}}' | node $h >/dev/null 2>&1; test $? -eq 2 || exit 1
-echo '{"tool_input":{"file_path":"a.ts"}}' | node $h >/dev/null 2>&1
-```
+1. The hook exits 2 when the file is the secrets file.
+
+   ```sh
+   echo '{"tool_input":{"file_path":".env"}}' | node .labs/work/hooks/block-env.mjs >/dev/null 2>&1; test $? -eq 2
+   ```
+2. The hook exits 0 when the file is a.ts.
+
+   ```sh
+   echo '{"tool_input":{"file_path":"a.ts"}}' | node .labs/work/hooks/block-env.mjs >/dev/null 2>&1
+   ```
 
 ## Hints
 

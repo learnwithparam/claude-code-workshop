@@ -16,9 +16,16 @@ Make one headless Claude call capped at two turns, save its JSON result to .labs
 
 ## Proof
 
-```sh
-grep -q 'total_cost_usd' .labs/work/call.json && grep -Eq '^[0-9]+(\.[0-9]+)?$' .labs/work/cost.txt
-```
+1. call.json records total_cost_usd.
+
+   ```sh
+   grep -q 'total_cost_usd' .labs/work/call.json
+   ```
+2. cost.txt holds one plain number.
+
+   ```sh
+   grep -Eq '^[0-9]+(\.[0-9]+)?$' .labs/work/cost.txt
+   ```
 
 ## Hints
 

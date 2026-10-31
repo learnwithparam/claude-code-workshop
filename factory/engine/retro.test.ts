@@ -97,7 +97,10 @@ describe("retro", () => {
       byAgent: (n) => (n === "planner" ? { text: "PROPOSAL: none" } : undefined),
     });
     host.exec = async () => ({ code: 0, output: "SCORE 1" });
-    expect(await retro(host, 1, EVAL, async () => {})).toEqual({ kind: "none" });
+    expect(await retro(host, 1, EVAL, async () => {})).toEqual({
+      kind: "none",
+      before: expect.any(Number),
+    });
   });
   it("treats a missing SCORE line as a broken eval", async () => {
     const { host } = fakeHost();
