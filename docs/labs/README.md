@@ -2,10 +2,10 @@
 
 The levels explain. The labs make you do it. Take them in order, one command at a time. Each lab has one goal, steps, a proof that is red until you finish, hints that appear one at a time, and a line on what you just learned.
 
-Two workshops use the same path.
+Two workshops share this folder. Pick yours once with `make lab PATH_ID=pro` or `make lab PATH_ID=factory`. Until you pick, `make lab` only asks. After that, `make lab`, `make next` and `make progress` follow your workshop only.
 
-- **Claude Code, beginner to pro:** the `start`, `daily`, `team` and `advanced` lanes.
-- **Software Factory:** the `factory` lane, after `start` and `daily`.
+- **Claude Code, beginner to pro** (`PATH_ID=pro`): the `start`, `daily`, `team` and `advanced` lanes.
+- **Software Factory** (`PATH_ID=factory`): the `start`, `daily` and `factory` lanes.
 
 ## Help fades as you go
 
@@ -20,7 +20,8 @@ Help never goes down from one lane to the next, and every `advanced` lab is goal
 ## Commands
 
 ```
-make progress          the lane map with a bar per lane
+make lab PATH_ID=pro   choose your workshop (pro or factory), then work on it
+make progress          your workshop's lane map with a bar per lane
 make next              show the next lab without running anything
 make lab               show the current lab, run its proof, record a pass
 make lab HINT=1        reveal the next hint, one per call
