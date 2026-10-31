@@ -1,0 +1,22 @@
+name: Lab feedback
+description: A lab step did not work, was unclear, or named something that is not there.
+labels: [lab-feedback]
+body:
+  - type: input
+    id: lab
+    attributes:
+      label: Lab id
+      description: For example start-01. The link in the lab brief fills this in.
+    validations:
+      required: true
+  - type: textarea
+    id: stuck
+    attributes:
+      label: Which step, and what happened
+      description: Paste the command you ran and what you saw.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected

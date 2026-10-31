@@ -61,6 +61,10 @@ function body(lab: Lab, color: boolean): string[] {
   return [paint(color, "bold", "Steps"), ...lab.steps.map((s, i) => `${i + 1}. ${show(s)}`), ""];
 }
 
+// The form's `lab` field is prefilled from the query string, so a report names its lab.
+export const feedbackUrl = (id: string): string =>
+  `https://github.com/learnwithparam/claude-code-workshop/issues/new?template=lab-feedback.yml&lab=${id}`;
+
 export function renderBrief(lab: Lab, progress: Progress, color: boolean): string {
   const shown = progress.hints[lab.id] ?? 0;
   const lines = [
@@ -75,6 +79,7 @@ export function renderBrief(lab: Lab, progress: Progress, color: boolean): strin
       "dim",
       `Hints: ${shown} of ${lab.hints.length} revealed. Reveal the next with: make lab HINT=1`,
     ),
+    paint(color, "dim", `Stuck? ${feedbackUrl(lab.id)}`),
   ];
   for (let i = 0; i < shown; i++)
     lines.push(`Hint ${i + 1}: ${commands(lab.hints[i] ?? "", color)}`);
