@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { parse } from "yaml";
 import { z } from "zod";
+import { authMode } from "./auth.ts";
 
 const argv = z.array(z.string()).min(1);
 
@@ -18,6 +19,11 @@ export const portableSchema = z.object({
   }),
   paths: z.object({ contract: z.string(), holdout: z.string(), source: z.string() }),
   keySource: z.object({ env: z.string(), file: z.string() }),
+  auth: authMode,
+  subscriptionCap: z.object({
+    calls: z.number().int().positive(),
+    tokens: z.number().int().positive(),
+  }),
   protected: z.array(z.string()),
   planBrief: z.string().min(1),
 });

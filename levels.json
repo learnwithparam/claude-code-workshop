@@ -213,6 +213,7 @@
     "docs/recordings/workflows.gif",
     "stryker.config.json",
     "stryker.vitest.config.ts",
+    "docs/factory/auth-modes.md",
     "docs/factory/f0-1-anatomy.md",
     "docs/factory/f0-overview.md",
     "docs/factory/f1-plan.md",
