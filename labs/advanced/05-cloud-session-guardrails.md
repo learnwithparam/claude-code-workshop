@@ -1,6 +1,7 @@
 # Check the guardrails a cloud session inherits
 
 **Pairs with:** `docs/factory/f11-cloud-sessions.md`
+**Help:** goal
 
 ## Goal
 
@@ -29,7 +30,7 @@ test "$(grep -c . $r)" -ge 2
 
 ## Hints
 
-1. The command prints two things: the deny list, then the names of the hooks. Redirect both into the file with `>`.
+1. The command prints two things: the deny list, then the names of the hooks. Redirect both into the file with `>`. The commands are `mkdir -p .labs/work` and `node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' > .labs/work/cloud-guards.txt`. For the optional step, run `claude --cloud` and ask it to run `git push`.
 2. The proof compares your file with what `.claude/settings.json` holds right now, so save it again after any change to that file.
 3. `push-route.md` needs a route and a reason on separate lines, for example: "Keep the deny, a person ships." then "A push is the step that needs a human."
 
