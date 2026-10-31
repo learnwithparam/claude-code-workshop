@@ -10,16 +10,18 @@ Say in one page what the factory does, which parts are code and which are a mode
 
 A ticket moves through stages. Each stage commits one artifact under `specs/<n>/` and the next stage reads only what was committed, so the commit history is the audit trail.
 
-| Stage    | Artifact                          | What decides "next"                    |
-| -------- | --------------------------------- | -------------------------------------- |
-| Plan     | `intent.md`, `spec.md`, `plan.md` | a human gate, and `plan-drift` later   |
-| Build    | tests, then the diff, `lock.json` | `red`, `lock`, `green`, `acceptance`   |
-| Test     | more tests, mutants               | `mutation`, `properties`, `holdout`    |
-| Review   | `review.json`                     | lenses, then verifiers that vote       |
-| Deploy   | the pull request, CI              | `ci`, risk tier approvals              |
-| Maintain | `incident.md`, a new `intent.md`  | sigma bands from `.factory/bands.yaml` |
+| Stage    | Artifact                          | What decides "next"                      |
+| -------- | --------------------------------- | ---------------------------------------- |
+| Plan     | `intent.md`, `spec.md`, `plan.md` | a human gate, and `plan-drift` later     |
+| Build    | tests, then the diff, `lock.json` | `red`, `lock`, `green`, `acceptance`     |
+| Test     | more tests, mutants               | `mutation`, `properties`, `holdout`      |
+| Review   | `review.json`                     | lenses, then verifiers that vote         |
+| Deploy   | the pull request, CI              | `ci`; `deploy.ts` is tests only          |
+| Maintain | `incident.md`, a new `intent.md`  | `bands.ts` and `retro.ts` are tests only |
 
-The names come from `ARTIFACTS` in `factory/engine/artifacts.ts` and `CHECK_NAMES` in `factory/engine/workflow.ts`. A workflow is a YAML file. `factory/engine/interpret.ts` runs its steps in order, repeats a step while its loop checks fail up to a cap, stops early as `needs-human` with the reason "test contradicts ticket" when two rounds in a row fail the same check with the same evidence (`sameFailure` on the loop), and writes `run.log` when the run finishes or stops at a gate or a cap.
+The large-feature workflow, `feature-sdd`, adds four Spec Kit stages to the plan row: `constitution.md` before the spec, `clarify.md` after it, then `tasks.md` and `analyze.md` after the plan. F2 covers them.
+
+The names come from `ARTIFACTS` in `factory/engine/artifacts.ts` and `CHECK_NAMES` in `factory/engine/workflow.ts`. A workflow is a YAML file. `factory/engine/interpret.ts` runs its steps in order, repeats a step while its loop checks fail up to a cap, stops early as `needs-human` with the reason "test contradicts ticket" when two rounds in a row fail the same check with the same evidence (`sameFailure` on the loop), and writes `run.log` and `cost.json` under `specs/<n>/` when the run finishes or stops at a gate or a cap.
 
 ## What is code and what is a model
 
@@ -28,24 +30,40 @@ A model writes `intent.md`, `spec.md`, `plan.md`, the tests and the fix. Code de
 - `red` runs the new tests on the base commit and fails if they pass.
 - `lock` hashes every test file in state the agent cannot write.
 - `plan-drift` fails a diff that touches a file `plan.md` does not list.
-- `review.ts` keeps a finding only when at least two of its verifiers vote for it.
-- `risk.ts` turns changed paths into a tier, and an agent's approval never counts.
-- `bands.ts` turns a metric breach into an action with no model involved.
+- `review.ts` keeps a finding only when at least two of its three verifiers vote for it. The `review` step of a real run calls it.
+- `risk.ts` turns changed paths into a tier, and a human gate needs that tier's approvals: none for low, one for medium, two for high. An agent's approval never counts.
+- `interpret.ts` stops a run once its spend reaches the configured share of the cap in `.factory/config.json`, and hands each call the money that is left.
+- `bands.ts` turns a metric breach into an action with no model involved. Only tests call it so far.
 
 The rule behind the list: a gate reads an exit code or a hash, never the model's word that it is done.
+
+## What a real run does today
+
+`npx tsx factory/engine/main.ts <issue> --workflow=<name>` runs these, each pinned by a test in `factory/engine`:
+
+- It reads `.factory/config.yaml` once, before the first agent, so the commands the gate runs cannot be edited mid-run (F0.1).
+- Each step gets a model from `.factory/config.json`, and `run.log` and `cost.json` record the model and the cost of every call (F12).
+- The run stops as `needs-human` with the reason `spend cap` at the configured share of `spend.capUsd` (F13).
+- A `review` step runs its lenses and the voting verifiers, and a builder fixes what survives, up to three rounds (F5).
+- A `gate: human` step computes the risk tier from the files changed so far and waits for that tier's approvals (F1).
+- `feature-sdd` runs the constitution, clarify, tasks and analyze stages (F2).
+
+Not wired into a real run: deploy (`deploy.ts`), the sigma bands (`bands.ts`) and the retro (`retro.ts`). Tests exercise them, and a separate change is wiring them. F6 and F7 describe them as they stand.
+
+After the stage modules come F8 (workflows), F9 (the capstone), F10 (assignments), F11 (cloud sessions), F12 (model routing) and F13 (spend and safety).
 
 ## Public factories, compared
 
 The workshop is built from published descriptions. This table says where each idea lands here and where this repo does less.
 
-| Idea     | Anthropic AI-native SDLC playbook and review post                                | OpenAI software factory (Pragmatic Engineer write-up)                    | This repo                                                                         |
-| -------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| Start    | an `intent.md` per stage, committed                                              | an outcome, then context                                                 | `intent.md` from the `intent` step, or from a sigma breach                        |
-| Verify   | tests first, hooks that block test edits during a fix, evals gate prompt changes | CI is watched until it is green                                          | `red` and `lock`, `.claude/hooks/pretooluse-test-lock.mjs`, the `ci` check        |
-| Review   | layered review, parallel hunters, agents that vote on each finding               | specialist reviewers                                                     | `factory/engine/review.ts`, `REVIEW.md`                                           |
-| Deploy   | autonomy tiered by environment, hooks as approval gates                          | an agent assists the deploy after a human approves                       | `factory/engine/deploy.ts`: production refuses without the tier's human approvals |
-| Risk     | the tier comes from the change, not the author                                   | risk classification picks the path                                       | `classify` in `factory/engine/risk.ts`                                            |
-| Maintain | sigma bands turn a breach into a new intent                                      | observe, feed regressions back, an incident bot that acts only when told | `.factory/bands.yaml`, `detect` and `actionFor` in `factory/engine/bands.ts`      |
+| Idea     | Anthropic AI-native SDLC playbook and review post                                | OpenAI software factory (Pragmatic Engineer write-up)                    | This repo                                                                                |
+| -------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| Start    | an `intent.md` per stage, committed                                              | an outcome, then context                                                 | `intent.md` from the `intent` step, or from a sigma breach                               |
+| Verify   | tests first, hooks that block test edits during a fix, evals gate prompt changes | CI is watched until it is green                                          | `red` and `lock`, `.claude/hooks/pretooluse-test-lock.mjs`, the `ci` check               |
+| Review   | layered review, parallel hunters, agents that vote on each finding               | specialist reviewers                                                     | `factory/engine/review.ts`, `REVIEW.md`                                                  |
+| Deploy   | autonomy tiered by environment, hooks as approval gates                          | an agent assists the deploy after a human approves                       | `factory/engine/deploy.ts`: production refuses without approvals, tests only             |
+| Risk     | the tier comes from the change, not the author                                   | risk classification picks the path                                       | `classify` in `factory/engine/risk.ts`, applied at every human gate                      |
+| Maintain | sigma bands turn a breach into a new intent                                      | observe, feed regressions back, an incident bot that acts only when told | `.factory/bands.yaml`, `detect` and `actionFor` in `factory/engine/bands.ts`, tests only |
 
 This repo has no deploy target of its own: `release` calls `make deploy ENV=...`, and the Makefile here does not define that target. Treat F6 as a pattern to copy, not a pipeline that ships this app.
 
@@ -57,11 +75,11 @@ Anthropic also publishes a Founder's playbook. Its page holds only a table of co
 
 1. Read the comment line above `name:` in `.factory/workflows/bug-tdd.yaml` and `.factory/workflows/feature-sdd.yaml`. Each names its method and source.
 2. List the workflows: `ls .factory/workflows`.
-3. Print the stages the legacy runner would run, with no spend: `make factory ISSUE=1 FLAGS=--dry-run`. It reads `.factory/config.json` and prints model, turns and budget per stage.
+3. Print the stages the older runner would run, with no spend: `make factory ISSUE=1 FLAGS=--dry-run`. It reads `.factory/config.json` and prints model, turns and budget per stage.
 4. Run the engine's offline tests, which run every workflow against a fake host: `npx vitest run factory/engine`.
 5. With `gh` signed in, `npx tsx factory/engine/main.ts --watch` lists issues labelled `factory:ready`. `npx tsx factory/engine/main.ts --report` rolls up saved `metrics.json` files and needs a `.factory/runs` folder from an earlier run.
 
-A real run is `npx tsx factory/engine/main.ts <issue> --workflow=<name>`. It needs `gh` and the API key file the api workspace holds, and it spends tokens, so read F1 first.
+A real run needs `gh` and the key source named in `.factory/config.yaml`, and it spends tokens up to the cap in `.factory/config.json`, so read F1 first.
 
 ## Proof that bites
 
@@ -82,5 +100,5 @@ Expect `risk > is high for a CI workflow and low for docs` to fail with `expecte
 ## Discussion
 
 1. Which stage in your team's flow commits nothing the next stage can read, and what would you commit?
-2. The OpenAI description has an agent assist the deploy after a human approves. Where in `deploy.ts` is the approval, and what would you add before you let an agent run `make deploy`?
+2. The OpenAI description has an agent assist the deploy after a human approves. `deploy.ts` holds the approval check but no run calls it yet. Where would you call it, and what would you add before you let an agent run `make deploy`?
 3. Which gate here would you most want to turn off under deadline, and what does its failing test say you would lose?
