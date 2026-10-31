@@ -2,6 +2,18 @@
 
 **Stage:** all of them. **Layer:** execution, moved off your machine. **Prerequisite:** F3 (the builder works in its own worktree) and F7 (the factory runs on a schedule you do not watch).
 
+## Story
+
+**The ticket.** Issue 35, whose CI stage ran in a sandbox.
+
+**Without the layer.** `specs/35/ci.md`: "`gh` is not authenticated in this sandbox". That is by design. Agents run with an allowlisted environment and an isolated home, so they never hold a login (`docs/factory/harness-retro.md`, item 3).
+
+**What the layer did.** The deny on `git push` in `.claude/settings.json` makes the same choice for cloud sessions. The clone carries it, the agent cannot push, and the push stays a person's step.
+
+![A cloud session's git push is refused by the cloned deny rule, with the three ways a team ships instead](img/cloud-push.svg)
+
+_Notice:_ every way out has a person in it: shipping the PR, pushing from a checkout, or writing the hook.
+
 ## Goal
 
 Start several Claude Code cloud sessions on one repo, keep keys out of every prompt, understand why a cloud session cannot `git push` here, hand the push to a person or a gated step, and read what the sessions cost.

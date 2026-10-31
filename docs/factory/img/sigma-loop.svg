@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 328" width="960" height="328" role="img" aria-labelledby="t d">
+  <title id="t">The sigma bands maintain loop</title>
+  <desc id="d">Three metrics in bands.yaml feed detect, which computes how many standard deviations the latest value is from the mean of the last 14. One sigma logs, two sigma starts a read-only diagnosis, three sigma writes a new intent.md through intentFor, which starts the incident workflow, and the next values feed the band again. The feed and the loop are dashed because only tests call detect today.</desc>
+  <style>
+    text { font-family: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #171717; }
+    .mono { font-family: "Geist Mono", ui-monospace, Menlo, Consolas, monospace; }
+    .h { font-size: 16px; font-weight: 600; }
+    .s { font-size: 14px; font-weight: 600; }
+    .m { fill: #525252; }
+    .card { fill: #ffffff; stroke: #d4d4d4; }
+    .ln { stroke: #a3a3a3; stroke-width: 1.5; fill: none; }
+    .ah { fill: #a3a3a3; }
+    .model { fill: #e8f1fc; stroke: #0062d1; }
+    .code { fill: #e7f5ea; stroke: #107d32; }
+    .human { fill: #fdf1e3; stroke: #a35200; }
+    .file { fill: #f3ebfc; stroke: #7d2fd0; }
+    .fail { fill: #fdecec; stroke: #c4171c; }
+    .soon { stroke-dasharray: 5 4; }
+    @media (prefers-color-scheme: dark) {
+      text { fill: #ededed; }
+      .m { fill: #a1a1a1; }
+      .card { fill: #0a0a0a; stroke: #3f3f3f; }
+      .ln { stroke: #737373; }
+      .ah { fill: #737373; }
+      .model { fill: #0d2340; stroke: #52a8ff; }
+      .code { fill: #0c2a16; stroke: #3fb950; }
+      .human { fill: #33220a; stroke: #f5a623; }
+      .file { fill: #261540; stroke: #bf7af0; }
+      .fail { fill: #3a0e10; stroke: #ff6166; }
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="ah" d="M0 0L10 5L0 10z"/>
+    </marker>
+  </defs>
+  <rect class="card" x="0.5" y="0.5" width="959" height="327" rx="12"/>
+  <text class="h" x="24" y="34">Sigma bands: a metric that leaves its band becomes a ticket</text>
+  <text class="m" x="24" y="54">bands.ts is plain arithmetic: mean and standard deviation over the last 14 values. No model decides a breach.</text>
+  <rect class="file" x="24" y="80" width="220" height="96" rx="8"/>
+  <text class="mono" x="40" y="102">.factory/bands.yaml</text>
+  <text class="m" x="40" y="124">ci-failure-rate, up is bad</text>
+  <text class="m" x="40" y="142">pr-cycle-time-hours, up is bad</text>
+  <text class="m" x="40" y="160">eval-pass-rate, down is bad</text>
+  <path class="ln soon" d="M244 128H290" marker-end="url(#a)"/>
+  <text class="m" x="250" y="120">feed</text>
+  <rect class="code soon" x="292" y="96" width="170" height="64" rx="8"/>
+  <text class="mono" x="377" y="122" text-anchor="middle">detect()</text>
+  <text class="m" x="377" y="142" text-anchor="middle">z from the window</text>
+  <path class="ln" d="M462 128H500" marker-end="url(#a)"/>
+  <rect class="code" x="502" y="76" width="280" height="32" rx="8"/>
+  <text class="s" x="516" y="97">1 sigma</text>
+  <text x="586" y="97">log it</text>
+  <rect class="model" x="502" y="116" width="280" height="32" rx="8"/>
+  <text class="s" x="516" y="137">2 sigma</text>
+  <text x="586" y="137">diagnose, read-only agent</text>
+  <rect class="file" x="502" y="156" width="280" height="32" rx="8"/>
+  <text class="s" x="516" y="177">3 sigma</text>
+  <text x="586" y="177">intentFor writes intent.md</text>
+  <path class="ln" d="M782 172H820" marker-end="url(#a)"/>
+  <rect class="model" x="822" y="140" width="114" height="64" rx="8"/>
+  <text class="mono" x="879" y="166" text-anchor="middle">incident</text>
+  <text class="m" x="879" y="186" text-anchor="middle">workflow</text>
+  <path class="ln soon" d="M879 204V250H377V162" marker-end="url(#a)"/>
+  <text class="m" x="400" y="240">the incident becomes a failing test, the fix ships, the next values feed the band again</text>
+  <rect class="card soon" x="24" y="268" width="912" height="40" rx="8"/>
+  <text x="40" y="293">Tests only today: nothing calls detect() on a schedule, and nothing feeds it these metrics.</text>
+</svg>

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 284" width="960" height="284" role="img" aria-labelledby="t d">
+  <title id="t">The run spend cap</title>
+  <desc id="d">A bar from zero to the ten dollar cap. Agent calls run while the total is under seven dollars fifty, and each call gets a ceiling of the cap minus what is spent. At seven fifty the next call is not run, run.log records the stop and the outcome is needs-human with reason spend cap. Review lens hunts and verifier ballots are drawn dashed because they are not added to the total today.</desc>
+  <style>
+    text { font-family: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #171717; }
+    .mono { font-family: "Geist Mono", ui-monospace, Menlo, Consolas, monospace; }
+    .h { font-size: 16px; font-weight: 600; }
+    .s { font-size: 14px; font-weight: 600; }
+    .m { fill: #525252; }
+    .card { fill: #ffffff; stroke: #d4d4d4; }
+    .ln { stroke: #a3a3a3; stroke-width: 1.5; fill: none; }
+    .ah { fill: #a3a3a3; }
+    .model { fill: #e8f1fc; stroke: #0062d1; }
+    .code { fill: #e7f5ea; stroke: #107d32; }
+    .human { fill: #fdf1e3; stroke: #a35200; }
+    .file { fill: #f3ebfc; stroke: #7d2fd0; }
+    .fail { fill: #fdecec; stroke: #c4171c; }
+    .soon { stroke-dasharray: 5 4; }
+    @media (prefers-color-scheme: dark) {
+      text { fill: #ededed; }
+      .m { fill: #a1a1a1; }
+      .card { fill: #0a0a0a; stroke: #3f3f3f; }
+      .ln { stroke: #737373; }
+      .ah { fill: #737373; }
+      .model { fill: #0d2340; stroke: #52a8ff; }
+      .code { fill: #0c2a16; stroke: #3fb950; }
+      .human { fill: #33220a; stroke: #f5a623; }
+      .file { fill: #261540; stroke: #bf7af0; }
+      .fail { fill: #3a0e10; stroke: #ff6166; }
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="ah" d="M0 0L10 5L0 10z"/>
+    </marker>
+  </defs>
+  <rect class="card" x="0.5" y="0.5" width="959" height="283" rx="12"/>
+  <text class="h" x="24" y="34">The run spend cap</text>
+  <text class="m" x="24" y="54">runStep in interpret.ts checks the run total before every agent call. config.json: capUsd 10, stopAt 0.75.</text>
+  <rect class="card" x="60" y="100" width="840" height="40" rx="6"/>
+  <rect class="code" x="60" y="100" width="630" height="40" rx="6"/>
+  <rect class="fail" x="690" y="100" width="210" height="40" rx="6"/>
+  <text x="76" y="125">agent calls run, each with maxUsd = cap minus spent</text>
+  <text x="706" y="125">next call not run</text>
+  <path class="ln" d="M60 92V148"/>
+  <text class="mono" x="60" y="166" text-anchor="start">$0</text>
+  <path class="ln" d="M690 92V148"/>
+  <text class="mono" x="690" y="166" text-anchor="middle">$7.50 stop</text>
+  <path class="ln" d="M900 92V148"/>
+  <text class="mono" x="900" y="166" text-anchor="end">$10 cap</text>
+  <rect class="file" x="60" y="190" width="400" height="74" rx="8"/>
+  <text class="s" x="76" y="214">When it stops</text>
+  <text class="mono" x="76" y="234">run.log: &lt;stage&gt; not run: $X of $Y spent</text>
+  <text class="m" x="76" y="252">reason "spend cap", outcome needs-human</text>
+  <rect class="card soon" x="500" y="190" width="400" height="74" rx="8"/>
+  <text class="s" x="516" y="214">Not counted today</text>
+  <text x="516" y="234">review lens hunts and verifier ballots</text>
+  <text class="m" x="516" y="252">only the review fixer is added to the total</text>
+</svg>

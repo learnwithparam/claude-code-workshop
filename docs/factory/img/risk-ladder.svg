@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 372" width="960" height="372" role="img" aria-labelledby="t d">
+  <title id="t">Risk tiers and the approvals each needs</title>
+  <desc id="d">Three rungs. High covers paths that steer an agent or the pipeline, such as .claude, .factory, factory, scripts, CLAUDE.md, AGENTS.md, package.json and migrations, and needs two approvals. Medium covers everything else, including an empty diff, and needs one. Low covers only docs and fixtures and needs none from the table, but a human gate step still needs one person.</desc>
+  <style>
+    text { font-family: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #171717; }
+    .mono { font-family: "Geist Mono", ui-monospace, Menlo, Consolas, monospace; }
+    .h { font-size: 16px; font-weight: 600; }
+    .s { font-size: 14px; font-weight: 600; }
+    .m { fill: #525252; }
+    .card { fill: #ffffff; stroke: #d4d4d4; }
+    .ln { stroke: #a3a3a3; stroke-width: 1.5; fill: none; }
+    .ah { fill: #a3a3a3; }
+    .model { fill: #e8f1fc; stroke: #0062d1; }
+    .code { fill: #e7f5ea; stroke: #107d32; }
+    .human { fill: #fdf1e3; stroke: #a35200; }
+    .file { fill: #f3ebfc; stroke: #7d2fd0; }
+    .fail { fill: #fdecec; stroke: #c4171c; }
+    .soon { stroke-dasharray: 5 4; }
+    @media (prefers-color-scheme: dark) {
+      text { fill: #ededed; }
+      .m { fill: #a1a1a1; }
+      .card { fill: #0a0a0a; stroke: #3f3f3f; }
+      .ln { stroke: #737373; }
+      .ah { fill: #737373; }
+      .model { fill: #0d2340; stroke: #52a8ff; }
+      .code { fill: #0c2a16; stroke: #3fb950; }
+      .human { fill: #33220a; stroke: #f5a623; }
+      .file { fill: #261540; stroke: #bf7af0; }
+      .fail { fill: #3a0e10; stroke: #ff6166; }
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="ah" d="M0 0L10 5L0 10z"/>
+    </marker>
+  </defs>
+  <rect class="card" x="0.5" y="0.5" width="959" height="371" rx="12"/>
+  <text class="h" x="24" y="34">Risk tier and approvals</text>
+  <text class="m" x="24" y="54">classify() in risk.ts reads only the changed paths. The worst path sets the tier, and high is checked first.</text>
+  <rect class="fail" x="24" y="76" width="738" height="70" rx="8"/>
+  <text class="s" x="40" y="106">high</text>
+  <text class="mono" x="120" y="104">.github/  .claude/  .factory/  factory/  scripts/</text>
+  <text class="mono" x="120" y="126">CLAUDE.md  AGENTS.md  REVIEW.md  Makefile  package.json  migrations/  ../</text>
+  <rect class="human" x="780" y="76" width="156" height="70" rx="8"/>
+  <text class="s" x="858" y="108" text-anchor="middle">2 approvals</text>
+  <text class="m" x="858" y="128" text-anchor="middle">distinct people</text>
+  <rect class="human" x="64" y="162" width="698" height="70" rx="8"/>
+  <text class="s" x="80" y="192">medium</text>
+  <text class="mono" x="160" y="190">everything else: api/, web/, shared/, tests/</text>
+  <text class="m" x="160" y="212">an empty diff is medium, never low</text>
+  <rect class="human" x="780" y="162" width="156" height="70" rx="8"/>
+  <text class="s" x="858" y="194" text-anchor="middle">1 approval</text>
+  <text class="m" x="858" y="214" text-anchor="middle">distinct people</text>
+  <rect class="code" x="104" y="248" width="658" height="70" rx="8"/>
+  <text class="s" x="120" y="278">low</text>
+  <text class="mono" x="200" y="276">only docs/ and fixtures/</text>
+  <text class="m" x="200" y="298">a gate: human step still needs 1, from Math.max(1, APPROVALS[tier])</text>
+  <rect class="human" x="780" y="248" width="156" height="70" rx="8"/>
+  <text class="s" x="858" y="280" text-anchor="middle">0 approvals</text>
+  <text class="m" x="858" y="300" text-anchor="middle">distinct people</text>
+  <text class="m" x="24" y="352">An agent's approval never counts. An approval names one commit, so a push after it voids it.</text>
+</svg>

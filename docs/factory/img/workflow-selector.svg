@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 428" width="960" height="428" role="img" aria-labelledby="t d">
+  <title id="t">Choosing a workflow for a ticket</title>
+  <desc id="d">A decision tree. If there is no code to write yet, use spike. If the thing under test answers differently each time, use llm-eval. If you can write a test that fails today, use refactor when behaviour should stay the same and bug-tdd otherwise. If a person must judge done, use feature-bdd or feature-sdd, which put a human gate before the build. A side panel lists the workflows that the kind of ticket names directly: deps, security, contract, ui-visual, docs, incident and feature-atdd.</desc>
+  <style>
+    text { font-family: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #171717; }
+    .mono { font-family: "Geist Mono", ui-monospace, Menlo, Consolas, monospace; }
+    .h { font-size: 16px; font-weight: 600; }
+    .s { font-size: 14px; font-weight: 600; }
+    .m { fill: #525252; }
+    .card { fill: #ffffff; stroke: #d4d4d4; }
+    .ln { stroke: #a3a3a3; stroke-width: 1.5; fill: none; }
+    .ah { fill: #a3a3a3; }
+    .model { fill: #e8f1fc; stroke: #0062d1; }
+    .code { fill: #e7f5ea; stroke: #107d32; }
+    .human { fill: #fdf1e3; stroke: #a35200; }
+    .file { fill: #f3ebfc; stroke: #7d2fd0; }
+    .fail { fill: #fdecec; stroke: #c4171c; }
+    .soon { stroke-dasharray: 5 4; }
+    @media (prefers-color-scheme: dark) {
+      text { fill: #ededed; }
+      .m { fill: #a1a1a1; }
+      .card { fill: #0a0a0a; stroke: #3f3f3f; }
+      .ln { stroke: #737373; }
+      .ah { fill: #737373; }
+      .model { fill: #0d2340; stroke: #52a8ff; }
+      .code { fill: #0c2a16; stroke: #3fb950; }
+      .human { fill: #33220a; stroke: #f5a623; }
+      .file { fill: #261540; stroke: #bf7af0; }
+      .fail { fill: #3a0e10; stroke: #ff6166; }
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="ah" d="M0 0L10 5L0 10z"/>
+    </marker>
+  </defs>
+  <rect class="card" x="0.5" y="0.5" width="959" height="427" rx="12"/>
+  <text class="h" x="24" y="34">Which workflow fits this ticket</text>
+  <text class="m" x="24" y="54">main.ts does not pick for you: you name the workflow with --workflow=. Ask what evidence the task can give.</text>
+  <rect class="card" x="24" y="76" width="250" height="44" rx="8"/>
+  <text x="149" y="103" text-anchor="middle">Is there code to write yet?</text>
+  <path class="ln" d="M274 98H330" marker-end="url(#a)"/>
+  <text class="m" x="290" y="92">no</text>
+  <rect class="model" x="332" y="76" width="170" height="44" rx="8"/>
+  <text class="mono" x="417" y="96" text-anchor="middle">spike</text>
+  <text class="m" x="417" y="112" text-anchor="middle">explore, then decide</text>
+  <path class="ln" d="M149 120V146" marker-end="url(#a)"/>
+  <text class="m" x="156" y="138">yes</text>
+  <rect class="card" x="24" y="148" width="250" height="44" rx="8"/>
+  <text x="149" y="175" text-anchor="middle">Does it answer differently each time?</text>
+  <path class="ln" d="M274 170H330" marker-end="url(#a)"/>
+  <text class="m" x="290" y="164">yes</text>
+  <rect class="model" x="332" y="148" width="170" height="44" rx="8"/>
+  <text class="mono" x="417" y="168" text-anchor="middle">llm-eval</text>
+  <text class="m" x="417" y="184" text-anchor="middle">grade a pass rate</text>
+  <path class="ln" d="M149 192V218" marker-end="url(#a)"/>
+  <text class="m" x="156" y="210">no</text>
+  <rect class="card" x="24" y="220" width="250" height="44" rx="8"/>
+  <text x="149" y="247" text-anchor="middle">Can you write a test that fails today?</text>
+  <path class="ln" d="M274 242H330" marker-end="url(#a)"/>
+  <text class="m" x="290" y="236">yes</text>
+  <rect class="card" x="332" y="220" width="170" height="44" rx="8"/>
+  <text x="417" y="247" text-anchor="middle">Should behaviour stay?</text>
+  <path class="ln" d="M502 242H540" marker-end="url(#a)"/>
+  <text class="m" x="510" y="236">yes</text>
+  <rect class="model" x="542" y="220" width="130" height="44" rx="8"/>
+  <text class="mono" x="607" y="240" text-anchor="middle">refactor</text>
+  <text class="m" x="607" y="256" text-anchor="middle">pin, then change</text>
+  <path class="ln" d="M417 264V290" marker-end="url(#a)"/>
+  <text class="m" x="424" y="282">no</text>
+  <rect class="model" x="332" y="292" width="170" height="44" rx="8"/>
+  <text class="mono" x="417" y="312" text-anchor="middle">bug-tdd</text>
+  <text class="m" x="417" y="328" text-anchor="middle">red, lock, mutation</text>
+  <path class="ln" d="M149 264V290" marker-end="url(#a)"/>
+  <text class="m" x="156" y="282">no</text>
+  <rect class="card" x="24" y="292" width="250" height="44" rx="8"/>
+  <text x="149" y="319" text-anchor="middle">Must a person judge done?</text>
+  <path class="ln" d="M149 336V362" marker-end="url(#a)"/>
+  <text class="m" x="156" y="354">yes</text>
+  <rect class="model" x="24" y="364" width="250" height="44" rx="8"/>
+  <text class="mono" x="149" y="384" text-anchor="middle">feature-bdd, feature-sdd</text>
+  <text class="m" x="149" y="400" text-anchor="middle">gate: human before the build</text>
+  <rect class="card" x="700" y="76" width="236" height="332" rx="8"/>
+  <text class="s" x="716" y="100">Named by the ticket itself</text>
+  <text class="mono" x="716" y="130">deps</text>
+  <text class="m" x="716" y="146">a dependency bump</text>
+  <text class="mono" x="716" y="170">security</text>
+  <text class="m" x="716" y="186">a security fix</text>
+  <text class="mono" x="716" y="210">contract</text>
+  <text class="m" x="716" y="226">the api and web boundary</text>
+  <text class="mono" x="716" y="250">ui-visual</text>
+  <text class="m" x="716" y="266">a UI change</text>
+  <text class="mono" x="716" y="290">docs</text>
+  <text class="m" x="716" y="306">documentation</text>
+  <text class="mono" x="716" y="330">incident</text>
+  <text class="m" x="716" y="346">an incident or breach</text>
+  <text class="mono" x="716" y="370">feature-atdd</text>
+  <text class="m" x="716" y="386">a small feature with examples</text>
+</svg>

@@ -2,6 +2,18 @@
 
 **Stage:** Plan. **Layers:** skills, boundary. **Workflows:** `feature-atdd`, `feature-sdd`, `deps`, `incident`, `security` and `ui-visual` open with an `intent` step; every workflow with a `plan` step ends the stage with `plan.md`.
 
+## Story
+
+**The ticket.** A `gate: human` step on a docs-only change, recorded in `docs/factory/harness-retro.md` (item 5).
+
+**Without the layer.** "A step marked `gate: human` on a docs-only change is tier low, so it needed 0 approvals and passed with nobody reading it."
+
+**What the layer did.** `3d6cac4` (#87), "A human gate always needs a person". `gateMet` in `factory/engine/interpret.ts` takes `Math.max(1, APPROVALS[tier])`, and `factory/engine/wiring.test.ts` pins it with "still needs one person for a docs-only change".
+
+![Three risk tiers set by the changed paths, with the approvals each needs](img/risk-ladder.svg)
+
+_Notice:_ the tier comes from paths alone, and the bottom rung still needs one person at a human gate.
+
 ## Goal
 
 Turn a GitHub issue into decisions before any code exists: what outcome counts (`intent.md`), what kind of work it is (triage), and how much human approval it needs (the risk tier). By the end you can say which of the three is decided by a model and which by code.

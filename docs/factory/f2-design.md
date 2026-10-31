@@ -2,6 +2,18 @@
 
 **Stage:** design. **Layers:** context and verification. **Workflows:** `feature-atdd`, `feature-bdd`, `feature-sdd`.
 
+## Story
+
+**The ticket.** Issue 34, the workbook, recorded in `docs/factory/harness-retro.md` (item 2).
+
+**Without the layer.** "The build changed code, the spec hashed differently, and the resume regenerated the spec." The person had approved a spec that was then rewritten under them.
+
+**What the layer did.** `2f5d84f` (#73) made the spec and plan gates hash their own documents only. "keeps a spec or plan approval valid after later stages change other files" in `factory/engine/engine.test.ts` holds it, and "binds an approval to the artifact digest" keeps an edited spec from passing on an old approval.
+
+![The files a run writes in specs/<n>/, with what writes and what reads each one](img/artifact-chain.svg)
+
+_Notice:_ `spec.md` is read by the human gate by digest, so an approval covers that document and nothing else.
+
 ## Goal
 
 Turn an `intent.md` into a `spec.md` that a check can grade, and stop for a human before any code exists. You write the same behaviour as examples, as Gherkin and as EARS requirements, and learn which one fits which ticket.

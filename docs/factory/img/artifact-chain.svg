@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 310" width="960" height="310" role="img" aria-labelledby="t d">
+  <title id="t">The artifact chain in specs/&lt;n&gt;/</title>
+  <desc id="d">Seven files in the order a run writes them: intent.md, spec.md, plan.md, the golden tests, lock.json, review.json and run.log. Above each file is the agent or check that writes it; below is what reads it next. The planner writes intent, spec and plan; the human gate reads the spec; plan-drift reads the plan; red and lock read the golden tests; the fixer reads review.json.</desc>
+  <style>
+    text { font-family: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #171717; }
+    .mono { font-family: "Geist Mono", ui-monospace, Menlo, Consolas, monospace; }
+    .h { font-size: 16px; font-weight: 600; }
+    .s { font-size: 14px; font-weight: 600; }
+    .m { fill: #525252; }
+    .card { fill: #ffffff; stroke: #d4d4d4; }
+    .ln { stroke: #a3a3a3; stroke-width: 1.5; fill: none; }
+    .ah { fill: #a3a3a3; }
+    .model { fill: #e8f1fc; stroke: #0062d1; }
+    .code { fill: #e7f5ea; stroke: #107d32; }
+    .human { fill: #fdf1e3; stroke: #a35200; }
+    .file { fill: #f3ebfc; stroke: #7d2fd0; }
+    .fail { fill: #fdecec; stroke: #c4171c; }
+    .soon { stroke-dasharray: 5 4; }
+    @media (prefers-color-scheme: dark) {
+      text { fill: #ededed; }
+      .m { fill: #a1a1a1; }
+      .card { fill: #0a0a0a; stroke: #3f3f3f; }
+      .ln { stroke: #737373; }
+      .ah { fill: #737373; }
+      .model { fill: #0d2340; stroke: #52a8ff; }
+      .code { fill: #0c2a16; stroke: #3fb950; }
+      .human { fill: #33220a; stroke: #f5a623; }
+      .file { fill: #261540; stroke: #bf7af0; }
+      .fail { fill: #3a0e10; stroke: #ff6166; }
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="ah" d="M0 0L10 5L0 10z"/>
+    </marker>
+  </defs>
+  <rect class="card" x="0.5" y="0.5" width="959" height="309" rx="12"/>
+  <text class="h" x="24" y="34">The artifact chain</text>
+  <text class="m" x="24" y="54">Each agent call starts fresh, so the files in specs/&lt;n&gt;/ are what carry the work forward.</text>
+  <text class="m" x="24" y="104">written by</text>
+  <text class="m" x="24" y="214">read by</text>
+  <text class="m" x="155" y="98" text-anchor="middle">planner reply,</text>
+  <text class="m" x="155" y="114" text-anchor="middle">saved by the runner</text>
+  <rect class="file" x="104" y="132" width="102" height="44" rx="8"/>
+  <text class="mono" x="155" y="159" text-anchor="middle">intent.md</text>
+  <text x="155" y="208" text-anchor="middle">later agents,</text>
+  <text class="m" x="155" y="224" text-anchor="middle">read from disk</text>
+  <path class="ln" d="M206 154H224" marker-end="url(#a)"/>
+  <text class="m" x="277" y="98" text-anchor="middle">planner</text>
+  <rect class="file" x="226" y="132" width="102" height="44" rx="8"/>
+  <text class="mono" x="277" y="159" text-anchor="middle">spec.md</text>
+  <text x="277" y="208" text-anchor="middle">the human gate,</text>
+  <text class="m" x="277" y="224" text-anchor="middle">approved by digest</text>
+  <path class="ln" d="M328 154H346" marker-end="url(#a)"/>
+  <text class="m" x="399" y="98" text-anchor="middle">planner</text>
+  <text class="m" x="399" y="114" text-anchor="middle">file list only</text>
+  <rect class="file" x="348" y="132" width="102" height="44" rx="8"/>
+  <text class="mono" x="399" y="159" text-anchor="middle">plan.md</text>
+  <text x="399" y="208" text-anchor="middle">plan-drift, on</text>
+  <text class="m" x="399" y="224" text-anchor="middle">each step it runs</text>
+  <path class="ln" d="M450 154H468" marker-end="url(#a)"/>
+  <text class="m" x="521" y="98" text-anchor="middle">builder, red phase</text>
+  <text class="m" x="521" y="114" text-anchor="middle">tests only</text>
+  <rect class="file" x="470" y="132" width="102" height="44" rx="8"/>
+  <text class="mono" x="521" y="159" text-anchor="middle">golden/</text>
+  <text x="521" y="208" text-anchor="middle">red on the base</text>
+  <text class="m" x="521" y="224" text-anchor="middle">commit, then lock</text>
+  <path class="ln" d="M572 154H590" marker-end="url(#a)"/>
+  <text class="m" x="643" y="98" text-anchor="middle">lock check</text>
+  <text class="m" x="643" y="114" text-anchor="middle">sha256 per test</text>
+  <rect class="file" x="592" y="132" width="102" height="44" rx="8"/>
+  <text class="mono" x="643" y="159" text-anchor="middle">lock.json</text>
+  <text x="643" y="208" text-anchor="middle">lock, every</text>
+  <text class="m" x="643" y="224" text-anchor="middle">later round</text>
+  <path class="ln" d="M694 154H712" marker-end="url(#a)"/>
+  <text class="m" x="765" y="98" text-anchor="middle">reviewRound</text>
+  <text class="m" x="765" y="114" text-anchor="middle">votes per finding</text>
+  <rect class="file" x="714" y="132" width="102" height="44" rx="8"/>
+  <text class="mono" x="765" y="159" text-anchor="middle">review.json</text>
+  <text x="765" y="208" text-anchor="middle">the fixer</text>
+  <text class="m" x="765" y="224" text-anchor="middle">and a person</text>
+  <path class="ln" d="M816 154H834" marker-end="url(#a)"/>
+  <text class="m" x="887" y="98" text-anchor="middle">the engine</text>
+  <text class="m" x="887" y="114" text-anchor="middle">every check</text>
+  <rect class="file" x="836" y="132" width="102" height="44" rx="8"/>
+  <text class="mono" x="887" y="159" text-anchor="middle">run.log</text>
+  <text x="887" y="208" text-anchor="middle">you, after</text>
+  <text class="m" x="887" y="224" text-anchor="middle">the run ends</text>
+  <rect class="code" x="104" y="250" width="832" height="40" rx="8"/>
+  <text x="520" y="275" text-anchor="middle">classify() skips these run files when it sets the risk tier, except golden/. run.log is gitignored, so it stays where it ran.</text>
+</svg>

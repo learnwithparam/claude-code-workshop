@@ -2,6 +2,18 @@
 
 **Stage:** Deploy. **Layer:** delivery. **Workflows:** the `ci` step in `bug-tdd` and `feature-atdd` (and the others that end with it).
 
+## Story
+
+**The ticket.** Issue 35, the CI stage, in `specs/35/ci.md`.
+
+**Without the layer.** With no `gh` login in the sandbox there was no CI result to read. A stage that summarised from memory would have had nothing to stand on.
+
+**What the layer did.** The `ci` check runs `gh pr checks --watch`, so it cannot pass without a result. The stage wrote "No CI job log was reachable: `gh` is not authenticated in this sandbox", listed the local failures it blamed on the sandbox, and asked a person to "confirm both pass on a real CI runner".
+
+![Three risk tiers set by the changed paths, with the approvals each needs](img/risk-ladder.svg)
+
+_Notice:_ this ladder sets the count at a human gate today. `release` in `deploy.ts` asks it again before production, once something calls it.
+
 ## Goal
 
 Decide how much human approval a change needs from the files it touches, never from who wrote it. Check the change against the latest `main`, watch CI, and release only with the approvals the tier demands on this exact commit.
@@ -9,7 +21,8 @@ Decide how much human approval a change needs from the files it touches, never f
 ## What is built and what is design
 
 - Built and tested in `factory/engine/review.test.ts`: `classify` and `approvalsMet` (`risk.ts`), and `release`, `rollback` and `mergeQueue` (`deploy.ts`).
-- Not called by the runner: `interpret.ts` and `cli.ts` do not import `risk.ts` or `deploy.ts`. They are libraries with proofs, ready to wire.
+- Called by the runner: `interpret.ts` imports `classify` and `APPROVALS` from `risk.ts` and applies them at every `gate: human` step, with a floor of one person.
+- Not called by the runner: nothing imports `deploy.ts`, and `approvalsMet` is used only by `release`. They are a library with proofs, ready to wire.
 - Missing target: `deploy.ts` runs `make deploy ENV=<env>`, and this repo's `Makefile` has no `deploy` target. The release and rollback commands therefore have nothing to call here. A learner adds a deploy target for their own host. This is a design, not a working deploy.
 - Built and used: the `ci` check in `factory/engine/checks/index.ts` runs `gh pr checks --watch`, and the workflow loop feeds a failure back to the builder.
 

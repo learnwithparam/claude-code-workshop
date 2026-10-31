@@ -2,6 +2,18 @@
 
 **Stage:** all of them. **Workflows shown:** whichever you choose below.
 
+## Story
+
+**The ticket.** An open item in `docs/factory/harness-retro.md` (item 8).
+
+**Without the layer.** "`factory/engine/cli.ts` builds `approvers` as a list of one login, the person running the CLI." So "a high-tier gate could never reach two".
+
+**What the layer did.** Nothing yet. That gap is the assignment "Two people at a high-risk gate" below. Every assignment here starts from a gap like it.
+
+![The six stages from a ready ticket to a merged pull request, with the artifact and the deciding check under each](img/pipeline.svg)
+
+_Notice:_ each assignment changes one box or one arrow. Name it before you file the issue.
+
 ## Status: not built yet
 
 None of these assignments exists in the repo today. There are no issue templates (`.github/ISSUE_TEMPLATE` is absent), no red tests under `tests/assignments/`, and no structural test that checks both exist. This page is the brief for each one. The paths below named "proposed" are where the red test should go, and you create it. Paths without that word exist now.
