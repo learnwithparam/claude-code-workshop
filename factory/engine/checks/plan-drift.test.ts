@@ -1,6 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
 import { fakeHost } from "../fake-host.ts";
 import { amendmentDigest } from "../plan-amendment.ts";
+import { pinPortable } from "../portable.ts";
 import { planDriftCheck } from "./plan-drift.ts";
 
 describe("plan-drift check", () => {
@@ -63,6 +67,37 @@ describe("plan-drift check", () => {
       );
       expect(r.ok).toBe(false);
       expect(r.evidence).toContain("gate-owned");
+    });
+    it("needs two approvals when the diff is high risk, as the human gate does", async () => {
+      const changed = ["shared/src/a.ts", "shared/src/b.ts", ".github/workflows/ci.yml"];
+      const host = (approvals: string[]) =>
+        fakeHost({
+          files: {
+            "specs/7/plan.md": "shared/src/a.ts\n.github/workflows/ci.yml",
+            "specs/7/plan-amendment.md": amend,
+          },
+          changed,
+          approvals,
+        }).host;
+      const one = [`7:plan-amendment:${amendmentDigest(amend)}`];
+      const r = await run(host(one));
+      expect(r.ok).toBe(false);
+      expect(r.evidence).toContain("not approved");
+      expect((await run(host([...one, ...one]))).ok).toBe(true);
+    });
+    describe("with a repo config that protects more than the built-in list", () => {
+      afterEach(() => pinPortable());
+      it("refuses an amended path that matches a protected glob", async () => {
+        const dir = mkdtempSync(join(tmpdir(), "portable-"));
+        const cfg = join(dir, "config.yaml");
+        const real = (await import("node:fs")).readFileSync(".factory/config.yaml", "utf8");
+        writeFileSync(cfg, real.replace(/protected: \[/, 'protected: ["shared/src/b.ts", '));
+        pinPortable(cfg);
+        const approvals = [`7:plan-amendment:${amendmentDigest(amend)}`];
+        const r = await run(setup({ amendment: amend, approvals }).host);
+        expect(r.ok).toBe(false);
+        expect(r.evidence).toContain("gate-owned");
+      });
     });
     it("refuses an amendment edited after approval", async () => {
       const approvals = [`7:plan-amendment:${amendmentDigest(amend)}`];

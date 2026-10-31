@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
-import { artifactPath, isGateOwned } from "./artifacts.ts";
-import { classify } from "./risk.ts";
+import { artifactPath, badPlanLines } from "./artifacts.ts";
+import { portable } from "./portable.ts";
+import { APPROVALS, classify } from "./risk.ts";
 import type { Host } from "./types.ts";
 
 export const AMENDMENT_STAGE = "plan-amendment";
@@ -24,12 +25,14 @@ export async function approvedAmendment(host: Host, n: number): Promise<Amendmen
   if (text === null) return { paths: [] };
   const paths = parseAmendment(text).map((e) => e.path);
   if (!paths.length) return { paths: [], problem: "plan-amendment.md lists no path with a reason" };
-  const owned = paths.filter(isGateOwned);
+  // The same test plan.md gets: the built-in gate-owned list plus the repo's protected globs.
+  const owned = paths.filter((p) => badPlanLines(p, false, portable().protected).length > 0);
   if (owned.length)
     return { paths: [], problem: `gate-owned paths cannot be amended: ${owned.join(", ")}` };
-  // Auto-approval needs the diff to be low risk too; anything else waits for a person.
-  const auto = classify(await host.changedFiles()) === "low";
+  // The tier is the one the human gate would use for this diff, and it sets how many people approve.
+  const tier = classify(await host.changedFiles());
   const digest = amendmentDigest(text);
-  if (auto || (await host.approved(n, AMENDMENT_STAGE, digest))) return { paths };
+  const need = Math.max(1, APPROVALS[tier]);
+  if (tier === "low" || (await host.approved(n, AMENDMENT_STAGE, digest, need))) return { paths };
   return { paths: [], problem: "plan-amendment.md is not approved for its current text" };
 }
