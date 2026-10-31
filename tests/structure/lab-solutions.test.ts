@@ -122,6 +122,6 @@ describe("lab proofs", () => {
       `echo '{"permissions":{"deny":["Read(**/.env*)"]},"hooks":{"PreToolUse":[],"Stop":[]}}' > .claude/settings.json`,
     );
     expect(lab, "advanced-05 is missing").toBeDefined();
-    expect(inTempDir(changed, lab?.proof ?? "false")).not.toBe(0);
+    expect(inTempDir(changed, lab?.proof[0]?.command ?? "false")).not.toBe(0);
   });
 });
