@@ -1,130 +1,98 @@
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { loadLabs } from "../../scripts/labs/catalog.ts";
+import { LAZY, NEEDS, SOLUTIONS, sh } from "./lab-artifacts.ts";
 
-const W = ".labs/work";
-const BLOCK_ENV = `import{readFileSync as r}from"node:fs";const i=JSON.parse(r(0,"utf8"));if((i.tool_input?.file_path??"").endsWith(".env")){console.error("no");process.exit(2)}`;
-const KEBAB = `import{readdirSync as d}from"node:fs";const bad=d(process.argv[2],{recursive:true}).filter(f=>!/^[a-z0-9.-]+$/.test(String(f).split("/").pop()));bad.forEach(f=>console.log(f));process.exitCode=bad.length?1:0`;
-const sh = (...lines: string[]) => lines.join("\n");
-// The cloud-guards proof reads the repo's settings, so a solution needs a settings file beside the work.
-const SETTINGS = `{"permissions":{"deny":["Read(**/.env*)","Bash(git push *)"]},"hooks":{"PreToolUse":[],"Stop":[]}}`;
-const GUARDS = `node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))'`;
-const cloudSolution = sh(
-  `mkdir -p .claude ${W}`,
-  `echo '${SETTINGS}' > .claude/settings.json`,
-  `${GUARDS} > ${W}/cloud-guards.txt`,
-  `printf 'Keep the deny, a person ships.\\nA push is the step that needs a human.\\n' > ${W}/push-route.md`,
-);
+const REPO = resolve(".");
+// Proofs read this repo (its folders, shared/ files, make targets), so each run gets a scratch
+// folder that links to it. The learner's work lands in the scratch folder, never in the repo.
+const SKIP = new Set([".git", ".labs", ".gitignore", "CLAUDE.local.md"]);
 
-// One known-good way to finish each lab, written as shell. Claude-powered steps are replaced by
-// their output, because the proof only reads the artifact, not how it was made.
-const SOLUTIONS: Record<string, string> = {
-  "start-01": sh(`mkdir -p ${W}`, `printf 'a\\nb\\nc\\n' > ${W}/repo-tour.md`),
-  "start-02": sh(`mkdir -p ${W}`, `echo 'Tests 3 passed' > ${W}/gate.log`),
-  "start-03": sh(
-    `mkdir -p ${W}`,
-    `printf 'one\\ntwo\\nthree\\nfour\\nVerify it\\n' > ${W}/plan.md`,
-  ),
-  "start-04": sh(`echo '- lab-note: x' > CLAUDE.local.md`, `echo '/CLAUDE.local.md' > .gitignore`),
-  "daily-01": sh(
-    `mkdir -p ${W}`,
-    `echo '{"session_id":"s"}' > ${W}/session.json`,
-    `echo tangerine > ${W}/recall.md`,
-  ),
-  "daily-02": sh(
-    `mkdir -p ${W}/rules`,
-    `printf -- '---\\npaths:\\n  - api/**\\n---\\n- a\\n- b\\n' > ${W}/rules/api-errors.md`,
-  ),
-  "daily-03": sh(
-    `mkdir -p ${W}/skills/commit-message`,
-    `printf 'name: commit-message\\ndescription: Use when committing\\n1\\n2\\n3\\n4\\n5\\n6\\n' > ${W}/skills/commit-message/SKILL.md`,
-  ),
-  "daily-04": sh(
-    `mkdir -p ${W}/hooks`,
-    `cat > ${W}/hooks/block-env.mjs <<'EOF'\n${BLOCK_ENV}\nEOF`,
-  ),
-  "team-01": sh(
-    `mkdir -p ${W}`,
-    `echo '{"permissions":{"deny":["Read(./.env)","Read(./.env.*)"]}}' > ${W}/settings.json`,
-  ),
-  "team-02": sh(
-    `mkdir -p ${W}`,
-    `printf '# Review\\n- Flag a\\n- Flag b\\n- Flag c\\n' > ${W}/REVIEW.md`,
-  ),
-  "team-03": sh(`mkdir -p ${W}`, `echo 'PASS hand-built: ok' > ${W}/prove.txt`),
-  "team-04": sh(
-    `mkdir -p ${W}/plugin/.claude-plugin`,
-    `echo '{"name":"kit","version":"0.1.0","description":"d"}' > ${W}/plugin/.claude-plugin/plugin.json`,
-  ),
-  "factory-01": sh(
-    `mkdir -p ${W}/specs/1`,
-    `printf '## Problem\\n## Done when\\n- a\\n- b\\n## Out of scope\\n' > ${W}/specs/1/intent.md`,
-  ),
-  "factory-02": sh(
-    `mkdir -p ${W}/specs/1`,
-    `printf 'Given a\\nWhen b\\nThen c\\nGiven d\\nWhen e\\nThen f\\n' > ${W}/specs/1/acceptance.md`,
-  ),
-  "factory-03": sh(
-    `mkdir -p ${W}`,
-    `printf 'stages that would run\\nreview loop\\n' > ${W}/dry-run.txt`,
-  ),
-  "factory-04": sh(`mkdir -p ${W}`, `echo 'Tests 4 passed' > ${W}/contract.log`),
-  "advanced-01": sh(
-    `mkdir -p ${W}/agents`,
-    `printf 'name: reviewer\\ndescription: d\\ntools: Read, Grep, Glob\\nmodel: haiku\\n' > ${W}/agents/reviewer.md`,
-  ),
-  "advanced-02": sh(
-    `mkdir -p ${W}`,
-    `echo '{"total_cost_usd":0.01}' > ${W}/call.json`,
-    `echo 0.012 > ${W}/cost.txt`,
-  ),
-  "advanced-03": sh(`mkdir -p ${W}/wt`, `echo 'gitdir: /x' > ${W}/wt/.git`),
-  "advanced-04": sh(
-    `mkdir -p ${W} docs/levels`,
-    `cat > ${W}/check-kebab.mjs <<'EOF'\n${KEBAB}\nEOF`,
-  ),
-  "advanced-05": cloudSolution,
-};
-
-function inTempDir(setup: string | undefined, proof: string) {
+function scratchRepo(): string {
   const dir = mkdtempSync(join(tmpdir(), "lab-proof-"));
+  for (const name of readdirSync(REPO)) {
+    if (!SKIP.has(name)) symlinkSync(join(REPO, name), join(dir, name));
+  }
+  copyFileSync(join(REPO, ".gitignore"), join(dir, ".gitignore"));
+  // A real repo with one commit, so labs that run git have something true to point at.
+  const git = (...args: string[]) => spawnSync("git", args, { cwd: dir });
+  git("init", "-q");
+  git(
+    "-c",
+    "user.name=lab",
+    "-c",
+    "user.email=lab@example.com",
+    "commit",
+    "-q",
+    "--allow-empty",
+    "-m",
+    "init",
+  );
+  return dir;
+}
+
+function inScratchRepo(setup: string | undefined, proof: string) {
+  const dir = scratchRepo();
   if (setup) {
-    writeFileSync(join(dir, "setup.sh"), setup);
-    spawnSync("sh", [join(dir, "setup.sh")], { cwd: dir });
+    writeFileSync(join(dir, "..", `${dir.split("/").pop()}-setup.sh`), setup);
+    mkdirSync(join(dir, ".labs"), { recursive: true });
+    spawnSync("sh", [join(dir, "..", `${dir.split("/").pop()}-setup.sh`)], { cwd: dir });
   }
   return spawnSync("sh", ["-c", proof], { cwd: dir, encoding: "utf8" }).status;
 }
 
 describe("lab proofs", () => {
   const labs = loadLabs("labs");
+  const ids = labs.map((l) => l.id).sort();
+  const reachable = (id: string) => (NEEDS[id] ?? []).every((f) => existsSync(join(REPO, f)));
   const items = labs.flatMap((lab) => lab.proof.map((item, n) => ({ lab, item, n: n + 1 })));
 
-  it("has a solution for every lab and none extra", () => {
-    expect(Object.keys(SOLUTIONS).sort()).toEqual(labs.map((l) => l.id).sort());
+  it("has a solution and a lazy artifact for every lab and none extra", () => {
+    expect(Object.keys(SOLUTIONS).sort()).toEqual(ids);
+    expect(Object.keys(LAZY).sort()).toEqual(ids);
   });
 
   // A red item names one missing part, so every item must be red alone in an empty folder.
-  it.each(items)("$lab.id item $n is red with no work: $item.text", ({ item }) => {
-    expect(inTempDir(undefined, item.command)).not.toBe(0);
-  });
-
   it.each(items)(
+    "$lab.id item $n is red with no work: $item.text",
+    { timeout: 240_000 },
+    ({ item }) => {
+      expect(inScratchRepo(undefined, item.command)).not.toBe(0);
+    },
+  );
+
+  it.each(labs)(
+    "$id is red on a lazy artifact with the right shape",
+    { timeout: 240_000 },
+    (lab) => {
+      const codes = lab.proof.map((item) => inScratchRepo(LAZY[lab.id], item.command));
+      expect(codes.some((code) => code !== 0)).toBe(true);
+    },
+  );
+
+  it.each(items.filter(({ lab }) => reachable(lab.id)))(
     "$lab.id item $n is green once the steps are done: $item.text",
+    { timeout: 240_000 },
     ({ lab, item }) => {
-      expect(inTempDir(SOLUTIONS[lab.id], item.command)).toBe(0);
+      expect(inScratchRepo(SOLUTIONS[lab.id], item.command)).toBe(0);
     },
   );
 
   it("advanced-05 goes red when the deny list changes after cloud-guards.txt was saved", () => {
     const lab = labs.find((l) => l.id === "advanced-05");
-    const changed = sh(
-      cloudSolution,
-      `echo '{"permissions":{"deny":["Read(**/.env*)"]},"hooks":{"PreToolUse":[],"Stop":[]}}' > .claude/settings.json`,
-    );
+    const changed = sh(SOLUTIONS["advanced-05"] ?? "", "echo stale > .labs/work/cloud-guards.txt");
     expect(lab, "advanced-05 is missing").toBeDefined();
-    expect(inTempDir(changed, lab?.proof[0]?.command ?? "false")).not.toBe(0);
+    expect(inScratchRepo(changed, lab?.proof[0]?.command ?? "false")).not.toBe(0);
   });
 });

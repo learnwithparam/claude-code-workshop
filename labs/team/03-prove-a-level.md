@@ -13,11 +13,22 @@ Answer: A command you can run says so, not a sentence saying it works.
 
 Run one level's proof and save the output, so you can show the team it passed.
 
+## Predict
+
+You run a level's proof through tee. What do you get that a plain run does not give you?
+
+Answer: A saved receipt. The output prints as it runs and also lands in a file you can show the team.
+
 ## Steps
 
-1. Make the folder: `mkdir -p .labs/work`.
-2. Run the proof: `make prove LEVEL=hand-built | tee .labs/work/prove.txt`.
-3. Run the exercise view: `make exercise LEVEL=hand-built TRACK=b`. It prints `PASS` when the level is green. On a red level, track `a` adds a hint and track `b` prints only the failing line.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Make the folder: `mkdir -p .labs/work`.
+   Expect: No output. The folder `.labs/work` now exists.
+3. Run the proof: `make prove LEVEL=hand-built | tee .labs/work/prove.txt`.
+   Expect: A line starting `PASS hand-built:` that says every band renders and lints clean, followed by a count of bands. The count may differ. A line starting `FAIL` names the claim that broke.
+4. Run the exercise view: `make exercise LEVEL=hand-built TRACK=b`. It prints `PASS` when the level is green. On a red level, track `a` adds a hint and track `b` prints only the failing line.
+   Expect: A line reading `PASS`. A `FAIL` line names what to fix.
 
 ## Proof
 
@@ -25,6 +36,12 @@ Run one level's proof and save the output, so you can show the team it passed.
 
    ```sh
    grep -q '^PASS hand-built' .labs/work/prove.txt
+   ```
+2. prove.txt holds the line make prove prints now.
+
+   ```sh
+   line=$(make prove LEVEL=hand-built 2>/dev/null | grep '^PASS hand-built')
+   test -n "$line" && grep -qxF "$line" .labs/work/prove.txt
    ```
 
 ## Hints

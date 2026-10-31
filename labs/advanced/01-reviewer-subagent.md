@@ -13,12 +13,20 @@ Answer: Exit code 2 blocks the action every time, even when the model forgets th
 
 Write a read-only reviewer subagent at .labs/work/agents/reviewer.md: front matter with name, description, tools limited to Read, Grep and Glob, and model, then a short prompt. The proof below must pass.
 
+## Predict
+
+A reviewer subagent lists only Read, Grep and Glob as tools. Can it quietly fix a bug it finds?
+
+Answer: No. Without Write or Edit it has no way to change a file, so its report is the only thing it can produce.
+
 ## Steps
 
-1. Read a real subagent in this repo.
-2. Make the agents folder under the lab work folder.
-3. Write the file with the four front matter keys and a short prompt.
-4. Limit tools to reading and searching only.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Read a real subagent in this repo.
+3. Make the agents folder under the lab work folder.
+4. [editor] Write the file with the four front matter keys and a short prompt.
+5. Limit tools to reading and searching only.
 
 ## Proof
 
@@ -46,6 +54,16 @@ Write a read-only reviewer subagent at .labs/work/agents/reviewer.md: front matt
 
    ```sh
    f=.labs/work/agents/reviewer.md; test -f $f && ! grep -Eq '^tools:.*(Write|Edit|Bash)' $f
+   ```
+6. The file opens with front matter, has a four word description, a model name and a prompt body.
+
+   ```sh
+   f=.labs/work/agents/reviewer.md
+   test "$(sed -n 1p $f)" = '---' && test "$(grep -c '^---$' $f)" -ge 2 || exit 1
+   grep -q '^name: reviewer' $f && grep -Eq '^description: [^ ]+ [^ ]+ [^ ]+ [^ ]+' $f || exit 1
+   grep -q '^tools: Read, Grep, Glob$' $f && grep -Eq '^model: (haiku|sonnet|opus)$' $f || exit 1
+   ! grep -Eq '^tools:.*(Write|Edit|Bash)' $f || exit 1
+   test "$(awk '/^---$/{n++; next} n>=2 && NF>=5' $f | wc -l)" -ge 1
    ```
 
 ## Hints

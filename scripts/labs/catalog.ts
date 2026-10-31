@@ -24,11 +24,25 @@ const oneLine = z
   .max(240)
   .regex(/^[^\n]+$/, "must be one line");
 
+// Where a step is typed. A learner keeps Claude Code and a shell side by side; an untagged step is a shell step.
+export const WINDOWS = ["shell", "claude", "editor"] as const;
+export type Window = (typeof WINDOWS)[number];
+// A step may carry an indented `Expect:` line: what the learner sees if it worked.
+export const stepSchema = z.object({
+  where: z.enum(WINDOWS),
+  text: z.string().min(1),
+  expect: z.string().min(1).optional(),
+});
+export type Step = z.infer<typeof stepSchema>;
+
 export const warmupSchema = z.object({
   question: oneLine,
   from: z.string().regex(/^[a-z]+-\d{2}$/),
   answer: oneLine,
 });
+
+// One question and the reason behind its answer, so a learner commits to a guess before running.
+const predictSchema = z.object({ question: oneLine, answer: z.string().min(1).max(400) });
 
 const proofItem = z.object({ text: oneLine, command: z.string().min(1) });
 export type ProofItem = z.infer<typeof proofItem>;
@@ -42,7 +56,8 @@ export const labSchema = z.object({
   warmup: warmupSchema.optional(),
   help: z.enum(HELP),
   goal: oneLine,
-  steps: z.array(z.string().min(1)).min(1),
+  predict: predictSchema,
+  steps: z.array(stepSchema).min(1),
   // Each item says one thing that must be true and checks only that, so a red item names the missing part.
   proof: z.array(proofItem).min(1),
   // Two or more, so the first nudges and the last gives the answer away.
@@ -68,6 +83,40 @@ function listItems(body: string): string[] {
     else if (items.length > 0 && /^\s+\S/.test(line)) items[items.length - 1] += `\n${line}`;
   }
   return items;
+}
+
+export function parseStep(raw: string): Step {
+  const tag = /^\[([a-z]+)\] ?/.exec(raw);
+  if (!tag) return { where: "shell", text: raw };
+  const where = WINDOWS.find((w) => w === tag[1]);
+  if (!where) throw new Error(`unknown window tag [${tag[1]}], use ${WINDOWS.join(", ")}`);
+  return { where, text: raw.slice(tag[0].length) };
+}
+
+function stepOf(item: string): Step {
+  const [raw = "", ...rest] = item.split(/\n\s+Expect: /);
+  const expect = rest
+    .join(" ")
+    .replace(/\s*\n\s*/g, " ")
+    .trim();
+  const step = parseStep(raw.trim());
+  return expect ? { ...step, expect } : step;
+}
+
+// "Question?" then a line "Answer: reason". A missing Answer line leaves the answer empty and fails the schema.
+function predictOf(body: string): { question: string; answer: string } {
+  const at = body.search(/^Answer:/m);
+  if (at < 0) return { question: body.trim().replace(/\s*\n\s*/g, " "), answer: "" };
+  return {
+    question: body
+      .slice(0, at)
+      .trim()
+      .replace(/\s*\n\s*/g, " "),
+    answer: body
+      .slice(at + "Answer:".length)
+      .trim()
+      .replace(/\s*\n\s*/g, " "),
+  };
 }
 
 // "1. Sentence." then an indented sh block. A missing block gives an empty command, which zod rejects.
@@ -108,7 +157,8 @@ export function parseLab(lane: string, file: string, text: string): Lab {
     warmup: warmupOf(parts.get("warm-up")),
     help: /^\*\*Help:\*\* (\w+)\s*$/m.exec(text)?.[1],
     goal: parts.get("goal"),
-    steps: listItems(parts.get("steps") ?? ""),
+    predict: predictOf(parts.get("predict") ?? ""),
+    steps: listItems(parts.get("steps") ?? "").map(stepOf),
     proof: proofOf(parts.get("proof") ?? ""),
     hints: listItems(parts.get("hints") ?? ""),
     learned: parts.get("what you just learned"),

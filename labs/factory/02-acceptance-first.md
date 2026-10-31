@@ -13,12 +13,20 @@ Answer: The command output, not a sentence saying it works.
 
 Write .labs/work/specs/1/acceptance.md from your intent: two scenarios, each with a Given, a When and a Then line a test could assert. Write it before any code exists. The proof below must pass.
 
+## Predict
+
+Your acceptance scenarios exist before any code does. If a test were written from them and run now, would it pass?
+
+Answer: No, it would fail. A test that is red first proves it can catch the missing feature, and it turns green only when the work is real.
+
 ## Steps
 
-1. Read the design stage doc.
-2. Reread your intent.
-3. Write two scenarios, one Given, When and Then line each, at the left edge.
-4. Make each Then something a program can assert, such as a status code or a file.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Read the design stage doc.
+3. Reread your intent.
+4. [editor] Write two scenarios, one Given, When and Then line each, at the left edge.
+5. Make each Then something a program can assert, such as a status code or a file.
 
 ## Proof
 
@@ -36,6 +44,13 @@ Write .labs/work/specs/1/acceptance.md from your intent: two scenarios, each wit
 
    ```sh
    test "$(grep -c '^Then' .labs/work/specs/1/acceptance.md)" -ge 2
+   ```
+4. Every scenario line has real words, and no Then settles for looks good.
+
+   ```sh
+   f=.labs/work/specs/1/acceptance.md
+   for k in Given When Then; do test "$(grep "^$k" $f | awk 'NF>=4' | wc -l)" -ge 2 || exit 1; done
+   ! grep '^Then' $f | grep -Eqiw 'look(s)? (good|nice|right)|works|fine|correct'
    ```
 
 ## Hints

@@ -13,14 +13,28 @@ Answer: Every clone gets the committed file, so the rule protects the whole team
 
 Show which guardrails a cloud session inherits from this repo, and predict what happens when it tries to push.
 
+## Predict
+
+A cloud session clones this repo and runs a push. Does the push go through?
+
+Answer: No. The committed settings deny the push and travel with the clone, so a cloud session inherits the block.
+
 ## Steps
 
-1. Read the section "What a cloud session reads from the repo" in `docs/factory/f11-cloud-sessions.md`. A cloud session clones the repo, so what is committed in `.claude/` travels with it.
-2. Make the folder: `mkdir -p .labs/work`.
-3. Run the command from that section and save what it prints: `node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' > .labs/work/cloud-guards.txt`.
-4. Read the file. Find the push deny and the `PreToolUse` hook, and say to yourself what a cloud session does when it runs a push.
-5. Write `.labs/work/push-route.md`: name one route from the section "Know why `git push` fails" (a person ships, teleport, or a tested hook) and give one reason you chose it.
-6. Optional: start a real session with `claude --cloud` and ask it to run a push and show the exact result, then read the transcript. This needs a claude.ai login, so the proof does not ask for it.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Read the section "What a cloud session reads from the repo" in `docs/factory/f11-cloud-sessions.md`. A cloud session clones the repo, so what is committed in `.claude/` travels with it.
+   Expect: The section explains that a cloud session clones the repo and reads `.claude/`. You are reading, so nothing prints.
+3. Make the folder: `mkdir -p .labs/work`.
+   Expect: No output. The folder `.labs/work` now exists.
+4. Run the command from that section and save what it prints: `node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' > .labs/work/cloud-guards.txt`.
+   Expect: No output on screen, because it goes to `cloud-guards.txt`. The file lists the deny rules, including the push rule, then a line of hook names that includes `PreToolUse`.
+5. Read the file. Find the push deny and the `PreToolUse` hook, and say to yourself what a cloud session does when it runs a push.
+   Expect: You see the push deny in the first list and `PreToolUse` in the second. Nothing is printed for this step.
+6. [editor] Write `.labs/work/push-route.md`: name one route from the section "Know why `git push` fails" (a person ships, teleport, or a tested hook) and give one reason you chose it.
+   Expect: No output from a command, since you are writing the file. Afterwards `push-route.md` names one route and one reason.
+7. Optional: start a real session with `claude --cloud` and ask it to run a push and show the exact result, then read the transcript. This needs a claude.ai login, so the proof does not ask for it.
+   Expect: The session starts in the cloud and its push attempt is refused. The exact wording will differ. Skip this step if you have no claude.ai login.
 
 ## Proof
 
@@ -43,6 +57,17 @@ Show which guardrails a cloud session inherits from this repo, and predict what 
    r=.labs/work/push-route.md
    grep -qiE 'person ships|teleport|hook' $r || exit 1
    test "$(grep -c . $r)" -ge 2
+   ```
+4. The saved files match the repo now, and push-route.md names a route with a reason.
+
+   ```sh
+   f=.labs/work/cloud-guards.txt
+   r=.labs/work/push-route.md
+   node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' | diff -q - $f >/dev/null || exit 1
+   grep -qF 'Bash(git push *)' $f || exit 1
+   grep -q PreToolUse $f || exit 1
+   grep -qiE 'person ships|teleport|hook' $r || exit 1
+   test "$(grep -c . $r)" -ge 2 && test "$(awk 'NF>=5' $r | wc -l)" -ge 1
    ```
 
 ## Hints

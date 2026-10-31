@@ -12,9 +12,15 @@ const good = `# First prompt
 ## Goal
 Ask Claude one question.
 
+## Predict
+Will the answer print to the screen or go to a file?
+Answer: It goes to the file, because the redirect catches it before the screen.
+
 ## Steps
 1. Run \`claude\`.
-2. Ask it.
+   Expect: A reply in plain words; the wording differs each time.
+2. [claude] Ask it.
+3. [editor] Write \`a.md\`.
 
 ## Proof
 
@@ -46,13 +52,31 @@ describe("parseLab", () => {
       help: "guided",
       goal: "Ask Claude one question.",
       learned: "A prompt is just a question.",
+      predict: {
+        question: "Will the answer print to the screen or go to a file?",
+        answer: "It goes to the file, because the redirect catches it before the screen.",
+      },
     });
+    expect(lab.steps).toEqual([
+      {
+        where: "shell",
+        text: "Run `claude`.",
+        expect: "A reply in plain words; the wording differs each time.",
+      },
+      { where: "claude", text: "Ask it." },
+      { where: "editor", text: "Write `a.md`." },
+    ]);
     expect(lab.proof).toEqual([
       { text: "The notes file exists.", command: "test -f .labs/work/a.md" },
       { text: "The notes file is not empty.", command: "test -s .labs/work/a.md" },
     ]);
-    expect(lab.steps).toEqual(["Run `claude`.", "Ask it."]);
     expect(lab.hints).toHaveLength(2);
+  });
+
+  it("rejects an unknown window tag", () => {
+    expect(() => parseLab("start", "01-x.md", good.replace("[claude]", "[browser]"))).toThrow(
+      /window tag/,
+    );
   });
 
   it("rejects a lab with no proof", () => {
@@ -85,6 +109,16 @@ describe("parseLab", () => {
   it("rejects a warm-up with no From or no Answer", () => {
     const bad = good.replace("## Goal", "## Warm-up\nWhy?\nAnswer: Because.\n\n## Goal");
     expect(() => parseLab("start", "02-x.md", bad)).toThrow(/from/i);
+  });
+
+  it("rejects a lab with no predict section", () => {
+    const text = good.replace(/## Predict[\s\S]*?## Steps/, "## Steps");
+    expect(() => parseLab("start", "01-x.md", text)).toThrow(/predict/i);
+  });
+
+  it("rejects a predict section with no Answer line", () => {
+    const text = good.replace(/^Answer:.*\n/m, "");
+    expect(() => parseLab("start", "01-x.md", text)).toThrow(/predict/i);
   });
 
   it("rejects a missing or unknown help level", () => {

@@ -1,4 +1,4 @@
-import type { Lab, Lane } from "./catalog.ts";
+import type { Lab, Lane, Step, Window } from "./catalog.ts";
 import type { Progress } from "./progress.ts";
 
 type Stat = { lane: Lane; done: number; total: number };
@@ -25,6 +25,18 @@ function commands(text: string, color: boolean): string {
   return text.replace(/`([^`]+)`/g, (_m, cmd: string) => `\`${paint(color, "cyan", cmd)}\``);
 }
 
+// Shell and editor steps share cyan; Claude Code is yellow so the switch of window stands out.
+const WHERE: Record<Window, { words: string; style: keyof typeof CODES }> = {
+  shell: { words: "in your shell", style: "cyan" },
+  claude: { words: "in Claude Code", style: "yellow" },
+  editor: { words: "in your editor", style: "cyan" },
+};
+
+function tag(where: Window, color: boolean): string {
+  const { words, style } = WHERE[where];
+  return color ? paint(true, style, words) : `[${words}]`;
+}
+
 // A backticked span is a command when it starts with a shell program. File names and keys are not.
 const PROGRAMS = "ls|cat|mkdir|echo|tail|grep|cd|git|claude|make|npm|npx|node|tee";
 export const isCommand = (span: string): boolean => new RegExp(`^(${PROGRAMS})( |$)`).test(span);
@@ -32,7 +44,7 @@ export const isCommand = (span: string): boolean => new RegExp(`^(${PROGRAMS})( 
 // At "hinted" the commands leave the steps; the hints still carry them.
 function hideCommands(text: string): string {
   return text.replace(/`([^`]+)`/g, (m, span: string) =>
-    isCommand(span) ? "(command in hints)" : m,
+    isCommand(span) && span !== "make lab" ? "(command in hints)" : m,
   );
 }
 
@@ -56,9 +68,16 @@ export function renderMap(
 }
 
 function body(lab: Lab, color: boolean): string[] {
-  if (lab.help === "goal") return [paint(color, "bold", "Done when this passes"), lab.proof, ""];
+  if (lab.help === "goal") {
+    const items = lab.proof.map((item, i) => `${i + 1}. ${item.text}`);
+    return [paint(color, "bold", "Done when all of these pass"), ...items, ""];
+  }
   const show = (s: string) => (lab.help === "hinted" ? hideCommands(s) : commands(s, color));
-  return [paint(color, "bold", "Steps"), ...lab.steps.map((s, i) => `${i + 1}. ${show(s)}`), ""];
+  const step = (s: Step, i: number) => [
+    `${i + 1}. ${tag(s.where, color)} ${show(s.text)}`,
+    ...(s.expect ? [paint(color, "dim", `   Expect: ${s.expect}`)] : []),
+  ];
+  return [paint(color, "bold", "Steps"), ...lab.steps.flatMap(step), ""];
 }
 
 // The form's `lab` field is prefilled from the query string, so a report names its lab.
@@ -77,6 +96,10 @@ export function renderBrief(lab: Lab, progress: Progress, color: boolean): strin
       ? [`${paint(color, "bold", `Warm-up (from ${recall.from})`)} ${recall.question}`, ""]
       : []),
     `${paint(color, "bold", "Goal")} ${lab.goal}`,
+    "",
+    paint(color, "bold", "Predict first"),
+    lab.predict.question,
+    paint(color, "dim", 'Save your guess with: make lab GUESS="your guess"'),
     "",
     ...body(lab, color),
     paint(

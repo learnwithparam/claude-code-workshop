@@ -13,12 +13,20 @@ Answer: The plan, before any edit. A dry run does the same for a factory run.
 
 Run the factory in dry-run mode for issue 1, save its output to .labs/work/dry-run.txt, and find which stage has the largest budget. The dry run needs no key and spends nothing. The proof below must pass.
 
+## Predict
+
+A dry run prints the plan for each stage. Does it call the model or spend any budget?
+
+Answer: No. A dry run only reads the config and prints what each stage would get, so it costs nothing.
+
 ## Steps
 
-1. Make the lab work folder.
-2. Run the factory for issue 1 in dry-run mode and save what it prints.
-3. Read the factory config behind it.
-4. Note which stage has the largest budget.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Make the lab work folder.
+3. Run the factory for issue 1 in dry-run mode and save what it prints.
+4. Read the factory config behind it.
+5. Note which stage has the largest budget.
 
 ## Proof
 
@@ -31,6 +39,12 @@ Run the factory in dry-run mode for issue 1, save its output to .labs/work/dry-r
 
    ```sh
    grep -q 'review loop' .labs/work/dry-run.txt
+   ```
+3. dry-run.txt matches what the factory prints now.
+
+   ```sh
+   fresh=$(make factory ISSUE=1 FLAGS=--dry-run 2>/dev/null | grep -v '^npx tsx')
+   test -n "$fresh" && test "$(grep -v '^npx tsx' .labs/work/dry-run.txt)" = "$fresh"
    ```
 
 ## Hints

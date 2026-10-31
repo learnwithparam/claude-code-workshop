@@ -13,11 +13,22 @@ Answer: The plan. Reading a plan costs far less than reviewing a diff.
 
 Write one private preference into `CLAUDE.local.md` so Claude follows it in this repo and nowhere else.
 
+## Predict
+
+Claude follows a note you put in CLAUDE.local.md. Will a teammate who clones the repo get that note?
+
+Answer: No. CLAUDE.local.md is gitignored, so the note stays on your machine and a clone never carries it.
+
 ## Steps
 
-1. See the example: `cat docs/examples/CLAUDE.local.md`.
-2. Add a line to your own file: `echo "- lab-note: explain each change in two plain sentences." >> CLAUDE.local.md`.
-3. Check it loads: `claude -p "What preferences do my local notes give you?"`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. See the example: `cat docs/examples/CLAUDE.local.md`.
+   Expect: A short file of personal notes, written as bullets.
+3. Add a line to your own file: `echo "- lab-note: explain each change in two plain sentences." >> CLAUDE.local.md`.
+   Expect: No output. `tail -1 CLAUDE.local.md` then shows your `lab-note` line.
+4. Check it loads: `claude -p "What preferences do my local notes give you?"`.
+   Expect: A short answer that repeats your note, for example to explain each change in two plain sentences. The wording will differ.
 
 ## Proof
 
@@ -29,7 +40,12 @@ Write one private preference into `CLAUDE.local.md` so Claude follows it in this
 2. CLAUDE.local.md is listed in .gitignore.
 
    ```sh
-   grep -q 'CLAUDE.local.md' .gitignore
+   test -f CLAUDE.local.md && grep -q 'CLAUDE.local.md' .gitignore
+   ```
+3. The lab-note has at least three words, and git ignores CLAUDE.local.md.
+
+   ```sh
+   grep -Eq '^- lab-note: [^ ]+ [^ ]+ [^ ]+' CLAUDE.local.md && git check-ignore -q CLAUDE.local.md
    ```
 
 ## Hints

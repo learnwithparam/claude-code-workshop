@@ -5,7 +5,9 @@ import {
   loadProgress,
   markDone,
   type Progress,
+  recordAttempt,
   revealHint,
+  saveGuess,
   saveProgress,
 } from "./progress.ts";
 import { paint, renderBrief, renderMap } from "./render.ts";
@@ -14,6 +16,7 @@ export type CliDeps = {
   labs: Lab[];
   progressPath: string;
   color: boolean;
+  guess?: string;
   proof: (command: string) => { ok: boolean; output: string };
   now: () => string;
   out: (text: string) => void;
@@ -50,6 +53,9 @@ function showMap(deps: CliDeps, progress: Progress): void {
 function finish(deps: CliDeps, progress: Progress, lab: Lab): void {
   const c = deps.color;
   deps.out(`${paint(c, "green", `PASS ${lab.id}`)} ${lab.title}`);
+  const guess = progress.guesses?.[lab.id];
+  deps.out(guess ? `Your guess: ${guess}` : "You saved no guess for this lab.");
+  deps.out(`${paint(c, "bold", "Answer")} ${lab.predict.answer}`);
   deps.out(`${paint(c, "bold", "What you just learned")} ${lab.learned}`);
   const after = markDone(progress, lab.id, deps.now());
   saveProgress(deps.progressPath, after);
@@ -87,7 +93,7 @@ export function run(args: string[], deps: CliDeps): number {
   }
   if (command !== "lab" && command !== "next") {
     deps.out(
-      "usage: make lab [PATH_ID=pro|factory] [ID=<id>] [HINT=1] | make next | make progress",
+      "usage: make lab [PATH_ID=pro|factory] [ID=<id>] [HINT=1] [GUESS=...] | make next | make progress",
     );
     return 2;
   }
@@ -114,6 +120,11 @@ export function run(args: string[], deps: CliDeps): number {
     return 0;
   }
 
+  const guess = deps.guess?.trim();
+  if (guess) {
+    progress = saveGuess(progress, lab.id, guess);
+    saveProgress(deps.progressPath, progress);
+  }
   deps.out(renderBrief(lab, progress, deps.color));
   deps.out("");
   // Run every item, so one red item never hides another.
@@ -128,9 +139,20 @@ export function run(args: string[], deps: CliDeps): number {
     finish(deps, progress, lab);
     return 0;
   }
-  deps.out(
-    `\n${paint(deps.color, "red", `FAIL ${lab.id}`)} fix the items marked FAIL, then run make lab again.`,
-  );
+  const first = (progress.attempts[lab.id] ?? 0) === 0;
+  saveProgress(deps.progressPath, recordAttempt(progress, lab.id));
+  if (first) {
+    deps.out(
+      `\n${paint(deps.color, "red", `RED, as expected ${lab.id}`)} this is the first run, so the proof fails on purpose.`,
+    );
+    deps.out(
+      "The FAIL lines above are the state your steps will change. Do the steps, then run make lab again.",
+    );
+  } else {
+    deps.out(
+      `\n${paint(deps.color, "red", `FAIL ${lab.id}`)} fix the items marked FAIL, then run make lab again.`,
+    );
+  }
   return 1;
 }
 
@@ -155,8 +177,13 @@ export async function runWatch(args: string[], deps: CliDeps): Promise<number> {
     : currentLab(deps.labs, loadProgress(deps.progressPath));
   if (!lab) return run(plain, deps);
 
+  const guess = deps.guess?.trim();
+  if (guess) {
+    saveProgress(deps.progressPath, saveGuess(loadProgress(deps.progressPath), lab.id, guess));
+  }
   deps.out(renderBrief(lab, loadProgress(deps.progressPath), deps.color));
-  deps.out(`\n${paint(deps.color, "dim", `Proof: ${lab.proof}`)}`);
+  deps.out(`\n${paint(deps.color, "dim", "Proof")}`);
+  for (const item of lab.proof) deps.out(paint(deps.color, "dim", `- ${item.text}`));
   return new Promise<number>((resolve) => {
     const stops: Array<() => void> = [];
     const end = (code: number) => {
@@ -164,13 +191,14 @@ export async function runWatch(args: string[], deps: CliDeps): Promise<number> {
       resolve(code);
     };
     const check = () => {
-      const result = deps.proof(lab.proof);
-      if (result.ok) {
+      const failed = lab.proof.map((item) => deps.proof(item.command)).filter((r) => !r.ok);
+      if (failed.length === 0) {
         finish(deps, loadProgress(deps.progressPath), lab);
         return end(0);
       }
       deps.status(failLine(deps, lab));
-      if (result.output.trim()) deps.out(tail(result.output, 6));
+      const output = failed.map((r) => r.output).join("");
+      if (output.trim()) deps.out(tail(output, 6));
     };
     stops.push(watch(check));
     stops.push(

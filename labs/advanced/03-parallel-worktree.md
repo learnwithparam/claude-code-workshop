@@ -11,15 +11,23 @@ Answer: Resume the saved session and carry on from where you left off.
 
 ## Goal
 
-Create a second checkout of this repo at .labs/work/wt on a new branch, so two sessions can edit at once without sharing files. Keep it until the proof passes, then remove it. The proof below must pass.
+Create a second checkout of this repo at .labs/work/wt on a new branch named lab/parallel, so two sessions can edit at once without sharing files. Keep it until the proof passes, then remove it. The proof below must pass.
+
+## Predict
+
+Can you check out the same branch in two worktrees at once?
+
+Answer: No. Git allows a branch in only one worktree, so the second worktree needs its own new branch.
 
 ## Steps
 
-1. Make the lab work folder.
-2. Add a worktree there on a new branch.
-3. Open a Claude session inside it, then leave.
-4. Run make lab while the worktree still exists, so the proof can see it.
-5. Then remove the worktree. To redo the lab later, delete the branch too.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Make the lab work folder.
+3. Add a worktree there on a new branch.
+4. Open a Claude session inside it, then leave.
+5. Run make lab while the worktree still exists, so the proof can see it.
+6. Then remove the worktree. To redo the lab later, delete the branch too.
 
 ## Proof
 
@@ -32,6 +40,15 @@ Create a second checkout of this repo at .labs/work/wt on a new branch, so two s
 
    ```sh
    grep -q 'gitdir' .labs/work/wt/.git
+   ```
+3. The worktree belongs to this repo and sits on the branch lab/parallel.
+
+   ```sh
+   w=.labs/work/wt
+   test -f $w/.git && grep -q '^gitdir: ' $w/.git || exit 1
+   common=$(cd "$(git rev-parse --git-common-dir)" && pwd -P)
+   case "$(sed 's/^gitdir: //' $w/.git)" in "$common"/worktrees/*) ;; *) exit 1 ;; esac
+   test "$(git -C $w branch --show-current)" = lab/parallel
    ```
 
 ## Hints

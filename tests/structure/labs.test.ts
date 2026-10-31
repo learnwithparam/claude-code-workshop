@@ -18,6 +18,11 @@ describe("labs", () => {
     for (const lane of LANES) expect(labs.filter((l) => l.lane === lane).length).toBeGreaterThan(0);
   });
 
+  it.each(labs)("$id asks a predict question and has a reasoned answer", (lab) => {
+    expect(lab.predict.question.trim().endsWith("?"), `${lab.id} question needs a ?`).toBe(true);
+    expect(lab.predict.answer.length).toBeGreaterThan(20);
+  });
+
   it("each path's lanes match the lane list in docs/labs/README.md", () => {
     for (const [id, lanes] of Object.entries(PATHS)) {
       const line = readme
@@ -40,6 +45,26 @@ describe("labs", () => {
     expect(stray).toEqual([]);
   });
 
+  // A learner who types /exit into zsh, or a shell command into Claude Code, thinks the lab is broken.
+  const slash = /`\/[a-z][a-z-]*[^`]*`/;
+  const shell = /`(make|git|npm|npx|node|cd|mkdir|cat|ls|echo|tail|test|claude)( [^`]*)?`/;
+  const steps = labs.flatMap((l) => l.steps.map((s, i) => ({ at: `${l.id} step ${i + 1}`, ...s })));
+
+  it("no step mixes a slash command with a shell command", () => {
+    const mixed = steps.filter((s) => slash.test(s.text) && shell.test(s.text)).map((s) => s.at);
+    expect(mixed).toEqual([]);
+  });
+
+  it("every step with a slash command is tagged [claude]", () => {
+    const wrong = steps.filter((s) => slash.test(s.text) && s.where !== "claude").map((s) => s.at);
+    expect(wrong).toEqual([]);
+  });
+
+  it("a step that writes a file is tagged [editor]", () => {
+    const wrong = steps.filter((s) => /^(Write|Create) /.test(s.text) && s.where !== "editor");
+    expect(wrong.map((s) => s.at)).toEqual([]);
+  });
+
   // Recall: a lab after a lane's first reopens an idea the learner already finished.
   it.each(labs.filter((l) => !l.id.endsWith("-01")))(
     "$id opens with a warm-up from an earlier lab",
@@ -53,6 +78,21 @@ describe("labs", () => {
       expect(from).toBeLessThan(labs.indexOf(lab));
     },
   );
+
+  // A learner who runs a command must be able to tell whether what they see is right.
+  it("every step with a backticked command says what to expect", () => {
+    const missing = labs.flatMap((lab) =>
+      lab.steps
+        .map((step, i) => ({ step, at: `${lab.id} step ${i + 1}` }))
+        .filter(({ step }) => /`[^`]+`/.test(step.text) && !step.expect?.trim())
+        .map(({ at }) => at),
+    );
+    expect(missing).toEqual([]);
+  });
+
+  it.each(labs)("$id opens by running make lab to see the proof red", (lab) => {
+    expect(lab.steps[0]?.text, `${lab.id} step 1 must say to run make lab`).toContain("`make lab`");
+  });
 
   it("help never decreases along the lane order", () => {
     const ranks = labs.map((l) => RANK[l.help]);
@@ -69,8 +109,8 @@ describe("labs", () => {
     (lab) => {
       const hints = lab.hints.join("\n");
       const missing = lab.steps
-        .flatMap((s) => [...s.matchAll(/`([^`]+)`/g)].map((m) => m[1] ?? "").filter(isCommand))
-        .filter((c) => !hints.includes(c));
+        .flatMap((s) => [...s.text.matchAll(/`([^`]+)`/g)].map((m) => m[1] ?? "").filter(isCommand))
+        .filter((c) => c !== "make lab" && !hints.includes(c));
       expect(missing).toEqual([]);
     },
   );

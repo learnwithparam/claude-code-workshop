@@ -13,12 +13,20 @@ Answer: A diff can break it. Vague advice cannot be checked, so it is noise.
 
 Write the intent a factory run starts from, at .labs/work/specs/1/intent.md: a Problem, a Done when with two checks a command could run, and an Out of scope. The proof below must pass.
 
+## Predict
+
+What must an intent say so a later stage can check the work, beyond the problem itself?
+
+Answer: A "Done when" list of checkable bullets, because a stage can only test what was written down as a pass condition.
+
 ## Steps
 
-1. Read the intent stage doc to see what a good one holds.
-2. Make the spec folder under the lab work folder.
-3. Write the intent with the three headings, spelled as the proof expects.
-4. Under Done when, give two checks a command could run.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Read the intent stage doc to see what a good one holds.
+3. Make the spec folder under the lab work folder.
+4. [editor] Write the intent with the three headings, spelled as the proof expects.
+5. Under Done when, give two checks a command could run.
 
 ## Proof
 
@@ -41,6 +49,15 @@ Write the intent a factory run starts from, at .labs/work/specs/1/intent.md: a P
 
    ```sh
    test "$(grep -c '^- ' .labs/work/specs/1/intent.md)" -ge 2
+   ```
+5. intent.md has all three headings, and its Done when bullets name commands that exist.
+
+   ```sh
+   f=.labs/work/specs/1/intent.md
+   grep -q '^## Problem' $f && grep -q '^## Done when' $f && grep -q '^## Out of scope' $f || exit 1
+   cmds=$(awk '/^## /{s=($0=="## Done when")} s&&/^- .*`[^`]+`/' $f | grep -o '`[^`]*`' | tr -d '`' | awk '{print $1}')
+   test "$(echo "$cmds" | grep -c .)" -ge 2 || exit 1
+   for c in $cmds; do command -v "$c" >/dev/null || exit 1; done
    ```
 
 ## Hints
