@@ -2,6 +2,12 @@
 
 **Pairs with:** `docs/factory/f11-cloud-sessions.md`
 
+## Warm-up
+
+Why do you commit a deny rule in `.claude/settings.json` instead of keeping it on your machine?
+From: team-01
+Answer: Every clone gets the committed file, so the rule protects the whole team, and a cloud session too.
+
 ## Goal
 
 Show which guardrails a cloud session inherits from this repo, and predict what happens when it tries to push.
