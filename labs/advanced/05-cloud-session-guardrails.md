@@ -58,6 +58,17 @@ Answer: No. The committed settings deny the push and travel with the clone, so a
    grep -qiE 'person ships|teleport|hook' $r || exit 1
    test "$(grep -c . $r)" -ge 2
    ```
+4. The saved files match the repo now, and push-route.md names a route with a reason.
+
+   ```sh
+   f=.labs/work/cloud-guards.txt
+   r=.labs/work/push-route.md
+   node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' | diff -q - $f >/dev/null || exit 1
+   grep -qF 'Bash(git push *)' $f || exit 1
+   grep -q PreToolUse $f || exit 1
+   grep -qiE 'person ships|teleport|hook' $r || exit 1
+   test "$(grep -c . $r)" -ge 2 && test "$(awk 'NF>=5' $r | wc -l)" -ge 1
+   ```
 
 ## Hints
 

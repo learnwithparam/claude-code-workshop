@@ -45,6 +45,13 @@ Answer: No, it would fail. A test that is red first proves it can catch the miss
    ```sh
    test "$(grep -c '^Then' .labs/work/specs/1/acceptance.md)" -ge 2
    ```
+4. Every scenario line has real words, and no Then settles for looks good.
+
+   ```sh
+   f=.labs/work/specs/1/acceptance.md
+   for k in Given When Then; do test "$(grep "^$k" $f | awk 'NF>=4' | wc -l)" -ge 2 || exit 1; done
+   ! grep '^Then' $f | grep -Eqiw 'look(s)? (good|nice|right)|works|fine|correct'
+   ```
 
 ## Hints
 

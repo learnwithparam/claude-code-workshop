@@ -49,6 +49,14 @@ Answer: Only when Claude reads a file whose path matches. Unmatched rules cost n
    ```sh
    test "$(grep -c '^- ' .labs/work/rules/api-errors.md)" -ge 2
    ```
+4. The rule file is well formed and its paths point at a folder that exists.
+
+   ```sh
+   f=.labs/work/rules/api-errors.md
+   head -1 $f | grep -q '^---$' && grep -q '^paths:' $f && test "$(grep -c '^- ' $f)" -ge 2 || exit 1
+   for p in $(sed -n 's/^  - //p' $f | sed 's|/[*].*||'); do test -d "$p" && exit 0; done
+   exit 1
+   ```
 
 ## Hints
 

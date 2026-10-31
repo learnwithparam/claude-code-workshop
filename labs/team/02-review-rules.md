@@ -44,6 +44,14 @@ Answer: The second one. A reviewer can check it against a diff and say yes or no
    ```sh
    head -1 .labs/work/REVIEW.md | grep -q '^# '
    ```
+3. REVIEW.md has a title and three different, specific Flag lines.
+
+   ```sh
+   f=.labs/work/REVIEW.md
+   head -1 $f | grep -q '^# ' || exit 1
+   n=$(grep '^- Flag' $f | awk 'NF>=6' | sort -u | wc -l)
+   test "$n" -ge 3
+   ```
 
 ## Hints
 

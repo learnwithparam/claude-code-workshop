@@ -44,6 +44,11 @@ Answer: No. Each call starts with an empty context, so --continue is what reopen
    ```sh
    grep -qi 'tangerine' .labs/work/recall.md
    ```
+3. session.json is a real result with a session id, and recall.md holds the word.
+
+   ```sh
+   node -e "const s=require('./.labs/work/session.json'); process.exit(s.type==='result' && /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(s.session_id) ? 0 : 1)" && grep -qi 'tangerine' .labs/work/recall.md
+   ```
 
 ## Hints
 

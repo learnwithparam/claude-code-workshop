@@ -37,6 +37,12 @@ Answer: A saved receipt. The output prints as it runs and also lands in a file y
    ```sh
    grep -q '^PASS hand-built' .labs/work/prove.txt
    ```
+2. prove.txt holds the line make prove prints now.
+
+   ```sh
+   line=$(make prove LEVEL=hand-built 2>/dev/null | grep '^PASS hand-built')
+   test -n "$line" && grep -qxF "$line" .labs/work/prove.txt
+   ```
 
 ## Hints
 

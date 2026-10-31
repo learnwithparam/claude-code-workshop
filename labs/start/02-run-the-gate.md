@@ -42,6 +42,14 @@ Answer: The full test summary, with a passed line and no failed line, because a 
    ```sh
    f=.labs/work/gate.log; test -f $f && ! grep -q 'failed' $f
    ```
+3. gate.log shows passed tests and names a test file under shared that exists.
+
+   ```sh
+   f=.labs/work/gate.log
+   grep -Eq 'Tests +[0-9]+ passed' $f && ! grep -q 'failed' $f || exit 1
+   for t in $(grep -Eo 'shared/[A-Za-z0-9_./-]+[.]test[.]ts' $f); do test -f "$t" && exit 0; done
+   exit 1
+   ```
 
 ## Hints
 

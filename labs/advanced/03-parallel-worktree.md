@@ -11,7 +11,7 @@ Answer: Resume the saved session and carry on from where you left off.
 
 ## Goal
 
-Create a second checkout of this repo at .labs/work/wt on a new branch, so two sessions can edit at once without sharing files. Keep it until the proof passes, then remove it. The proof below must pass.
+Create a second checkout of this repo at .labs/work/wt on a new branch named lab/parallel, so two sessions can edit at once without sharing files. Keep it until the proof passes, then remove it. The proof below must pass.
 
 ## Predict
 
@@ -40,6 +40,15 @@ Answer: No. Git allows a branch in only one worktree, so the second worktree nee
 
    ```sh
    grep -q 'gitdir' .labs/work/wt/.git
+   ```
+3. The worktree belongs to this repo and sits on the branch lab/parallel.
+
+   ```sh
+   w=.labs/work/wt
+   test -f $w/.git && grep -q '^gitdir: ' $w/.git || exit 1
+   common=$(cd "$(git rev-parse --git-common-dir)" && pwd -P)
+   case "$(sed 's/^gitdir: //' $w/.git)" in "$common"/worktrees/*) ;; *) exit 1 ;; esac
+   test "$(git -C $w branch --show-current)" = lab/parallel
    ```
 
 ## Hints

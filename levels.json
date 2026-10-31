@@ -90,6 +90,7 @@
     "scripts/labs/**",
     "docs/labs/**",
     "tests/structure/labs.test.ts",
+    "tests/structure/lab-artifacts.ts",
     "tests/structure/lab-solutions.test.ts",
     "tests/structure/lab-references.test.ts"
   ],

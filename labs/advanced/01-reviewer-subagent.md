@@ -55,6 +55,16 @@ Answer: No. Without Write or Edit it has no way to change a file, so its report 
    ```sh
    f=.labs/work/agents/reviewer.md; test -f $f && ! grep -Eq '^tools:.*(Write|Edit|Bash)' $f
    ```
+6. The file opens with front matter, has a four word description, a model name and a prompt body.
+
+   ```sh
+   f=.labs/work/agents/reviewer.md
+   test "$(sed -n 1p $f)" = '---' && test "$(grep -c '^---$' $f)" -ge 2 || exit 1
+   grep -q '^name: reviewer' $f && grep -Eq '^description: [^ ]+ [^ ]+ [^ ]+ [^ ]+' $f || exit 1
+   grep -q '^tools: Read, Grep, Glob$' $f && grep -Eq '^model: (haiku|sonnet|opus)$' $f || exit 1
+   ! grep -Eq '^tools:.*(Write|Edit|Bash)' $f || exit 1
+   test "$(awk '/^---$/{n++; next} n>=2 && NF>=5' $f | wc -l)" -ge 1
+   ```
 
 ## Hints
 

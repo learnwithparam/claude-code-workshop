@@ -40,6 +40,14 @@ Answer: Every one, because a test that walks them all catches a break in any wor
    ```sh
    f=.labs/work/contract.log; test -f $f && ! grep -q 'failed' $f
    ```
+3. contract.log shows passed tests and names a contract test file that exists.
+
+   ```sh
+   f=.labs/work/contract.log
+   grep -Eq 'Tests +[0-9]+ passed' $f && ! grep -q 'failed' $f || exit 1
+   for t in $(grep -Eo 'tests/contract/[A-Za-z0-9_./-]+[.]test[.]ts' $f); do test -f "$t" && exit 0; done
+   exit 1
+   ```
 
 ## Hints
 

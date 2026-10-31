@@ -40,6 +40,12 @@ Answer: No. A dry run only reads the config and prints what each stage would get
    ```sh
    grep -q 'review loop' .labs/work/dry-run.txt
    ```
+3. dry-run.txt matches what the factory prints now.
+
+   ```sh
+   fresh=$(make factory ISSUE=1 FLAGS=--dry-run 2>/dev/null | grep -v '^npx tsx')
+   test -n "$fresh" && test "$(grep -v '^npx tsx' .labs/work/dry-run.txt)" = "$fresh"
+   ```
 
 ## Hints
 

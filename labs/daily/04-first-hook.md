@@ -44,6 +44,17 @@ Answer: Exit code 2 blocks the action. Any other path, including a clean exit 0,
    ```sh
    echo '{"tool_input":{"file_path":"a.ts"}}' | node .labs/work/hooks/block-env.mjs >/dev/null 2>&1
    ```
+3. The hook blocks .env paths with a message and lets .env.example and a.ts through.
+
+   ```sh
+   h=.labs/work/hooks/block-env.mjs
+   try() { echo "{\"tool_input\":{\"file_path\":\"$1\"}}" | node $h >/dev/null 2>.labs/work/err.txt; }
+   try .env; test $? -eq 2 || exit 1
+   test -s .labs/work/err.txt || exit 1
+   try /repo/app/.env; test $? -eq 2 || exit 1
+   try .env.example || exit 1
+   try a.ts
+   ```
 
 ## Hints
 

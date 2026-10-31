@@ -44,6 +44,11 @@ Answer: Everyone who clones the repo, because the committed file travels with th
    ```sh
    node -e "process.exit(require('./.labs/work/settings.json').permissions.deny.includes('Read(./.env.*)') ? 0 : 1)"
    ```
+3. Every deny entry is a real Tool(pattern) and none is a catch-all.
+
+   ```sh
+   node -e "const d=require('./.labs/work/settings.json').permissions.deny; const ok=d.includes('Read(./.env)') && d.includes('Read(./.env.*)') && d.every(e => /^[A-Z][A-Za-z]*\(.+\)$/.test(e) && !/[(]\.\/?[*]*[)]|[(]\.\/[*][*]/.test(e)); process.exit(ok ? 0 : 1)"
+   ```
 
 ## Hints
 

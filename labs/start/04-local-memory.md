@@ -40,7 +40,12 @@ Answer: No. CLAUDE.local.md is gitignored, so the note stays on your machine and
 2. CLAUDE.local.md is listed in .gitignore.
 
    ```sh
-   grep -q 'CLAUDE.local.md' .gitignore
+   test -f CLAUDE.local.md && grep -q 'CLAUDE.local.md' .gitignore
+   ```
+3. The lab-note has at least three words, and git ignores CLAUDE.local.md.
+
+   ```sh
+   grep -Eq '^- lab-note: [^ ]+ [^ ]+ [^ ]+' CLAUDE.local.md && git check-ignore -q CLAUDE.local.md
    ```
 
 ## Hints

@@ -49,6 +49,11 @@ Answer: A manifest with a name, a version and a description, because installing 
    ```sh
    node -e "process.exit(require('./.labs/work/plugin/.claude-plugin/plugin.json').description ? 0 : 1)"
    ```
+4. The plugin name is kebab-case, the version is semver, the description has words and a skill exists.
+
+   ```sh
+   node -e "const m=require('./.labs/work/plugin/.claude-plugin/plugin.json'); process.exit(/^[a-z0-9]+(-[a-z0-9]+)*$/.test(m.name) && /^\d+\.\d+\.\d+$/.test(m.version) && String(m.description).split(' ').length>=4 ? 0 : 1)" && ls .labs/work/plugin/skills/*/SKILL.md >/dev/null
+   ```
 
 ## Hints
 

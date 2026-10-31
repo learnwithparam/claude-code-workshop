@@ -30,6 +30,7 @@ Answer: Its description. Claude reads the descriptions first and opens the body 
 4. [editor] Create `.labs/work/skills/commit-message/SKILL.md` with `name:` and `description:` front matter, then the steps.
    Expect: No output from a command, since you are writing the file. Afterwards it has `---`, `name: commit-message`, a `description: Use when` line and at least a few lines of steps.
 5. The description starts with `Use when` and names the situation, not what the skill is.
+   Expect: No output, since you are checking your own file. Its `description:` line starts with `Use when`.
 
 ## Proof
 
@@ -47,6 +48,13 @@ Answer: Its description. Claude reads the descriptions first and opens the body 
 
    ```sh
    test "$(grep -c . .labs/work/skills/commit-message/SKILL.md)" -ge 8
+   ```
+4. The skill has a name, a Use when description and a body with real lines.
+
+   ```sh
+   f=.labs/work/skills/commit-message/SKILL.md
+   grep -q '^name: commit-message' $f && grep -Eq '^description: Use when [^ ]+ [^ ]+ [^ ]+' $f || exit 1
+   test "$(awk 'NF>=3' $f | wc -l)" -ge 4
    ```
 
 ## Hints
