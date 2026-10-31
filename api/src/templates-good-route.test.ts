@@ -1,7 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
+import { describe, expect, it } from "vitest";
 import worksheets from "../../fixtures/worksheets.json" with { type: "json" };
 import type { AgentResult } from "./agent/agent.ts";
-import { describe, expect, it } from "vitest";
 import { parseEnv } from "./env.ts";
 import { createApp } from "./server.ts";
 
