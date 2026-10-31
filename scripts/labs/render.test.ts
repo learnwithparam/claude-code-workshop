@@ -17,6 +17,8 @@ const lab: Lab = {
 };
 // biome-ignore lint/suspicious/noControlCharactersInRegex: the test looks for the escape byte
 const ESC = /\u001b/;
+// biome-ignore lint/suspicious/noControlCharactersInRegex: the test strips colour codes
+const COLOUR = /\u001b\[\d+m/g;
 
 describe("colorEnabled", () => {
   it("respects NO_COLOR and FORCE_COLOR", () => {
@@ -197,7 +199,7 @@ describe("screens fit the terminal", () => {
   });
   it("draws the same structure with colour off", () => {
     const plain = renderBrief(lab, none, false);
-    const stripped = renderBrief(lab, none, true).replace(/\u001b\[\d+m/g, "");
+    const stripped = renderBrief(lab, none, true).replace(COLOUR, "");
     expect(stripped.replace(/`/g, "")).toBe(plain.replace(/`/g, ""));
   });
 });

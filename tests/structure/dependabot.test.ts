@@ -38,9 +38,9 @@ describe("workflow Node setup", () => {
     const files = readdirSync(".github/workflows").filter((f) => f.endsWith(".yml"));
     for (const file of files) {
       const jobs = parse(readFileSync(`.github/workflows/${file}`, "utf8")).jobs ?? {};
-      for (const job of Object.values<{ steps?: { uses?: string; with?: Record<string, unknown> }[] }>(
-        jobs,
-      )) {
+      for (const job of Object.values<{
+        steps?: { uses?: string; with?: Record<string, unknown> }[];
+      }>(jobs)) {
         for (const step of job.steps ?? []) {
           if (step.uses?.startsWith("actions/setup-node")) {
             expect(step.with?.["check-latest"], `${file} setup-node`).toBe(true);
