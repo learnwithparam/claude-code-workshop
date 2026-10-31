@@ -18,6 +18,7 @@ const lab = (id: string, lane: Lab["lane"]): Lab => ({
   title: id,
   pairs: "docs/README.md",
   goal: "g",
+  help: "guided",
   steps: ["s"],
   proof: "true",
   hints: ["a", "b"],

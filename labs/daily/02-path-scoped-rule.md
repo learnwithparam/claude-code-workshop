@@ -1,6 +1,7 @@
 # Write a rule that loads only where it applies
 
 **Pairs with:** `docs/levels/context.md`
+**Help:** hinted
 
 ## Goal
 
@@ -24,6 +25,7 @@ head -1 .labs/work/rules/api-errors.md | grep -q '^---$' && grep -q '^paths:' .l
 1. The file starts with `---`, then a `paths:` list, then `---`, then bullets starting with `- `.
 2. A path is a glob such as `api/**`.
 3. Write rules as checks you could fail, such as "an error to a customer never names the model".
+4. Commands, in order: `ls .claude/rules`, then `cat` any file in it, `mkdir -p .labs/work/rules`.
 
 ## What you just learned
 
