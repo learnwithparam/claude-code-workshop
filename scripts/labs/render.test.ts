@@ -128,7 +128,8 @@ describe("renderBrief", () => {
   it("asks the predict question above the steps and never shows the answer", () => {
     const text = renderBrief(lab, { done: {}, hints: {}, attempts: {} }, false);
     expect(text).toContain("Will it edit a file?");
-    expect(text.indexOf("Will it edit a file?")).toBeLessThan(text.indexOf("1. Run"));
+    const steps = text.indexOf("1. [in your shell] Run");
+    expect(text.indexOf("Will it edit a file?")).toBeLessThan(steps);
     expect(text).not.toContain("plan mode is read-only");
   });
   it("prints the expect line dim under its step and omits it when absent", () => {
