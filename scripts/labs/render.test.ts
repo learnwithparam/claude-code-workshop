@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Lab } from "./catalog.ts";
-import { bar, colorEnabled, renderBrief, renderMap } from "./render.ts";
+import { bar, colorEnabled, renderBrief, renderMap, WIDTH } from "./render.ts";
 
 const lab: Lab = {
   id: "start-01",
@@ -71,7 +71,8 @@ describe("renderBrief window tags", () => {
   it("matches the snapshot with colour off", () => {
     expect(renderBrief(tagged, empty, false)).toMatchInlineSnapshot(`
       "start-01  First prompt
-      Pairs with docs/README.md
+      start lane, pairs with docs/README.md
+      ──────────────────────────────────────────────────────────────────────
 
       Goal Ask one question.
 
@@ -84,6 +85,7 @@ describe("renderBrief window tags", () => {
       2. [in Claude Code] Leave the session with \`/exit\`.
       3. [in your editor] Write \`.labs/work/notes.md\`.
 
+      ──────────────────────────────────────────────────────────────────────
       Hints: 0 of 2 revealed. Reveal the next with: make lab HINT=1
       Stuck? https://github.com/learnwithparam/claude-code-workshop/issues/new?template=lab-feedback.yml&lab=start-01"
     `);
@@ -173,5 +175,29 @@ describe("renderBrief", () => {
     const text = renderBrief(lab, { done: {}, hints: { "start-01": 1 } }, false);
     expect(text).toContain("Hint 1: one");
     expect(text).not.toContain("two");
+  });
+});
+
+describe("screens fit the terminal", () => {
+  const none = { done: {}, hints: {}, attempts: {} };
+  const goal: Lab = { ...lab, help: "goal" };
+  const hinted: Lab = { ...lab, help: "hinted" };
+  // The feedback link is a URL, which cannot wrap, so it is the one line allowed past the width.
+  const fits = (text: string) =>
+    text
+      .split("\n")
+      .filter((l) => !l.startsWith("Stuck?"))
+      .every((l) => l.length <= WIDTH);
+  it.each([lab, hinted, goal])("the $help brief is at most 70 columns", (l) => {
+    expect(fits(renderBrief(l, none, false))).toBe(true);
+  });
+  it("the map is at most 70 columns", () => {
+    const stats = [{ lane: "start" as const, done: 0, total: 1 }];
+    expect(fits(renderMap(stats, [lab], none, "start-01", false))).toBe(true);
+  });
+  it("draws the same structure with colour off", () => {
+    const plain = renderBrief(lab, none, false);
+    const stripped = renderBrief(lab, none, true).replace(/\u001b\[\d+m/g, "");
+    expect(stripped.replace(/`/g, "")).toBe(plain.replace(/`/g, ""));
   });
 });
