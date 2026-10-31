@@ -19,7 +19,7 @@ A ticket moves through stages. Each stage commits one artifact under `specs/<n>/
 | Deploy   | the pull request, CI              | `ci`, risk tier approvals              |
 | Maintain | `incident.md`, a new `intent.md`  | sigma bands from `.factory/bands.yaml` |
 
-The names come from `ARTIFACTS` in `factory/engine/artifacts.ts` and `CHECK_NAMES` in `factory/engine/workflow.ts`. A workflow is a YAML file. `factory/engine/interpret.ts` runs its steps in order, repeats a step while its loop checks fail up to a cap, and writes `run.log` when the run finishes or stops at a gate or a cap.
+The names come from `ARTIFACTS` in `factory/engine/artifacts.ts` and `CHECK_NAMES` in `factory/engine/workflow.ts`. A workflow is a YAML file. `factory/engine/interpret.ts` runs its steps in order, repeats a step while its loop checks fail up to a cap, stops early as `needs-human` with the reason "test contradicts ticket" when two rounds in a row fail the same check with the same evidence (`sameFailure` on the loop), and writes `run.log` when the run finishes or stops at a gate or a cap.
 
 ## What is code and what is a model
 
