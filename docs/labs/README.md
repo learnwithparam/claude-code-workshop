@@ -19,7 +19,7 @@ make lab ID=daily-03   work on any lab, in any order
 
 Colour turns off when `NO_COLOR` is set or output is not a terminal. Progress sits in `.labs/progress.json`, which git ignores. Your work for each lab goes under `.labs/work/`, so a lab never changes tracked files.
 
-Run Claude Code in one terminal and `make lab` in a second one beside it.
+Run Claude Code in one terminal and `make lab` in a second one beside it. Each step says where to type it: "in your shell", "in Claude Code" or "in your editor". A step with no tag is a shell step. In a lab file the tag opens the step as `[shell]`, `[claude]` or `[editor]`.
 
 ## The path
 

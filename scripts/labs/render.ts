@@ -1,4 +1,4 @@
-import type { Lab, Lane } from "./catalog.ts";
+import type { Lab, Lane, Window } from "./catalog.ts";
 import type { Progress } from "./progress.ts";
 
 type Stat = { lane: Lane; done: number; total: number };
@@ -23,6 +23,18 @@ export function bar(done: number, total: number, width: number, color: boolean):
 // Backticked commands stand out, so a learner finds what to type.
 function commands(text: string, color: boolean): string {
   return text.replace(/`([^`]+)`/g, (_m, cmd: string) => `\`${paint(color, "cyan", cmd)}\``);
+}
+
+// Shell and editor steps share cyan; Claude Code is yellow so the switch of window stands out.
+const WHERE: Record<Window, { words: string; style: keyof typeof CODES }> = {
+  shell: { words: "in your shell", style: "cyan" },
+  claude: { words: "in Claude Code", style: "yellow" },
+  editor: { words: "in your editor", style: "cyan" },
+};
+
+function tag(where: Window, color: boolean): string {
+  const { words, style } = WHERE[where];
+  return color ? paint(true, style, words) : `[${words}]`;
 }
 
 export function renderMap(
@@ -53,7 +65,7 @@ export function renderBrief(lab: Lab, progress: Progress, color: boolean): strin
     `${paint(color, "bold", "Goal")} ${lab.goal}`,
     "",
     paint(color, "bold", "Steps"),
-    ...lab.steps.map((s, i) => `${i + 1}. ${commands(s, color)}`),
+    ...lab.steps.map((s, i) => `${i + 1}. ${tag(s.where, color)} ${commands(s.text, color)}`),
     "",
     paint(
       color,

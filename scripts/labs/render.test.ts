@@ -8,7 +8,7 @@ const lab: Lab = {
   title: "First prompt",
   pairs: "docs/README.md",
   goal: "Ask one question.",
-  steps: ["Run `claude`."],
+  steps: [{ where: "shell", text: "Run `claude`." }],
   proof: "true",
   hints: ["one", "two"],
   learned: "l",
@@ -53,11 +53,45 @@ describe("renderMap", () => {
   });
 });
 
+const tagged: Lab = {
+  ...lab,
+  steps: [
+    { where: "shell", text: "Make the folder: `mkdir -p .labs/work`." },
+    { where: "claude", text: "Leave the session with `/exit`." },
+    { where: "editor", text: "Write `.labs/work/notes.md`." },
+  ],
+};
+
+describe("renderBrief window tags", () => {
+  const empty = { done: {}, hints: {} };
+  it("matches the snapshot with colour off", () => {
+    expect(renderBrief(tagged, empty, false)).toMatchInlineSnapshot(`
+      "start-01  First prompt
+      Pairs with docs/README.md
+
+      Goal Ask one question.
+
+      Steps
+      1. [in your shell] Make the folder: \`mkdir -p .labs/work\`.
+      2. [in Claude Code] Leave the session with \`/exit\`.
+      3. [in your editor] Write \`.labs/work/notes.md\`.
+
+      Hints: 0 of 2 revealed. Reveal the next with: make lab HINT=1"
+    `);
+  });
+  it("paints each tag with its own colour code", () => {
+    const text = renderBrief(tagged, empty, true);
+    expect(text).toContain("\u001b[36min your shell\u001b[0m");
+    expect(text).toContain("\u001b[33min Claude Code\u001b[0m");
+    expect(text).toContain("\u001b[36min your editor\u001b[0m");
+  });
+});
+
 describe("renderBrief", () => {
   it("shows the goal and steps but hides unrevealed hints", () => {
     const text = renderBrief(lab, { done: {}, hints: {} }, false);
     expect(text).toContain("Ask one question.");
-    expect(text).toContain("1. Run `claude`.");
+    expect(text).toContain("1. [in your shell] Run `claude`.");
     expect(text).not.toContain("one\n");
     expect(text).toContain("0 of 2");
   });

@@ -12,13 +12,19 @@ const oneLine = z
   .max(240)
   .regex(/^[^\n]+$/, "must be one line");
 
+// Where a step is typed. A learner keeps Claude Code and a shell side by side; an untagged step is a shell step.
+export const WINDOWS = ["shell", "claude", "editor"] as const;
+export type Window = (typeof WINDOWS)[number];
+export const stepSchema = z.object({ where: z.enum(WINDOWS), text: z.string().min(1) });
+export type Step = z.infer<typeof stepSchema>;
+
 export const labSchema = z.object({
   id: z.string().regex(/^[a-z]+-\d{2}$/),
   lane: z.enum(LANES),
   title: oneLine,
   pairs: z.string().min(1),
   goal: oneLine,
-  steps: z.array(z.string().min(1)).min(1),
+  steps: z.array(stepSchema).min(1),
   proof: z.string().min(1),
   // Two or more, so the first nudges and the last gives the answer away.
   hints: z.array(z.string().min(1)).min(2),
@@ -45,6 +51,14 @@ function listItems(body: string): string[] {
   return items;
 }
 
+export function parseStep(raw: string): Step {
+  const tag = /^\[([a-z]+)\] ?/.exec(raw);
+  if (!tag) return { where: "shell", text: raw };
+  const where = WINDOWS.find((w) => w === tag[1]);
+  if (!where) throw new Error(`unknown window tag [${tag[1]}], use ${WINDOWS.join(", ")}`);
+  return { where, text: raw.slice(tag[0].length) };
+}
+
 function proofOf(body: string): string {
   return /```sh\n([\s\S]*?)\n```/.exec(body)?.[1]?.trim() ?? "";
 }
@@ -59,7 +73,7 @@ export function parseLab(lane: string, file: string, text: string): Lab {
     title: /^# (.+)$/m.exec(text)?.[1],
     pairs: /^\*\*Pairs with:\*\* `([^`]+)`/m.exec(text)?.[1],
     goal: parts.get("goal"),
-    steps: listItems(parts.get("steps") ?? ""),
+    steps: listItems(parts.get("steps") ?? "").map(parseStep),
     proof: proofOf(parts.get("proof") ?? ""),
     hints: listItems(parts.get("hints") ?? ""),
     learned: parts.get("what you just learned"),

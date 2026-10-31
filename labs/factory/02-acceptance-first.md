@@ -10,7 +10,7 @@ Turn the intent into Given, When, Then scenarios that a test can be written from
 
 1. Read the stage: `cat docs/factory/f2-design.md`.
 2. Open your intent: `cat .labs/work/specs/1/intent.md`.
-3. Write `.labs/work/specs/1/acceptance.md` with two scenarios. Each has one `Given`, one `When` and one `Then` line.
+3. [editor] Write `.labs/work/specs/1/acceptance.md` with two scenarios. Each has one `Given`, one `When` and one `Then` line.
 4. Each Then is something a program can assert, such as a status code or a file.
 
 ## Proof

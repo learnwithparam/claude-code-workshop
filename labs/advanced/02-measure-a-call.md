@@ -11,7 +11,7 @@ Run one headless call with a turn cap and read its cost from the JSON result.
 1. Make the folder: `mkdir -p .labs/work`.
 2. Call with a cap: `claude -p "List the folders in this repo." --max-turns 2 --output-format json > .labs/work/call.json`.
 3. Read the cost: `node -e "console.log(require('./.labs/work/call.json').total_cost_usd)"`.
-4. Write the number into `.labs/work/cost.txt`.
+4. [editor] Write the number into `.labs/work/cost.txt`.
 
 ## Proof
 

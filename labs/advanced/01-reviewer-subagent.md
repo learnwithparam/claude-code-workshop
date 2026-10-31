@@ -10,8 +10,8 @@ Define a subagent that can read and search but cannot write, so a review can nev
 
 1. Read a real one: `ls .claude/agents` then `cat` one.
 2. Make the folder: `mkdir -p .labs/work/agents`.
-3. Write `.labs/work/agents/reviewer.md` with front matter `name`, `description`, `tools` and `model`, then a short prompt.
-4. The `tools` line lists only `Read, Grep, Glob`.
+3. [editor] Write `.labs/work/agents/reviewer.md` with front matter `name`, `description`, `tools` and `model`, then a short prompt.
+4. [editor] The `tools` line lists only `Read, Grep, Glob`.
 
 ## Proof
 

@@ -25,6 +25,26 @@ describe("labs", () => {
     expect(stray).toEqual([]);
   });
 
+  // A learner who types /exit into zsh, or a shell command into Claude Code, thinks the lab is broken.
+  const slash = /`\/[a-z][a-z-]*[^`]*`/;
+  const shell = /`(make|git|npm|npx|node|cd|mkdir|cat|ls|echo|tail|test|claude)( [^`]*)?`/;
+  const steps = labs.flatMap((l) => l.steps.map((s, i) => ({ at: `${l.id} step ${i + 1}`, ...s })));
+
+  it("no step mixes a slash command with a shell command", () => {
+    const mixed = steps.filter((s) => slash.test(s.text) && shell.test(s.text)).map((s) => s.at);
+    expect(mixed).toEqual([]);
+  });
+
+  it("every step with a slash command is tagged [claude]", () => {
+    const wrong = steps.filter((s) => slash.test(s.text) && s.where !== "claude").map((s) => s.at);
+    expect(wrong).toEqual([]);
+  });
+
+  it("a step that writes a file is tagged [editor]", () => {
+    const wrong = steps.filter((s) => /^(Write|Create) /.test(s.text) && s.where !== "editor");
+    expect(wrong.map((s) => s.at)).toEqual([]);
+  });
+
   it.each(labs)("$id pairs with a doc that exists and is listed in the path table", (lab) => {
     expect(existsSync(lab.pairs) || isOwned(lab.pairs), `${lab.pairs} is missing`).toBe(true);
     const row = readme.split("\n").find((line) => line.includes(`\`${lab.id}\``));
