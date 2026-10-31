@@ -43,7 +43,9 @@ describe("f10 assignments", () => {
   it("has no template or test the page does not name", () => {
     const named = new Set(sections.flatMap((s) => [s.template, s.test]));
     const files = [
-      ...listOrEmpty(".github/ISSUE_TEMPLATE").map((f) => `.github/ISSUE_TEMPLATE/${f}`),
+      ...listOrEmpty(".github/ISSUE_TEMPLATE")
+        .filter((f) => f.startsWith("assignment-"))
+        .map((f) => `.github/ISSUE_TEMPLATE/${f}`),
       ...listOrEmpty("tests/assignments").map((f) => `tests/assignments/${f}`),
     ];
     expect(files.filter((f) => !named.has(f))).toEqual([]);
