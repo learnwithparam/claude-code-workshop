@@ -100,7 +100,7 @@ Each red test below is skipped by default in the finished design, as `make prove
 
 ## 12. Count the review calls in the spend cap
 
-- **Goal:** `runReview` in `factory/engine/interpret.ts` adds the cost of the builder's fix to the run total, but not the lens hunts or the verifier ballots, and gives those calls no remaining-budget ceiling. Close the gap so the cap covers every agent call.
+- **Goal:** closed in the harness (`factory/engine/review-spend.test.ts`): `runReview` in `factory/engine/interpret.ts` counts every lens hunt, ballot and fix and gives each the remaining-budget ceiling. Use it as the worked example for a cap on another kind of call.
 - **Workflow:** `feature-atdd`.
 - **Issue:** "A review step adds every lens and verifier cost to the run total, checks the cap before each round, and stops with the reason `spend cap`."
 - **Failing test (proposed `tests/assignments/review-spend.test.ts`):** with `fakeHost` from `factory/engine/fake-host.ts`, give every agent a `costUsd`, run a `review` step with a small `spend.capUsd`, and assert `cost.json` lists the review calls and the run stops with the reason. `factory/engine/models.test.ts` has the same shape for the other steps.
