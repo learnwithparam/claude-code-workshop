@@ -3,6 +3,12 @@
 **Pairs with:** `docs/factory/f1-plan.md`
 **Help:** goal
 
+## Warm-up
+
+What makes a review rule useful?
+From: team-02
+Answer: A diff can break it. Vague advice cannot be checked, so it is noise.
+
 ## Goal
 
 Write the intent a factory run starts from, at .labs/work/specs/1/intent.md: a Problem, a Done when with two checks a command could run, and an Out of scope. The proof below must pass.

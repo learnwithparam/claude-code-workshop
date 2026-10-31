@@ -3,6 +3,12 @@
 **Pairs with:** `docs/levels/boundary.md`
 **Help:** hinted
 
+## Warm-up
+
+Which exit code makes a hook block a tool call?
+From: daily-04
+Answer: Exit code 2. The stderr text is shown to the model so it can explain the block.
+
 ## Goal
 
 Write a settings file that denies reading `.env` files, so the rule holds for everyone who clones the repo.

@@ -3,6 +3,12 @@
 **Pairs with:** `docs/levels/boundary.md`
 **Help:** hinted
 
+## Warm-up
+
+Does a skill load because of its name or its description?
+From: daily-03
+Answer: Its description. Claude matches the situation to the description, so write it as a situation.
+
 ## Goal
 
 Write a hook that stops Claude from editing `.env`, and prove it by feeding it both cases.

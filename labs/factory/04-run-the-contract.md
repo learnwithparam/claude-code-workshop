@@ -3,6 +3,12 @@
 **Pairs with:** `docs/factory/f8-workflows.md`
 **Help:** goal
 
+## Warm-up
+
+What does the factory read: your chat or what was committed?
+From: factory-01
+Answer: Only what was committed. An intent with a checkable done is the contract.
+
 ## Goal
 
 Run the workflow contract tests and save the log to .labs/work/contract.log, then read what passed or failed. This shows the stages and their artifacts agree. The proof below must pass.

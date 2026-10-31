@@ -3,6 +3,12 @@
 **Pairs with:** `docs/electives/agent-teams.md`
 **Help:** goal
 
+## Warm-up
+
+What do you do instead of re-explaining a task to Claude?
+From: daily-01
+Answer: Resume the saved session and carry on from where you left off.
+
 ## Goal
 
 Create a second checkout of this repo at .labs/work/wt on a new branch, so two sessions can edit at once without sharing files. Keep it until the proof passes, then remove it. The proof below must pass.

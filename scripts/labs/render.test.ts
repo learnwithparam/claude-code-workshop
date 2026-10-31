@@ -54,6 +54,25 @@ describe("renderMap", () => {
   });
 });
 
+describe("warm-up", () => {
+  const withWarmup: Lab = {
+    ...lab,
+    id: "daily-01",
+    warmup: { question: "What blocks a hook?", from: "start-01", answer: "Exit code 2." },
+  };
+  it("shows above the goal, with its answer under Hints, when the source lab is done", () => {
+    const text = renderBrief(withWarmup, { done: { "start-01": "x" }, hints: {} }, false);
+    expect(text).toContain("Warm-up (from start-01) What blocks a hook?");
+    expect(text.indexOf("Warm-up")).toBeLessThan(text.indexOf("Goal"));
+    expect(text.indexOf("Answer: Exit code 2.")).toBeGreaterThan(text.indexOf("Hints:"));
+  });
+  it("is absent when the source lab is not done", () => {
+    const text = renderBrief(withWarmup, { done: {}, hints: {} }, false);
+    expect(text).not.toContain("Warm-up");
+    expect(text).not.toContain("Exit code 2.");
+  });
+});
+
 describe("renderBrief", () => {
   it("shows the goal and steps but hides unrevealed hints", () => {
     const text = renderBrief(lab, { done: {}, hints: {} }, false);

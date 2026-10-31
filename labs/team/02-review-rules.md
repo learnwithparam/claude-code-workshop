@@ -3,6 +3,12 @@
 **Pairs with:** `docs/levels/verification.md`
 **Help:** hinted
 
+## Warm-up
+
+When does a path-scoped rule cost context?
+From: daily-02
+Answer: Only when a file matching its paths is in play. Otherwise it stays unloaded.
+
 ## Goal
 
 Write a short `REVIEW.md` that tells a reviewer what to flag, each rule something a diff can fail.

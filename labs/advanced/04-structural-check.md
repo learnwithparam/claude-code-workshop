@@ -3,6 +3,12 @@
 **Pairs with:** `docs/levels/workflows.md`
 **Help:** goal
 
+## Warm-up
+
+What does the workflow contract test walk?
+From: factory-04
+Answer: Every workflow file, so one edit that breaks a stage shows up at once.
+
 ## Goal
 
 Write .labs/work/check-kebab.mjs: given a folder, it walks it, prints each file whose name is not lowercase with dashes and dots, and exits 1 if any. Prove it passes on docs and fails on a bad tree. The proof below must pass.
