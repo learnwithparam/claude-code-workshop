@@ -7,6 +7,12 @@ export const metricsSchema = z.object({
   outcome: z.enum(["done", "awaiting-approval", "needs-human"]),
   rounds: z.record(z.string(), z.number()),
   costUsd: z.number(),
+  startedAt: z.iso.datetime(),
+  finishedAt: z.iso.datetime(),
+  stages: z.record(
+    z.string(),
+    z.object({ startedAt: z.iso.datetime(), finishedAt: z.iso.datetime() }),
+  ),
 });
 export type Metrics = z.infer<typeof metricsSchema>;
 
@@ -16,6 +22,9 @@ export const metricsFor = (ticket: number, workflow: string, r: Result): Metrics
   outcome: r.outcome,
   rounds: r.rounds,
   costUsd: r.costUsd,
+  startedAt: r.startedAt,
+  finishedAt: r.finishedAt,
+  stages: r.stages,
 });
 
 // A run is first-pass when it finished and no step needed a second round.

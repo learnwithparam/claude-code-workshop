@@ -23,6 +23,10 @@ export type Result = {
   // One entry per agent call: the model the resolver chose and what it cost. Written to cost.json.
   calls: { stage: string; round: number; model: string; costUsd: number }[];
   rounds: Record<string, number>;
+  // ISO times for the run and for each stage, written to metrics.json.
+  startedAt: string;
+  finishedAt: string;
+  stages: Record<string, { startedAt: string; finishedAt: string }>;
   costUsd: number;
   log: string[];
 };
@@ -55,7 +59,8 @@ async function gateMet(host: Host, n: number, step: Step, log?: string[]): Promi
 
 // Runs a workflow's steps in order. A step repeats its agent while its loop checks fail, up to the cap;
 // the evidence of the failing checks is the next round's prompt, so the loop learns from the check, not the model.
-export type RunOptions = { config?: FactoryConfig; ticketType?: string };
+// `commitLog` commits specs/<n>/run.log when the run ends, so the log is not left untracked.
+export type RunOptions = { config?: FactoryConfig; ticketType?: string; commitLog?: boolean };
 
 export async function runWorkflow(
   host: Host,
@@ -67,6 +72,9 @@ export async function runWorkflow(
   const res: Result = {
     outcome: "done",
     rounds: {},
+    startedAt: new Date().toISOString(),
+    finishedAt: "",
+    stages: {},
     costUsd: 0,
     calls: [],
     log: [`workflow ${wf.name}`],
@@ -74,6 +82,7 @@ export async function runWorkflow(
   const finish = async (outcome: Outcome, stoppedAt?: string, reason?: string): Promise<Result> => {
     res.outcome = outcome;
     res.stoppedAt = stoppedAt;
+    res.finishedAt = new Date().toISOString();
     host.setPhase(null);
     if (reason) {
       res.reason = reason;
@@ -86,6 +95,7 @@ export async function runWorkflow(
       "cost.json",
       `${JSON.stringify({ capUsd: opts.config?.spend.capUsd ?? null, totalUsd: res.costUsd, calls: res.calls }, null, 2)}\n`,
     );
+    if (opts.commitLog) await host.commit(`factory run log #${n}`, [artifactPath(n, "run.log")]);
     return res;
   };
 
@@ -100,7 +110,9 @@ export async function runWorkflow(
   }
 
   for (const step of wf.steps.slice(resumeAt)) {
+    const startedAt = new Date().toISOString();
     const stopped = await runStep(host, step, n, ticket, res, wf, opts);
+    res.stages[step.stage] = { startedAt, finishedAt: new Date().toISOString() };
     if (stopped) return finish("needs-human", step.stage, res.reason);
     if (step.gate === "human" && !(await gateMet(host, n, step, res.log))) {
       res.log.push(`gate ${step.stage} awaiting approval`);
@@ -123,9 +135,12 @@ async function runStep(
   const manifests = wf.manifests;
   const cfg = opts.config;
   // A reply the runner refuses (chat instead of the artifact) gets the reason and two more tries.
-  if (step.review) return runReview(host, step, n, res);
+  if (step.review) return runReview(host, step, n, res, opts);
   const max = step.loop?.max ?? (step.writes ? 3 : 1);
   let feedback = "";
+  // The failing checks and their evidence, last round and how many rounds in a row they repeated.
+  let lastFailure = "";
+  let repeats = 0;
   const where = step.writes
     ? `Reply with the artifact only; the runner saves your reply as specs/${n}/${step.writes}.`
     : `Write this stage's artifacts under specs/${n}/.`;
@@ -177,6 +192,14 @@ async function runStep(
     const bad = failing(results).filter(([name]) => until.has(name));
     if (refused) res.log.push(`  ${refused}`);
     if (!bad.length && !out.failed && !refused) return false;
+    const failure = JSON.stringify(bad.map(([k, v]) => [k, v.evidence]));
+    repeats = bad.length && failure === lastFailure ? repeats + 1 : 1;
+    lastFailure = failure;
+    if (bad.length && repeats >= (step.loop?.sameFailure ?? 2)) {
+      res.reason = "test contradicts ticket";
+      res.log.push(`${step.stage} failed the same check with the same evidence ${repeats} rounds`);
+      return true;
+    }
     feedback = `${refused}\nChecks failed in ${artifactPath(n, "run.log")}:\n${bad.map(([k, v]) => `${k}: ${v.evidence}`).join("\n")}`;
   }
   return true;
@@ -184,22 +207,53 @@ async function runStep(
 
 // Lenses hunt in parallel, three verifiers vote, and a builder fixes what survives, up to the round cap.
 // Returns true when an Important finding is left or a lens reply was not findings; the checks still run.
-async function runReview(host: Host, step: Step, n: number, res: Result): Promise<boolean> {
+async function runReview(
+  host: Host,
+  step: Step,
+  n: number,
+  res: Result,
+  opts: RunOptions,
+): Promise<boolean> {
   const lenses = step.review?.lenses ?? [];
+  const cfg = opts.config;
+  const cap = cfg?.spend.capUsd;
+  // Every lens hunt, ballot and fix goes through here, so the run total and the cap see all of them.
+  const counted: Host = {
+    ...host,
+    async agent(name, prompt, o) {
+      if (cfg && cap !== undefined && res.costUsd >= cap * cfg.spend.stopAt) {
+        res.reason = "spend cap";
+        res.log.push(`${o.stage} not run: $${res.costUsd.toFixed(4)} of $${cap} spent`);
+        // A refused call reads as a failed review, never a clean one.
+        return { text: "", costUsd: 0, failed: "spend cap" };
+      }
+      const out = await host.agent(name, prompt, {
+        ...o,
+        maxUsd: cap === undefined ? undefined : cap - res.costUsd,
+      });
+      res.costUsd += out.costUsd;
+      res.calls.push({
+        stage: o.stage,
+        round: res.rounds[step.stage] ?? 1,
+        model: o.model ?? "frontmatter",
+        costUsd: out.costUsd,
+      });
+      return out;
+    },
+  };
   let fixed = false;
   const fixer = async () => {
     fixed = true;
     const findings = (await host.read(artifactPath(n, "review.json"))) ?? "";
     host.setPhase("fix");
-    const out = await host.agent(
+    await counted.agent(
       "builder",
       `Fix these verified review findings. Never edit the locked tests.\n${findings}`,
       { stage: "review-fix" },
     );
     host.setPhase(null);
-    res.costUsd += out.costUsd;
   };
-  const r = await reviewLoop(host, n, lenses, fixer);
+  const r = await reviewLoop(counted, n, lenses, fixer);
   res.rounds[step.stage] = r.rounds;
   res.log.push(`${step.stage} ${r.clean ? "clean" : "NOT clean"} after ${r.rounds} round(s)`);
   // A fixer writes code after the build's checks passed, so the gate runs again on what it left.

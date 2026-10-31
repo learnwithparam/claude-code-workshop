@@ -1,4 +1,4 @@
-import type { Lab } from "./catalog.ts";
+import { type Lab, PATH_IDS, type PathId } from "./catalog.ts";
 import {
   currentLab,
   laneStats,
@@ -28,9 +28,23 @@ export type CliDeps = {
 
 const tail = (text: string, n: number) => text.trimEnd().split("\n").slice(-n).join("\n");
 
+function chooseText(): string {
+  return [
+    "Pick the workshop you signed up for. Run one of these:",
+    "  make lab PATH_ID=pro       Claude Code, beginner to pro",
+    "  make lab PATH_ID=factory   Software Factory",
+  ].join("\n");
+}
+
 function showMap(deps: CliDeps, progress: Progress): void {
   const here = currentLab(deps.labs, progress)?.id;
   deps.out(renderMap(laneStats(deps.labs, progress), deps.labs, progress, here, deps.color));
+  if (!progress.path) {
+    deps.out(`\n${chooseText()}`);
+    return;
+  }
+  const other = PATH_IDS.find((p) => p !== progress.path);
+  deps.out(`\nThe other workshop's labs are hidden. Switch with: make lab PATH_ID=${other}`);
 }
 
 function finish(deps: CliDeps, progress: Progress, lab: Lab): void {
@@ -55,14 +69,30 @@ function hint(deps: CliDeps, progress: Progress, lab: Lab): void {
 export function run(args: string[], deps: CliDeps): number {
   const [command = "progress", ...rest] = args;
   const id = rest.find((a) => !a.startsWith("--"));
-  const progress = loadProgress(deps.progressPath);
+  let progress = loadProgress(deps.progressPath);
+  const picked = rest.find((a) => a.startsWith("--path="))?.slice("--path=".length);
+
+  if (picked !== undefined) {
+    if (!PATH_IDS.includes(picked as PathId)) {
+      deps.out(`Unknown path "${picked}".\n${chooseText()}`);
+      return 2;
+    }
+    progress = { ...progress, path: picked as PathId };
+    saveProgress(deps.progressPath, progress);
+  }
 
   if (command === "progress") {
     showMap(deps, progress);
     return 0;
   }
   if (command !== "lab" && command !== "next") {
-    deps.out("usage: make lab [ID=<id>] [HINT=1] | make next | make progress");
+    deps.out(
+      "usage: make lab [PATH_ID=pro|factory] [ID=<id>] [HINT=1] | make next | make progress",
+    );
+    return 2;
+  }
+  if (!progress.path) {
+    deps.out(chooseText());
     return 2;
   }
   const wanted = command === "next" ? undefined : id;
@@ -107,6 +137,10 @@ export async function runWatch(args: string[], deps: CliDeps): Promise<number> {
   const { watch, keys } = deps;
   if (!deps.isTTY || !watch || !keys) {
     deps.out("Watch needs a terminal; running the proof once.");
+    return run(plain, deps);
+  }
+  // Picking or lacking a path is handled once by run, which saves it or asks for it.
+  if (plain.some((a) => a.startsWith("--path=")) || !loadProgress(deps.progressPath).path) {
     return run(plain, deps);
   }
   const wanted = plain.slice(1).find((a) => !a.startsWith("--"));
