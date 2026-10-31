@@ -4,12 +4,7 @@ method: prose check
 source: engineering standard
 for: documentation
 steps:
-  - {
-      stage: plan,
-      writes: plan.md,
-      agent: planner,
-      brief: "Reply with the plan and nothing else: one repo path per line for every file you will create or change, never a script you only run. The runner saves your reply as specs/<issue>/plan.md, and later stages may touch only the files listed.",
-    }
+  - { stage: plan, writes: plan.md, agent: planner }
   - {
       stage: write,
       agent: builder,
@@ -17,4 +12,9 @@ steps:
       checks: [prose, gate],
       loop: { until: [prose, gate], max: 3 },
     }
-  - { stage: review, agent: reviewer, checks: [plan-drift] }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }

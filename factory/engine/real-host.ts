@@ -12,14 +12,10 @@ import {
 import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { resolveModel } from "./models.ts";
 import type { Host } from "./types.ts";
 
 const AGENT_ENV = ["PATH", "SHELL", "TERM", "LANG", "ANTHROPIC_API_KEY"];
-const MODELS: Record<string, string> = {
-  opus: "claude-opus-5-5",
-  sonnet: "claude-sonnet-5-5",
-  haiku: "claude-haiku-5-5",
-};
 
 // .claude/agents/<name>.md: the frontmatter sets what the agent may do, the body is its prompt.
 export function parseAgent(text: string) {
@@ -39,14 +35,21 @@ export function approvalIn(
   stage: string,
   digest: string,
   approvers?: string[],
+  need = 1,
 ): boolean {
   const line = `approve ${stage} ${digest}`;
-  return comments.some(
-    (c) =>
-      ["OWNER", "MEMBER", "COLLABORATOR"].includes(c.authorAssociation) &&
-      (!approvers || approvers.includes(c.author?.login ?? "")) &&
-      c.body.split("\n").some((l) => l.trim() === line),
+  // Distinct people: one person commenting twice is still one approval.
+  const who = new Set(
+    comments
+      .filter(
+        (c) =>
+          ["OWNER", "MEMBER", "COLLABORATOR"].includes(c.authorAssociation) &&
+          (!approvers || approvers.includes(c.author?.login ?? "")) &&
+          c.body.split("\n").some((l) => l.trim() === line),
+      )
+      .map((c) => c.author?.login ?? ""),
   );
+  return who.size >= need;
 }
 
 export type RealHostOptions = {
@@ -112,7 +115,7 @@ export function realHost(o: RealHostOptions): Host {
   const tag = (v: string) => createHmac("sha256", key).update(v).digest("hex");
 
   return {
-    async agent(name, prompt, { stage }) {
+    async agent(name, prompt, { stage, model, maxUsd }) {
       const { fm, body } = parseAgent(
         readFileSync(join(o.cwd, ".claude/agents", `${name}.md`), "utf8"),
       );
@@ -124,9 +127,9 @@ export function realHost(o: RealHostOptions): Host {
           prompt,
           options: {
             cwd: o.cwd,
-            model: MODELS[fm.model ?? "sonnet"] ?? fm.model,
+            model: model ?? resolveModel({ step: stage, type: "", frontmatter: fm.model }),
             maxTurns: Number(fm.maxTurns ?? 20),
-            maxBudgetUsd: o.maxUsdPerAgent ?? 3,
+            maxBudgetUsd: Math.min(o.maxUsdPerAgent ?? 3, maxUsd ?? Number.POSITIVE_INFINITY),
             permissionMode: fm.permissionMode === "acceptEdits" ? "acceptEdits" : "plan",
             allowedTools: fm.tools?.split(",").map((t) => t.trim()),
             systemPrompt: { type: "preset", preset: "claude_code", append: body },
@@ -204,7 +207,7 @@ export function realHost(o: RealHostOptions): Host {
       return [...new Set([...diff, ...dirty])].filter(Boolean);
     },
 
-    async commit(message) {
+    async commit(message, paths) {
       // No repo hooks or fsmonitor: the agent can write .git/hooks, and a commit must not run them.
       if (gitConfig() !== pinnedConfig)
         throw new Error("git config changed during the run; refusing to commit");
@@ -220,7 +223,8 @@ export function realHost(o: RealHostOptions): Host {
           "core.attributesFile=/dev/null",
           ...a,
         ]);
-      g("add", "-A");
+      const scope = paths?.length ? ["--", ...paths] : [];
+      g("add", ...(scope.length ? scope : ["-A"]));
       const r = g(
         "-c",
         "user.name=factory",
@@ -230,6 +234,7 @@ export function realHost(o: RealHostOptions): Host {
         "--no-verify",
         "-m",
         message,
+        ...scope,
       );
       if (r.status !== 0) throw new Error(`commit failed: ${r.stderr}`);
     },
@@ -250,11 +255,11 @@ export function realHost(o: RealHostOptions): Host {
     setPhase(p) {
       phase = p;
     },
-    async approved(n, stage, digest) {
+    async approved(n, stage, digest, need = 1) {
       // Runner-side call with the real environment: gh needs the person's login, the agents never see it.
       const r = sh("gh", ["issue", "view", String(n), "--json", "comments"], o.cwd, process.env);
       if (r.status !== 0) return false;
-      return approvalIn(JSON.parse(r.stdout).comments ?? [], stage, digest, o.approvers);
+      return approvalIn(JSON.parse(r.stdout).comments ?? [], stage, digest, o.approvers, need);
     },
   };
 }

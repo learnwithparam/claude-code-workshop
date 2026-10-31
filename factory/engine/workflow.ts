@@ -1,6 +1,7 @@
 import { parse } from "yaml";
 import { z } from "zod";
 import { AGENT_ARTIFACTS } from "./artifacts.ts";
+import { portable } from "./portable.ts";
 
 export const CHECK_NAMES = [
   "red",
@@ -29,11 +30,20 @@ const stepSchema = z.object({
   brief: z.string().optional(),
   // A read-only agent cannot write its own artifact, so the runner saves its reply as this one.
   writes: z.enum(AGENT_ARTIFACTS).optional(),
+  // The reply must begin with this text, or it is chat and not the artifact; nothing is saved.
+  startsWith: z.string().optional(),
   checks: z.array(z.enum(CHECK_NAMES)).default([]),
-  // Repeat the agent until every check in `until` passes, at most `max` times.
+  // Repeat the agent until every check in `until` passes, at most `max` times. The same failing check with
+  // the same evidence `sameFailure` rounds in a row (default 2) means the test contradicts the ticket.
   loop: z
-    .object({ until: z.array(z.enum(CHECK_NAMES)).min(1), max: z.number().int().min(1).max(5) })
+    .object({
+      until: z.array(z.enum(CHECK_NAMES)).min(1),
+      max: z.number().int().min(1).max(5),
+      sameFailure: z.number().int().min(2).default(2),
+    })
     .optional(),
+  // Parallel lenses hunt, three verifiers vote (2 of 3 keep a finding), a builder fixes what survives.
+  review: z.object({ lenses: z.array(z.string()).min(1) }).optional(),
   gate: z.enum(["human", "auto"]).default("auto"),
   // Fix steps run with the test lock on.
   phase: z.enum(["build", "fix"]).default("build"),
@@ -57,5 +67,8 @@ export function loadWorkflow(text: string): Workflow {
     for (const c of step.loop?.until ?? [])
       if (!step.checks.includes(c))
         throw new Error(`step ${step.stage}: loop check ${c} is not in its checks`);
+  // The plan brief is written once, in .factory/config.yaml; a plan step that sets none takes it.
+  for (const step of wf.steps)
+    if (step.writes === "plan.md" && !step.brief) step.brief = portable().planBrief;
   return wf;
 }

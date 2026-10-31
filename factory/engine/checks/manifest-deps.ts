@@ -95,7 +95,10 @@ export const manifestDeps: Check = {
     const changed = await host.changedFiles();
     for (const file of changed.filter((f) => INSTALL_CONFIG.test(f)))
       problems.push(`${file} is an install file this check does not cover`);
-    for (const file of changed.filter((f) => isManifest(f) || isLockfile(f))) {
+    const touched = changed.filter((f) => isManifest(f) || isLockfile(f));
+    // Run 36 reported done with the registry blocked and nothing bumped; an empty diff must not pass.
+    if (!touched.length) problems.push("no manifest or lockfile changed");
+    for (const file of touched) {
       const base = await baseJson(host, file);
       const head = await headJson(host, file);
       if (!base || !head) {

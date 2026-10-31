@@ -1,4 +1,4 @@
-.PHONY: prove-homework doctor dev check check-affected prove levels claude smoke hooks eval factory exercise
+.PHONY: lab next progress prove-homework doctor dev check check-affected prove levels claude smoke hooks eval factory exercise
 
 doctor:
 	@node -v | grep -qE '^v2[2-9]' && echo "ok node $$(node -v)" || (echo "need Node 22+" && exit 1)
@@ -51,3 +51,13 @@ levels:
 # A session that ignores your own ~/.claude, so a demo shows only this repo's config.
 claude:
 	CLAUDE_CONFIG_DIR=$(CURDIR)/.workshop-home claude
+
+# Hands-on labs, start to advanced. HINT=1 reveals one hint; WATCH=1 reruns the proof on each save; PATH_ID=pro|factory picks your workshop; ID=<lab> picks a lab; progress is in .labs/ (gitignored).
+lab:
+	npx tsx scripts/labs/main.ts lab $(ID) $(if $(PATH_ID),--path=$(PATH_ID)) $(if $(HINT),--hint) $(if $(WATCH),--watch)
+
+next:
+	npx tsx scripts/labs/main.ts next
+
+progress:
+	npx tsx scripts/labs/main.ts progress

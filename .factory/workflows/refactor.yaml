@@ -4,12 +4,7 @@ method: characterization then behaviour-unchanged
 source: Working Effectively with Legacy Code
 for: refactors
 steps:
-  - {
-      stage: plan,
-      writes: plan.md,
-      agent: planner,
-      brief: "Reply with the plan and nothing else: one repo path per line for every file you will create or change; a new source file also needs its owner entry, so list levels.json. The runner saves your reply as specs/<issue>/plan.md, and later stages may touch only the files listed.",
-    }
+  - { stage: plan, writes: plan.md, agent: planner }
   - {
       stage: characterize,
       agent: builder,
@@ -31,4 +26,9 @@ steps:
       checks: [mutation],
       loop: { until: [mutation], max: 3 },
     }
-  - { stage: review, agent: reviewer, checks: [plan-drift] }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }

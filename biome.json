@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.6.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.4/schema.json",
   "files": {
     "includes": [
       "**",
@@ -7,6 +7,7 @@
       "!**/node_modules",
       "!fixtures",
       "!supplied",
+      "!.labs",
       "!test-results",
       "!playwright-report",
       "!.workshop-home",

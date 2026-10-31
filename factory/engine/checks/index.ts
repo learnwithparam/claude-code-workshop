@@ -1,12 +1,15 @@
+import { portable } from "../portable.ts";
 import type { Check } from "../types.ts";
 import { commandCheck } from "./exec-check.ts";
+import { holdout } from "./holdout.ts";
 import { lock } from "./lock.ts";
 import { manifestDeps } from "./manifest-deps.ts";
 import { mutation } from "./mutation.ts";
 import { planDriftCheck } from "./plan-drift.ts";
 import { red } from "./red.ts";
 
-const vitestFor = (dir: (n: number) => string) => (n: number) => ["vitest", "run", dir(n)];
+const t = () => portable().tests;
+const unit = (dir: (n: number) => string) => (n: number) => [...t().unit, dir(n)];
 
 // Every check declares its test size: prepush runs the small ones, CI runs all of them.
 export const CHECKS: Record<string, Check> = {
@@ -15,41 +18,32 @@ export const CHECKS: Record<string, Check> = {
   "plan-drift": planDriftCheck,
   green: commandCheck(
     "small",
-    "npx",
-    vitestFor((n) => `specs/${n}`),
+    unit((n) => `specs/${n}`),
   ),
   acceptance: commandCheck(
     "medium",
-    "npx",
-    vitestFor((n) => `specs/${n}`),
+    unit((n) => `specs/${n}`),
   ),
   // Holdout cases live where the builder's tools cannot read them; the runner alone executes them.
-  holdout: commandCheck(
-    "medium",
-    "npx",
-    vitestFor((n) => `.factory/holdout/${n}`),
-  ),
+  holdout,
   properties: commandCheck(
     "medium",
-    "npx",
-    vitestFor((n) => `specs/${n}/properties`),
+    unit((n) => `specs/${n}/properties`),
   ),
   "behaviour-unchanged": commandCheck(
     "medium",
-    "npx",
-    vitestFor((n) => `specs/${n}/golden`),
+    unit((n) => `specs/${n}/golden`),
   ),
   mutation,
   "manifest-deps": manifestDeps,
   contract: commandCheck(
     "medium",
-    "npx",
-    vitestFor(() => "tests/contract"),
+    unit(() => portable().paths.contract),
   ),
-  visual: commandCheck("large", "npx", () => ["playwright", "test", "tests/e2e"]),
-  eval: commandCheck("large", "npx", () => ["tsx", "scripts/eval.ts"]),
-  gate: commandCheck("large", "make", () => ["check"]),
-  prepush: commandCheck("small", "bash", () => ["scripts/git/pre-push"]),
-  ci: commandCheck("large", "gh", () => ["pr", "checks", "--watch"]),
-  prose: commandCheck("small", "npx", () => ["tsx", "scripts/check-prose.ts", "docs"]),
+  visual: commandCheck("large", () => t().e2e),
+  eval: commandCheck("large", () => t().eval),
+  gate: commandCheck("large", () => portable().gate),
+  prepush: commandCheck("small", () => t().prepush),
+  ci: commandCheck("large", () => ["gh", "pr", "checks", "--watch"]),
+  prose: commandCheck("small", () => t().prose),
 };

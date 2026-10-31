@@ -53,6 +53,14 @@ describe("manifest-deps on a manifest", () => {
   });
 });
 
+describe("manifest-deps when nothing changed", () => {
+  it("fails: a bump that changed no manifest or lockfile proved nothing", async () => {
+    const r = await run({ "specs/1/bump.md": "blocked" }, {});
+    expect(r.ok).toBe(false);
+    expect(r.evidence).toMatch(/no manifest or lockfile changed/);
+  });
+});
+
 describe("manifest-deps on a lockfile", () => {
   it("passes the registry tarball for the new version", async () => {
     expect((await lockfile(lock("4.1.0"))).ok).toBe(true);

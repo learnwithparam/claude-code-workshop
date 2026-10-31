@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { firstPass, type Metrics, rollup } from "./metrics.ts";
+import type { Result } from "./interpret.ts";
+import { firstPass, type Metrics, metricsFor, metricsSchema, rollup } from "./metrics.ts";
 
 const m = (rounds: Record<string, number>, outcome: Metrics["outcome"] = "done"): Metrics => ({
   ticket: 1,
@@ -7,6 +8,9 @@ const m = (rounds: Record<string, number>, outcome: Metrics["outcome"] = "done")
   outcome,
   rounds,
   costUsd: 0.5,
+  startedAt: "2026-10-31T10:00:00.000Z",
+  finishedAt: "2026-10-31T10:05:00.000Z",
+  stages: {},
 });
 
 describe("metrics", () => {
@@ -28,6 +32,27 @@ describe("metrics", () => {
   });
 });
 
+describe("metricsFor", () => {
+  it("carries the run and stage timestamps through the schema", () => {
+    const r: Result = {
+      outcome: "done",
+      rounds: { fix: 1 },
+      costUsd: 0.1,
+      calls: [],
+      log: [],
+      startedAt: "2026-10-31T10:00:00.000Z",
+      finishedAt: "2026-10-31T10:01:00.000Z",
+      stages: {
+        fix: { startedAt: "2026-10-31T10:00:00.000Z", finishedAt: "2026-10-31T10:01:00.000Z" },
+      },
+    };
+    const out = metricsSchema.parse(metricsFor(1, "bug-tdd", r));
+    expect(out.startedAt).toBe(r.startedAt);
+    expect(out.stages.fix?.finishedAt).toBe(r.finishedAt);
+    expect(() => metricsSchema.parse({ ...out, startedAt: "yesterday" })).toThrow();
+  });
+});
+
 describe("report", () => {
   it("rolls up every saved metrics.json and skips a half-written run", async () => {
     const { mkdtempSync, mkdirSync, writeFileSync } = await import("node:fs");
@@ -36,7 +61,19 @@ describe("report", () => {
     const { report } = await import("./cli.ts");
     const dir = mkdtempSync(join(tmpdir(), "runs-"));
     for (const [n, body] of [
-      ["1", { ticket: 1, workflow: "bug-tdd", outcome: "done", rounds: { fix: 1 }, costUsd: 0.5 }],
+      [
+        "1",
+        {
+          ticket: 1,
+          workflow: "bug-tdd",
+          outcome: "done",
+          rounds: { fix: 1 },
+          costUsd: 0.5,
+          startedAt: "2026-10-31T10:00:00.000Z",
+          finishedAt: "2026-10-31T10:05:00.000Z",
+          stages: {},
+        },
+      ],
       ["2", "{broken"],
     ] as const) {
       mkdirSync(join(dir, n));

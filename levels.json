@@ -1,6 +1,7 @@
 {
   "hand-built": [
     "shared/**",
+    "features/**",
     "web/**",
     "tests/structure/bands.test.ts",
     "fixtures/worksheets.json",
@@ -25,6 +26,7 @@
     ".claude/hooks/posttooluse-format.mjs",
     "docs/managed-settings.example.json",
     "tests/structure/hook-catalogue.test.ts",
+    "tests/structure/workbook-boundaries.test.ts",
     ".gitleaks.toml",
     "scripts/git/**",
     "scripts/prove/boundary.ts",
@@ -83,7 +85,12 @@
     "scripts/commands.ts",
     "scripts/commands.test.ts",
     "docs/commands-by-level.md",
-    "tests/structure/recordings.test.ts"
+    "tests/structure/recordings.test.ts",
+    "labs/**",
+    "scripts/labs/**",
+    "docs/labs/**",
+    "tests/structure/labs.test.ts",
+    "tests/structure/lab-solutions.test.ts"
   ],
   "execution": [
     ".claude/agents/**",
@@ -91,6 +98,7 @@
     ".mcp.json",
     "tests/structure/agent-frontmatter.test.ts",
     ".factory/config.json",
+    ".factory/config.yaml",
     "factory/config.ts",
     "factory/tsconfig.json",
     "scripts/prove/execution.ts",
@@ -190,6 +198,7 @@
   ],
   "workflows": [
     "specs/**",
+    "tests/contract/**",
     "factory/engine/**",
     ".factory/workflows/**",
     ".factory/bands.yaml",
@@ -200,6 +209,34 @@
     "docs/recordings/workflows.cast",
     "docs/recordings/workflows.gif",
     "stryker.config.json",
-    "stryker.vitest.config.ts"
+    "stryker.vitest.config.ts",
+    "docs/factory/f0-1-anatomy.md",
+    "docs/factory/f0-overview.md",
+    "docs/factory/f1-plan.md",
+    "docs/factory/f10-assignments.md",
+    "docs/factory/f11-cloud-sessions.md",
+    "docs/factory/f12-model-routing.md",
+    "docs/factory/f13-spend-and-safety.md",
+    "docs/factory/f2-design.md",
+    "docs/factory/f3-build.md",
+    "docs/factory/f4-test.md",
+    "docs/factory/f5-review.md",
+    "docs/factory/f6-deploy.md",
+    "docs/factory/f7-maintain.md",
+    "docs/factory/f8-workflows.md",
+    "docs/factory/harness-retro.md",
+    "docs/factory/faq.md",
+    "docs/factory/visual-guide.md",
+    "docs/factory/img/**",
+    "tests/structure/factory-visuals.test.ts"
+  ],
+  "capstone": [
+    "scripts/prove/capstone.ts",
+    "docs/levels/capstone.md",
+    "docs/factory/f9-capstone.md",
+    "docs/recordings/capstone.cast",
+    "docs/recordings/capstone.gif",
+    "scripts/capstone-strip.ts",
+    "scripts/capstone-strip.test.ts"
   ]
 }

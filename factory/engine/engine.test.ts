@@ -22,7 +22,7 @@ describe("workflow schema", () => {
 
 describe("runWorkflow", () => {
   const loop = wf(
-    "  - {stage: fix, agent: builder, checks: [green], loop: {until: [green], max: 3}}",
+    "  - {stage: fix, agent: builder, checks: [green], loop: {until: [green], max: 3, sameFailure: 3}}",
   );
   it("loops until the check passes, feeding the evidence back", async () => {
     const { host, calls } = fakeHost({
@@ -32,6 +32,32 @@ describe("runWorkflow", () => {
     expect(r.outcome).toBe("needs-human");
     expect(r.rounds.fix).toBe(3);
     expect(calls.filter((c) => c.startsWith("agent"))).toHaveLength(3);
+  });
+  it("stops after two rounds that fail the same check with the same evidence", async () => {
+    const same = wf(
+      "  - {stage: fix, agent: builder, checks: [green], loop: {until: [green], max: 5}}",
+    );
+    const { host, calls } = fakeHost({
+      exec: [{ match: "npx vitest run specs/1", result: { code: 1, output: "boom" } }],
+    });
+    const r = await runWorkflow(host, same, 1, "t");
+    expect(r.outcome).toBe("needs-human");
+    expect(r.reason).toBe("test contradicts ticket");
+    expect(r.rounds.fix).toBe(2);
+    expect(calls.filter((c) => c.startsWith("agent"))).toHaveLength(2);
+  });
+  it("keeps looping while the failing evidence changes", async () => {
+    const same = wf(
+      "  - {stage: fix, agent: builder, checks: [green], loop: {until: [green], max: 3}}",
+    );
+    let round = 0;
+    const { host } = fakeHost();
+    const exec = host.exec;
+    host.exec = async (cmd, args, o) =>
+      cmd === "npx" ? { code: 1, output: `boom ${++round}` } : exec(cmd, args, o);
+    const r = await runWorkflow(host, same, 1, "t");
+    expect(r.rounds.fix).toBe(3);
+    expect(r.reason).toBeUndefined();
   });
   it("saves a read-only agent's reply as the step's artifact, and nothing when it failed", async () => {
     const plan = wf("  - {stage: plan, agent: planner, writes: plan.md}");
@@ -63,6 +89,47 @@ describe("runWorkflow", () => {
       expect(r.outcome).toBe("needs-human");
     }
   });
+  it("drops plan lines under specs/<n>/ instead of refusing the plan", async () => {
+    // Run 27 listed specs/27/intent.md, which the runner allows anyway, and the whole plan was refused.
+    const plan = wf("  - {stage: plan, agent: planner, writes: plan.md}");
+    const { host, files } = fakeHost({ agents: [{ text: "shared/src/a.ts\nspecs/3/intent.md" }] });
+    expect((await runWorkflow(host, plan, 3, "t")).outcome).toBe("done");
+    expect(files.get("specs/3/plan.md")).toBe("shared/src/a.ts\n");
+  });
+  it("refuses a reply that does not begin as the step requires, and saves nothing", async () => {
+    // Run 28 saved the planner's chat apology as the spec, and it reached the amigos gate as if it were Gherkin.
+    const scenarios = wf(
+      '  - {stage: scenarios, agent: planner, writes: spec.md, startsWith: "Feature:"}',
+    );
+    const chat = fakeHost({
+      agents: [{ text: "I drafted the scenarios, but plan mode blocks edits." }],
+    });
+    expect((await runWorkflow(chat.host, scenarios, 4, "t")).outcome).toBe("needs-human");
+    expect(chat.files.has("specs/4/spec.md")).toBe(false);
+    const real = fakeHost({ agents: [{ text: "\nFeature: kinds\n  Scenario: one" }] });
+    expect((await runWorkflow(real.host, scenarios, 4, "t")).outcome).toBe("done");
+    expect(real.files.get("specs/4/spec.md")).toBe("Feature: kinds\n  Scenario: one\n");
+  });
+  it("retries a refused reply instead of ending the run, and tells the agent why", async () => {
+    // Run 35 stopped three times on one chat reply from the planner; a second try wrote the spec.
+    const scenarios = wf(
+      '  - {stage: scenarios, agent: planner, writes: spec.md, startsWith: "Feature:"}',
+    );
+    const { host, files, prompts } = fakeHost({
+      agents: [{ text: "Plan mode blocks edits." }, { text: "Feature: kinds\n  Scenario: one" }],
+    });
+    expect((await runWorkflow(host, scenarios, 4, "t")).outcome).toBe("done");
+    expect(files.get("specs/4/spec.md")).toContain("Feature: kinds");
+    expect(prompts[1]).toContain('the reply must begin with "Feature:"');
+  });
+  it("tells a step that has `writes` to reply, not to write files", async () => {
+    // Run 34: the read-only planner was told to write under specs/<n>/, could not, and replied with plan-mode chatter.
+    const { host, prompts } = fakeHost({ agents: [{ text: "R1. When x, the system shall y." }] });
+    const spec = wf("  - {stage: spec, agent: planner, writes: spec.md}");
+    await runWorkflow(host, spec, 5, "t");
+    expect(prompts[0]).toContain("runner saves your reply as specs/5/spec.md");
+    expect(prompts[0]).not.toContain("Write this stage's artifacts");
+  });
   it("stops at the cap and writes run.log", async () => {
     const { host, files } = fakeHost({
       exec: [{ match: "npx vitest", result: { code: 1, output: "x" } }],
@@ -85,12 +152,36 @@ describe("runWorkflow", () => {
     expect(done.outcome).toBe("done");
     expect(b.calls).toHaveLength(0);
   });
+  it("on resume skips every step before the last approved gate, so the signed artifacts stay put", async () => {
+    // Run 28 reran its scenarios stage on resume, the spec changed, and the approval no longer matched.
+    const two = wf(
+      "  - {stage: scenarios, agent: planner}\n  - {stage: amigos, agent: reviewer, gate: human}\n  - {stage: build, agent: builder}",
+    );
+    const { host, calls } = fakeHost({ approvals: ["4:amigos"] });
+    const r = await runWorkflow(host, two, 4, "t");
+    expect(r.outcome).toBe("done");
+    expect(calls.filter((c) => c.startsWith("agent"))).toHaveLength(1);
+  });
   it("digest tells a missing file from an empty one and a moved boundary from the same text", async () => {
     const d = (files: Record<string, string>) =>
       artifactDigest(fakeHost({ files }).host, 5, "spec");
     expect(await d({ "specs/5/spec.md": "" })).not.toBe(await d({}));
-    expect(await d({ a: "b\nc", "specs/5/spec.md": "x" })).not.toBe(
-      await d({ "a\nb": "c", "specs/5/spec.md": "x" }),
+    expect(await d({ "specs/5/spec.md": "a\nb" })).not.toBe(
+      await d({ "specs/5/spec.md": "a", "specs/5/intent.md": "b" }),
+    );
+  });
+  it("keeps a spec or plan approval valid after later stages change other files", async () => {
+    // Run 34: the build changed code, so the approved spec hashed differently and a resume regenerated it.
+    const d = (stage: string, files: Record<string, string>) =>
+      artifactDigest(fakeHost({ files: { "specs/6/spec.md": "s", ...files } }).host, 6, stage);
+    expect(await d("spec", {})).toBe(
+      await d("spec", { "specs/6/plan.md": "p", "shared/a.ts": "x" }),
+    );
+    expect(await d("plan", { "specs/6/plan.md": "p" })).toBe(
+      await d("plan", { "specs/6/plan.md": "p", "shared/a.ts": "x" }),
+    );
+    expect(await d("plan", { "specs/6/plan.md": "p" })).not.toBe(
+      await d("plan", { "specs/6/plan.md": "q" }),
     );
   });
   it("binds an approval to the artifact digest, so edited artifacts need a new one", async () => {
@@ -148,6 +239,31 @@ describe("checks", () => {
     expect(planDrift("- `a.ts`\n* b.ts\n", ["a.ts", "b.ts"], 1)).toEqual([]);
     // A path that only appears inside a longer one is not listed.
     expect(planDrift("src/a.ts.bak", ["a.ts"], 1)).toEqual(["a.ts"]);
+  });
+  it("plan-drift lets regenerated golden snapshots through, since a human reviews them at the feedback gate", () => {
+    // Run 29 changed icons, the goldens were regenerated, and the plan could not list them: the gate owns that folder.
+    const snap = "specs/25/golden/__snapshots__/early-reader.html";
+    expect(planDrift("a.ts", ["a.ts", snap], 29)).toEqual([]);
+    // Only snapshot files in a numbered spec's folder: no traversal, no scripts dressed as snapshots.
+    for (const bad of [
+      "specs/../golden/__snapshots__/a.html",
+      "specs/25/golden/__snapshots__/a.ts",
+      "specs/25/golden/__snapshots__/sub/a.html",
+    ])
+      expect(planDrift("a.ts", [bad], 29)).toEqual([bad]);
+    expect(planDrift("a.ts", ["specs/25/golden/other.test.ts"], 29)).toEqual([
+      "specs/25/golden/other.test.ts",
+    ]);
+  });
+});
+
+describe("badPlanLines for another spec's golden test", () => {
+  it("lets a plan list an older spec's golden test, which the lock check already protects", () => {
+    expect(badPlanLines("specs/31/golden/sse-contract.golden.test.ts")).toEqual([]);
+  });
+  it("still refuses golden snapshots and other golden files", () => {
+    const plan = "specs/31/golden/__snapshots__/a.html\nspecs/31/golden/data.json";
+    expect(badPlanLines(plan)).toEqual(plan.split("\n"));
   });
 });
 

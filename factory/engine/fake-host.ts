@@ -16,10 +16,16 @@ export function fakeHost(script: FakeScript = {}) {
   const files = new Map(Object.entries(script.files ?? {}));
   const state = new Map<string, string>();
   const calls: string[] = [];
+  const prompts: string[] = [];
+  const models: (string | undefined)[] = [];
+  const budgets: (number | undefined)[] = [];
   const phases: (string | null)[] = [];
   let agentCalls = 0;
   const host: Host = {
-    async agent(name, _prompt, o) {
+    async agent(name, prompt, o) {
+      prompts.push(prompt);
+      models.push(o.model);
+      budgets.push(o.maxUsd);
       calls.push(`agent ${name} ${o.stage}`);
       const named = script.byAgent?.(name);
       if (named) return { text: "", costUsd: 0.01, ...named };
@@ -39,13 +45,14 @@ export function fakeHost(script: FakeScript = {}) {
     write: async (p, t) => void files.set(p, t),
     list: async (d) => [...files.keys()].filter((k) => k.startsWith(d)),
     changedFiles: async () => script.changed ?? [...files.keys()],
-    commit: async (m) => void calls.push(`commit ${m}`),
+    commit: async (m, paths) =>
+      void calls.push(`commit ${m}${paths ? ` -- ${paths.join(" ")}` : ""}`),
     recall: async (k) => state.get(k) ?? null,
     remember: async (k, v) => void state.set(k, v),
     setPhase: (p) => void phases.push(p),
-    approved: async (n, stage, digest) =>
-      script.approvals?.some((a) => a === `${n}:${stage}` || a === `${n}:${stage}:${digest}`) ??
-      false,
+    approved: async (n, stage, digest, need = 1) =>
+      (script.approvals?.filter((a) => a === `${n}:${stage}` || a === `${n}:${stage}:${digest}`)
+        .length ?? 0) >= need,
   };
-  return { host, files, calls, phases };
+  return { host, files, calls, phases, prompts, models, budgets };
 }

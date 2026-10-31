@@ -10,12 +10,7 @@ steps:
       writes: intent.md,
       brief: "Write a short design contract for the ticket: the screen job, the primary action, the states it needs, the responsive rules, and the patterns to reject. Reply with the contract only.",
     }
-  - {
-      stage: plan,
-      writes: plan.md,
-      agent: planner,
-      brief: "Reply with the plan and nothing else: one repo path per line for every file you will create or change, never a script you only run. The runner saves your reply as specs/<issue>/plan.md, and later stages may touch only the files listed.",
-    }
+  - { stage: plan, writes: plan.md, agent: planner }
   - {
       stage: build,
       agent: builder,
@@ -29,9 +24,14 @@ steps:
       brief: "Review the built UI against the design contract and list what is off. Change nothing.",
     }
   - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }
+  - {
       stage: feedback,
       agent: planner,
       brief: "Summarise what changed for the human who approves, in plain words.",
       gate: human,
     }
-  - { stage: review, agent: reviewer, checks: [plan-drift] }

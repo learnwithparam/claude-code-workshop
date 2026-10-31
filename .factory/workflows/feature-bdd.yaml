@@ -8,7 +8,8 @@ steps:
       stage: scenarios,
       agent: planner,
       writes: spec.md,
-      brief: "Write Gherkin scenarios for the ticket: Given, When, Then with concrete values, one behaviour each. Reply with the scenarios only.",
+      startsWith: "Feature:",
+      brief: "Write Gherkin scenarios for the ticket: Given, When, Then with concrete values, one behaviour each. Begin your reply with Feature: and reply with the scenarios only; the runner saves it as the spec, so a summary or a note about plan mode makes the spec unusable.",
     }
   - {
       stage: amigos,
@@ -16,12 +17,7 @@ steps:
       brief: "Read the scenarios as product, developer and tester. List missing cases and ambiguous steps. Change nothing.",
       gate: human,
     }
-  - {
-      stage: plan,
-      writes: plan.md,
-      agent: planner,
-      brief: "Reply with the plan and nothing else: one repo path per line for every file you will create or change, never a script you only run. The runner saves your reply as specs/<issue>/plan.md, and later stages may touch only the files listed.",
-    }
+  - { stage: plan, writes: plan.md, agent: planner }
   - {
       stage: red,
       agent: builder,
@@ -37,7 +33,12 @@ steps:
       checks: [acceptance, holdout, lock],
       loop: { until: [acceptance, holdout, lock], max: 4 },
     }
-  - { stage: review, agent: reviewer, checks: [plan-drift] }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }
   - {
       stage: ci,
       agent: builder,

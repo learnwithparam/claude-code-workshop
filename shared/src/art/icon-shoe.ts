@@ -1,0 +1,1 @@
+export const SHOE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="shoe" focusable="false"><title>shoe</title><path d="M8 20h18v14l26 6c6 2 6 14 2 14H8z" fill="#ef4444"/><rect x="8" y="48" width="48" height="6" rx="2" fill="#f8fafc"/><path d="M14 28h8M14 34h8" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/></svg>`;

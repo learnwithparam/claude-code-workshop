@@ -1,0 +1,1 @@
+export const TREE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="tree" focusable="false"><title>tree</title><rect x="28" y="36" width="8" height="20" rx="0" fill="#78350f"/><circle cx="32" cy="24" r="18" fill="#16a34a"/><circle cx="20" cy="34" r="10" fill="#15803d"/><circle cx="44" cy="34" r="10" fill="#15803d"/></svg>`;

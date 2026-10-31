@@ -17,12 +17,7 @@ steps:
       gate: human,
       brief: "Write concrete examples, one per line as 'Given <state>, when <action>, then <result>' with real values. Reply with the examples only.",
     }
-  - {
-      stage: plan,
-      writes: plan.md,
-      agent: planner,
-      brief: "Reply with the plan and nothing else: one repo path per line for every file you will create or change, never a script you only run. The runner saves your reply as specs/<issue>/plan.md, and later stages may touch only the files listed.",
-    }
+  - { stage: plan, writes: plan.md, agent: planner }
   - {
       stage: tests,
       agent: builder,
@@ -38,7 +33,12 @@ steps:
       checks: [acceptance, holdout, lock],
       loop: { until: [acceptance, holdout, lock], max: 4 },
     }
-  - { stage: review, agent: reviewer, checks: [plan-drift] }
+  - {
+      stage: review,
+      agent: reviewer,
+      review: { lenses: [reviewer, security-reviewer, test-reviewer] },
+      checks: [plan-drift],
+    }
   - {
       stage: ci,
       agent: builder,

@@ -4,6 +4,8 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: z.string().min(20),
   ALLOWED_ORIGIN: z.string().url().default("http://localhost:4321"),
   DAILY_BUDGET_USD: z.coerce.number().positive().default(1),
+  // Dollars already spent against the shared live-run cap, so eval can stop before it overshoots.
+  LIVE_SPENT_USD: z.coerce.number().nonnegative().default(0),
   PORT: z.coerce.number().int().default(8787),
 });
 export type Env = z.infer<typeof envSchema>;

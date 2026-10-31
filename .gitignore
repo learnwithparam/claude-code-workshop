@@ -10,8 +10,11 @@ dist/
 **/.factory/runs/
 **/.cc-writes/
 *.log
+# The run commits its own log as an audit artifact.
+!specs/*/run.log
 supplied/
 test-results/
 playwright-report/
 .factory-base/
 **/.stryker-tmp/
+.labs/

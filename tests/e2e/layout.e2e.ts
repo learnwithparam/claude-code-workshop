@@ -28,8 +28,11 @@ for (const width of [375, 1280]) {
 }
 
 // Print clipped the answer key once: #worksheet is fixed-height with overflow hidden.
+// The answer key starts its own page (#30), so a worksheet prints as two Letter pages.
 for (const { prompt, worksheet } of fixtures) {
-  test(`prints on one Letter page with nothing clipped: ${prompt}`, async ({ page }) => {
+  test(`prints as the worksheet page plus the answer key page, nothing clipped: ${prompt}`, async ({
+    page,
+  }) => {
     await page.setContent(renderWorksheet(worksheetSchema.parse(worksheet)));
     const clipped = await page.evaluate(() => {
       const sheet = document.getElementById("worksheet");
@@ -38,6 +41,6 @@ for (const { prompt, worksheet } of fixtures) {
     expect(clipped).toBeLessThanOrEqual(0);
     const pdf = await page.pdf({ format: "Letter", printBackground: true });
     const pages = pdf.toString("latin1").match(/\/Type\s*\/Page\b(?!s)/g)?.length ?? 0;
-    expect(pages).toBe(1);
+    expect(pages).toBe(2);
   });
 }

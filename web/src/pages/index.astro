@@ -1,12 +1,10 @@
 ---
 import { renderWorksheet, worksheetSchema } from "@workshop/shared";
 import fixtures from "../../../fixtures/worksheets.json";
+import { EXAMPLE_PROMPTS } from "../lib/example-prompts.ts";
 
-// Offline examples: rendered at build time, so they cost no tokens.
-const examples = fixtures.map((fixture) => ({
-  prompt: fixture.prompt,
-  html: renderWorksheet(worksheetSchema.parse(fixture.worksheet)),
-}));
+// The first fixture is the opening page, rendered at build time so it costs no tokens.
+const firstPage = fixtures[0] ? renderWorksheet(worksheetSchema.parse(fixtures[0].worksheet)) : "";
 ---
 
 <!doctype html>
@@ -32,13 +30,26 @@ const examples = fixtures.map((fixture) => ({
       button { padding: 10px 14px; border: 1px solid var(--ink); background: var(--ink); color: var(--surface); border-radius: 8px; font: inherit; cursor: pointer; }
       button.ghost { background: var(--surface); color: var(--ink); border-color: var(--line); width: 100%; text-align: left; margin-top: 8px; }
       button:disabled { opacity: .5; cursor: wait; }
+      #examples { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+      #examples button.ghost { width: auto; margin: 0; min-height: 44px; }
+      #examples button[aria-pressed="true"] { border-color: var(--ink); border-width: 2px; font-weight: 600; }
+      #strip { max-width: 816px; min-height: 143px; }
+      #strip ul { display: flex; gap: 12px; margin: 0; padding: 4px; list-style: none; overflow-x: auto; }
+      #strip li { flex: none; }
+      .thumb { position: relative; width: 98px; height: 127px; border: 1px solid var(--line); background: var(--surface); overflow: hidden; }
+      .thumb.skeleton { background: var(--line); }
+      .thumb iframe { position: absolute; top: 0; left: 0; width: 816px; max-width: none; height: 1056px; aspect-ratio: auto; border: 0; transform: scale(.12); transform-origin: 0 0; pointer-events: none; }
+      .thumb button { position: absolute; inset: 0; width: 100%; padding: 0; background: transparent; border: 0; border-radius: 0; }
+      .thumb.current { outline: 3px solid var(--ink); outline-offset: 2px; }
+      .thumb .tag { position: absolute; right: 0; bottom: 0; padding: 0 6px; background: var(--ink); color: var(--surface); font-size: 12px; }
       input:focus-visible, button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
       .chip { font-size: 13px; margin: 8px 0 0; min-height: 20px; }
       .preview { display: grid; gap: 8px; min-width: 0; }
       iframe { width: 100%; max-width: 816px; aspect-ratio: 816 / 1056; border: 1px solid var(--line); background: var(--surface); }
       .bar { display: flex; justify-content: space-between; align-items: center; max-width: 816px; }
       h2 { font-size: 14px; color: var(--muted); font-weight: 500; margin: 16px 0 0; }
-      @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
+      @media (max-width: 760px) { main { grid-template-columns: 1fr; } #examples { flex-direction: column; } #examples button.ghost { width: 100%; } }
+      @media print { #strip, #examples { display: none; } }
     </style>
   </head>
   <body>
@@ -52,19 +63,25 @@ const examples = fixtures.map((fixture) => ({
           <button id="send" type="submit">Send</button>
         </form>
         <p class="chip" id="chip" aria-live="polite"></p>
-        <h2>Examples, no tokens used</h2>
-        {examples.map((example, index) => (
-          <button type="button" class="ghost" data-example={index}>{example.prompt}</button>
-        ))}
+        <h2 id="examples-label">Examples, fill the box only</h2>
+        <ul id="examples" aria-labelledby="examples-label">
+          {EXAMPLE_PROMPTS.map((prompt) => (
+            <li><button type="button" class="ghost" data-example={prompt} aria-pressed="false">{prompt}</button></li>
+          ))}
+        </ul>
       </section>
       <section class="preview" aria-label="Worksheet preview">
-        <div class="bar"><span class="chip">Preview</span><button type="button" id="print" class="ghost" style="width:auto;margin:0">Print / Save PDF</button></div>
-        <iframe id="frame" title="Worksheet preview" srcdoc={examples[0]?.html}></iframe>
+        <div class="bar"><span class="chip">Preview</span><span><button type="button" id="workbook" class="ghost" style="width:auto;margin:0" hidden>Make this a workbook</button> <button type="button" id="print" class="ghost" style="width:auto;margin:0">Print / Save PDF</button></span></div>
+        <iframe id="frame" title="Worksheet preview" srcdoc={firstPage}></iframe>
+        <nav id="strip" aria-label="Worksheet pages"><ul id="pages"></ul></nav>
       </section>
     </main>
     <script>
       import { chat, type ChatMessage } from "../lib/api.ts";
+      import { requestWorkbook, showWorkbookAction } from "../lib/workbook-action.ts";
+      import type { Worksheet } from "@workshop/shared";
       import { remember } from "../lib/history.ts";
+      import { stripSlots } from "../lib/page-strip.ts";
 
       const log = document.getElementById("log") as HTMLElement;
       const form = document.getElementById("form") as HTMLFormElement;
@@ -72,7 +89,15 @@ const examples = fixtures.map((fixture) => ({
       const send = document.getElementById("send") as HTMLButtonElement;
       const chip = document.getElementById("chip") as HTMLElement;
       const frame = document.getElementById("frame") as HTMLIFrameElement;
+      const strip = document.getElementById("strip") as HTMLElement;
+      const pageList = document.getElementById("pages") as HTMLElement;
+      const exampleButtons = [...document.querySelectorAll<HTMLButtonElement>("button[data-example]")];
       const history: ChatMessage[] = [];
+      const pages: string[] = [frame.srcdoc];
+      let active = 0;
+      let loading = false;
+      let sheet: Worksheet | null = null;
+      const workbookButton = document.getElementById("workbook") as HTMLButtonElement;
 
       const add = (role: "user" | "assistant", content: string) => {
         const div = document.createElement("div");
@@ -81,16 +106,78 @@ const examples = fixtures.map((fixture) => ({
         log.append(div);
       };
 
+      const show = (index: number) => {
+        active = index;
+        frame.srcdoc = pages[index] ?? "";
+        drawStrip();
+        pageList.querySelectorAll("button")[index]?.focus();
+      };
+
+      // Redrawn in place; the button at the active index keeps focus so keyboard users do not lose their spot.
+      function drawStrip() {
+        const slots = stripSlots(pages.length, active, loading);
+        strip.hidden = slots.length === 0;
+        const focused = pageList.contains(document.activeElement) ? [...pageList.querySelectorAll("button")].indexOf(document.activeElement as HTMLButtonElement) : -1;
+        pageList.replaceChildren(
+          ...slots.map((slot, i) => {
+            const li = document.createElement("li");
+            const thumb = document.createElement("div");
+            thumb.className = `thumb${slot.skeleton ? " skeleton" : ""}${slot.current ? " current" : ""}`;
+            if (slot.skeleton) {
+              thumb.setAttribute("role", "img");
+              thumb.setAttribute("aria-label", slot.label);
+            } else {
+              const mini = document.createElement("iframe");
+              mini.srcdoc = pages[i] ?? "";
+              mini.tabIndex = -1;
+              mini.setAttribute("aria-hidden", "true");
+              mini.setAttribute("inert", "");
+              mini.title = "";
+              const btn = document.createElement("button");
+              btn.type = "button";
+              btn.setAttribute("aria-label", slot.label);
+              if (slot.current) btn.setAttribute("aria-current", "page");
+              btn.addEventListener("click", () => show(i));
+              thumb.append(mini, btn);
+              if (slot.current) {
+                const tag = document.createElement("span");
+                tag.className = "tag";
+                tag.setAttribute("aria-hidden", "true");
+                tag.textContent = "Viewing";
+                thumb.append(tag);
+              }
+            }
+            li.append(thumb);
+            return li;
+          }),
+        );
+        if (focused >= 0) pageList.querySelectorAll("button")[Math.min(focused, pages.length - 1)]?.focus();
+      }
+
+      const lock = (busy: boolean) => {
+        send.disabled = busy;
+        for (const btn of exampleButtons) btn.disabled = busy;
+      };
+
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const content = text.value.trim();
         if (!content) return;
         text.value = "";
-        send.disabled = true;
+        for (const btn of exampleButtons) btn.setAttribute("aria-pressed", "false");
+        lock(true);
+        loading = true;
+        drawStrip();
         history.push({ role: "user", content });
         add("user", content);
         for await (const ev of chat(history)) {
-          if (ev.event === "worksheet") frame.srcdoc = ev.data.html;
+          if (ev.event === "worksheet") {
+            pages.splice(0, pages.length, ev.data.html);
+            active = 0;
+            frame.srcdoc = ev.data.html;
+            sheet = ev.data.sheet;
+            workbookButton.hidden = !showWorkbookAction(sheet);
+          }
           const shown = remember(history, ev);
           if (shown) add("assistant", shown);
           if (ev.event === "usage") {
@@ -98,20 +185,40 @@ const examples = fixtures.map((fixture) => ({
             chip.textContent = `${u.input} in, ${u.cacheRead} cached, ${u.output} out, $${u.costUsd.toFixed(4)}`;
           }
         }
-        send.disabled = false;
+        loading = false;
+        drawStrip();
+        lock(false);
         text.focus();
       });
 
-      for (const btn of document.querySelectorAll<HTMLButtonElement>("button[data-example]")) {
+      // An example only fills the box. Sending spends tokens, so the visitor presses Send.
+      for (const btn of exampleButtons) {
         btn.addEventListener("click", () => {
-          const html = (window as unknown as { __examples: string[] }).__examples[Number(btn.dataset.example)];
-          if (html) frame.srcdoc = html;
+          text.value = btn.dataset.example ?? "";
+          for (const other of exampleButtons) other.setAttribute("aria-pressed", String(other === btn));
+          text.focus();
         });
       }
+      workbookButton.addEventListener("click", async () => {
+        if (!sheet) return;
+        lock(true);
+        workbookButton.disabled = true;
+        chip.textContent = "Making the workbook...";
+        const result = await requestWorkbook(sheet);
+        if (result) {
+          pages.splice(0, pages.length, result.html);
+          active = 0;
+          frame.srcdoc = result.html;
+          chip.textContent = "Workbook ready.";
+          drawStrip();
+        } else {
+          chip.textContent = "Could not make a workbook. Try again.";
+        }
+        workbookButton.disabled = false;
+        lock(false);
+      });
       document.getElementById("print")?.addEventListener("click", () => frame.contentWindow?.print());
-    </script>
-    <script define:vars={{ examples: examples.map((e) => e.html) }}>
-      window.__examples = examples;
+      drawStrip();
     </script>
   </body>
 </html>

@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" width="960" height="420" role="img" aria-labelledby="t d">
+  <title id="t">The factory pipeline, from a ready ticket to a merged pull request</title>
+  <desc id="d">A ticket labelled factory:ready enters six stages in order: Plan, Build, Test, Review, Deploy and Maintain. Under each stage is the artifact it commits and the check that decides whether the next stage may start. Plan ends at a human gate. Build, Test, Review and Deploy end at checks that code runs. Maintain is drawn dashed because only tests call it today. A person merges the pull request.</desc>
+  <style>
+    text { font-family: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #171717; }
+    .mono { font-family: "Geist Mono", ui-monospace, Menlo, Consolas, monospace; }
+    .h { font-size: 16px; font-weight: 600; }
+    .s { font-size: 15px; font-weight: 600; }
+    .m { fill: #525252; }
+    .card { fill: #ffffff; stroke: #d4d4d4; }
+    .ln { stroke: #a3a3a3; stroke-width: 1.5; fill: none; }
+    .ah { fill: #a3a3a3; }
+    .model { fill: #e8f1fc; stroke: #0062d1; }
+    .code { fill: #e7f5ea; stroke: #107d32; }
+    .human { fill: #fdf1e3; stroke: #a35200; }
+    .file { fill: #f3ebfc; stroke: #7d2fd0; }
+    .soon { stroke-dasharray: 5 4; }
+    @media (prefers-color-scheme: dark) {
+      text { fill: #ededed; }
+      .m { fill: #a1a1a1; }
+      .card { fill: #0a0a0a; stroke: #3f3f3f; }
+      .ln { stroke: #737373; }
+      .ah { fill: #737373; }
+      .model { fill: #0d2340; stroke: #52a8ff; }
+      .code { fill: #0c2a16; stroke: #3fb950; }
+      .human { fill: #33220a; stroke: #f5a623; }
+      .file { fill: #261540; stroke: #bf7af0; }
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="ah" d="M0 0L10 5L0 10z"/>
+    </marker>
+  </defs>
+  <rect class="card" x="0.5" y="0.5" width="959" height="419" rx="12"/>
+  <text class="h" x="24" y="34">From a ready ticket to a merged pull request</text>
+
+  <!-- the ticket -->
+  <rect class="card" x="24" y="60" width="118" height="64" rx="32"/>
+  <text class="s" x="83" y="88" text-anchor="middle">Ticket</text>
+  <text class="mono m" x="83" y="106" text-anchor="middle">factory:ready</text>
+  <text class="m" x="24" y="190">artifact</text>
+  <text class="m" x="24" y="206">committed to</text>
+  <text class="mono m" x="24" y="222">specs/&lt;n&gt;/</text>
+  <text class="m" x="24" y="282">what decides</text>
+  <text class="m" x="24" y="298">"next"</text>
+
+  <!-- stage row -->
+  <g>
+    <rect class="model" x="160" y="60" width="118" height="64" rx="8"/>
+    <text class="s" x="219" y="88" text-anchor="middle">Plan</text>
+    <text class="m" x="219" y="106" text-anchor="middle">planner</text>
+    <rect class="model" x="292" y="60" width="118" height="64" rx="8"/>
+    <text class="s" x="351" y="88" text-anchor="middle">Build</text>
+    <text class="m" x="351" y="106" text-anchor="middle">builder</text>
+    <rect class="model" x="424" y="60" width="118" height="64" rx="8"/>
+    <text class="s" x="483" y="88" text-anchor="middle">Test</text>
+    <text class="m" x="483" y="106" text-anchor="middle">test-reviewer</text>
+    <rect class="model" x="556" y="60" width="118" height="64" rx="8"/>
+    <text class="s" x="615" y="88" text-anchor="middle">Review</text>
+    <text class="m" x="615" y="106" text-anchor="middle">lenses, voters</text>
+    <rect class="model" x="688" y="60" width="118" height="64" rx="8"/>
+    <text class="s" x="747" y="88" text-anchor="middle">Deploy</text>
+    <text class="m" x="747" y="106" text-anchor="middle">builder on CI</text>
+    <rect class="model soon" x="820" y="60" width="118" height="64" rx="8"/>
+    <text class="s" x="879" y="88" text-anchor="middle">Maintain</text>
+    <text class="m" x="879" y="106" text-anchor="middle">tests only</text>
+  </g>
+  <g>
+    <path class="ln" d="M142 92H158" marker-end="url(#a)"/>
+    <path class="ln" d="M278 92H290" marker-end="url(#a)"/>
+    <path class="ln" d="M410 92H422" marker-end="url(#a)"/>
+    <path class="ln" d="M542 92H554" marker-end="url(#a)"/>
+    <path class="ln" d="M674 92H686" marker-end="url(#a)"/>
+    <path class="ln soon" d="M806 92H818" marker-end="url(#a)"/>
+  </g>
+
+  <!-- artifact row -->
+  <g>
+    <rect class="file" x="160" y="150" width="118" height="84" rx="8"/>
+    <text class="mono" x="219" y="178" text-anchor="middle">intent.md</text>
+    <text class="mono" x="219" y="196" text-anchor="middle">spec.md</text>
+    <text class="mono" x="219" y="214" text-anchor="middle">plan.md</text>
+    <rect class="file" x="292" y="150" width="118" height="84" rx="8"/>
+    <text class="mono" x="351" y="178" text-anchor="middle">golden tests</text>
+    <text class="mono" x="351" y="196" text-anchor="middle">lock.json</text>
+    <text class="mono" x="351" y="214" text-anchor="middle">the diff</text>
+    <rect class="file" x="424" y="150" width="118" height="84" rx="8"/>
+    <text class="mono" x="483" y="178" text-anchor="middle">more tests</text>
+    <text class="mono" x="483" y="196" text-anchor="middle">properties/</text>
+    <text class="mono" x="483" y="214" text-anchor="middle">golden/</text>
+    <rect class="file" x="556" y="150" width="118" height="84" rx="8"/>
+    <text class="mono" x="615" y="196" text-anchor="middle">review.json</text>
+    <rect class="file" x="688" y="150" width="118" height="84" rx="8"/>
+    <text class="mono" x="747" y="187" text-anchor="middle">pull request</text>
+    <text class="mono" x="747" y="205" text-anchor="middle">ci.md</text>
+    <rect class="file soon" x="820" y="150" width="118" height="84" rx="8"/>
+    <text class="mono" x="879" y="187" text-anchor="middle">incident.md</text>
+    <text class="mono" x="879" y="205" text-anchor="middle">intent.md</text>
+  </g>
+
+  <!-- gate row -->
+  <g>
+    <rect class="human" x="160" y="258" width="118" height="56" rx="8"/>
+    <text x="219" y="282" text-anchor="middle">human gate</text>
+    <text class="m" x="219" y="299" text-anchor="middle">tier sets the count</text>
+    <rect class="code" x="292" y="258" width="118" height="56" rx="8"/>
+    <text class="mono" x="351" y="282" text-anchor="middle">red, lock</text>
+    <text class="mono" x="351" y="299" text-anchor="middle">green, gate</text>
+    <rect class="code" x="424" y="258" width="118" height="56" rx="8"/>
+    <text class="mono" x="483" y="282" text-anchor="middle">mutation</text>
+    <text class="mono" x="483" y="299" text-anchor="middle">properties</text>
+    <rect class="code" x="556" y="258" width="118" height="56" rx="8"/>
+    <text x="615" y="282" text-anchor="middle">2 of 3 votes</text>
+    <text class="mono" x="615" y="299" text-anchor="middle">plan-drift</text>
+    <rect class="code" x="688" y="258" width="118" height="56" rx="8"/>
+    <text class="mono" x="747" y="282" text-anchor="middle">ci</text>
+    <text class="m" x="747" y="299" text-anchor="middle">gh pr checks</text>
+    <rect class="code soon" x="820" y="258" width="118" height="56" rx="8"/>
+    <text class="mono" x="879" y="282" text-anchor="middle">bands.ts</text>
+    <text class="mono" x="879" y="299" text-anchor="middle">retro.ts</text>
+  </g>
+
+  <!-- merge and the way back -->
+  <path class="ln" d="M747 314V340" marker-end="url(#a)"/>
+  <rect class="human" x="688" y="342" width="118" height="34" rx="17"/>
+  <text x="747" y="364" text-anchor="middle">a person merges</text>
+  <path class="ln soon" d="M879 314V394H83V126" marker-end="url(#a)"/>
+  <text class="m" x="300" y="388">a 3 sigma breach writes a new intent.md (tests only today)</text>
+
+  <!-- legend -->
+  <g>
+    <rect class="model" x="160" y="342" width="14" height="14" rx="3"/>
+    <text class="m" x="180" y="354">a model works</text>
+    <rect class="code" x="290" y="342" width="14" height="14" rx="3"/>
+    <text class="m" x="310" y="354">code decides</text>
+    <rect class="human" x="410" y="342" width="14" height="14" rx="3"/>
+    <text class="m" x="430" y="354">a person decides</text>
+    <rect class="file" x="548" y="342" width="14" height="14" rx="3"/>
+    <text class="m" x="568" y="354">a file</text>
+  </g>
+</svg>
