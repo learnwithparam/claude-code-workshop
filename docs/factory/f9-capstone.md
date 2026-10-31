@@ -57,12 +57,14 @@ npx tsx factory/engine/main.ts <issue> --workflow=feature-bdd
 
 Use the workflow named in the table. Then read, in order:
 
-1. `specs/<issue>/run.log` for each step and round.
+1. `specs/<issue>/run.log` for each step and round, with the model each round ran on, and `specs/<issue>/cost.json` for what each call cost against the cap.
 2. The `red` result: it must say the golden test failed on the base commit.
 3. The `lock` result: it must say no test file changed during the build.
 4. The `plan-drift` result: it must say the diff stayed inside `plan.md`.
 
 A ticket is done only when all three held and the spec folder is green.
+
+Expect the run to stop and wait. The workbook ticket runs `feature-sdd`, which writes a constitution, the spec, a clarify list, the plan, tasks and an analysis. It stops at the `spec` gate and again at the `plan` gate with `awaiting-approval`; comment `approve <stage> <digest>` on the issue as the logged-in `gh` user, then run the same command again, and the engine skips the stages you already signed. The review step of these workflows runs lenses and three voting verifiers, and a surviving Important finding ends the run as `needs-human`. If the spend cap is reached first, the run ends `needs-human` with the reason `spend cap` in `run.log`. Read those lines before you call a ticket stuck.
 
 ## What the red suites teach
 
@@ -96,7 +98,7 @@ Restore each one and confirm the suite is green again. A guard you broke without
 
 ## Exercise
 
-Track A: run all four tickets and record, for each, how many rounds the loop took and where it stopped for a person. Track B: delete the `lock` check from one workflow, run the template ticket, and read whether the builder edited a golden test to get green.
+Track A: run all four tickets and record, for each, how many rounds the loop took, what it cost in `cost.json`, and where it stopped for a person. Track B: delete the `lock` check from one workflow, run the template ticket, and read whether the builder edited a golden test to get green.
 
 ## Discussion
 

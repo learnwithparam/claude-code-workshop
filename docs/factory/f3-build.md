@@ -23,12 +23,12 @@ The planner cannot write. In the workflow the `plan` step has `writes: plan.md`,
 `plan.md` is one repo path per line (a bullet or backticks are fine). `badPlanLines` in `factory/engine/artifacts.ts` refuses a plan line that is not an ordinary repo path:
 
 - globs, absolute paths and `..` segments;
-- anything under `.github`, `.claude`, `.factory`, `factory` or `scripts`, plus `package.json`, lockfiles, `biome.json`, `vitest` and `tsconfig` files. Only a workflow with `manifests: true` (the `deps` one) may list `package.json` and the lockfile;
+- anything under `.github`, `.claude`, `.factory`, `factory` or `scripts`, plus `package.json`, lockfiles, `biome.json`, `vitest` and `tsconfig` files, and any glob in `protected` of `.factory/config.yaml`. Only a workflow with `manifests: true` (the `deps` one) may list `package.json` and the lockfile;
 - lines under `specs/<n>/`, which the runner drops because it always allows them.
 
 Two plans to read, from the real runs: `specs/25/plan.md` lists the split of `render.ts` plus `levels.json`; `specs/31/plan.md` lists both sides of the SSE contract and `tests/contract/`.
 
-Why `levels.json` shows up: a new source file needs an owner there, so a plan that adds a file must list it. The workflow brief says so, and `workflows.test.ts` asserts every plan brief contains that sentence.
+Why `levels.json` shows up: a new source file needs an owner there, so a plan that adds a file must list it. The plan brief says so. It is written once, as `planBrief` in `.factory/config.yaml`, and `loadWorkflow` gives it to every plan step that sets none of its own. `workflows.test.ts` asserts every plan brief contains that sentence.
 
 ## Plan drift
 
@@ -41,6 +41,7 @@ plan-drift fails: files outside plan.md: api/src/agent/template-eval.ts. Update 
 - A missing `plan.md` is a failed check, not a crash, so the loop can act on it.
 - Editing `plan.md` is not itself a pass: the plan file is in every diff, so the check reads the listed paths and not the file's own change.
 - Regenerated golden snapshots under `specs/<n>/golden/__snapshots__/` pass, because a human reviews them at the feedback gate.
+- The builder may propose unplanned files in `specs/<n>/plan-amendment.md`, one bullet per path with a reason. Approved paths count as planned. A person approves it at the `plan-amendment` gate, and the digest binds the approval to the text, so a later edit voids it. It passes without a person only when the diff is low risk. A path the gate owns, such as `factory/` or `scripts/`, is never amendable.
 
 ## Worktrees
 
@@ -53,14 +54,15 @@ Two kinds, both real.
 
 The builder is limited by files the runner does not let it edit.
 
-| fence               | where                                    | what it stops                                                                                |
-| ------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `FACTORY_PHASE=fix` | `.claude/hooks/pretooluse-test-lock.mjs` | an edit to any test file (`.test.ts`, `.e2e.ts`, `.feature`, `tests/`) in a fix step; exit 2 |
-| `lock` check        | `factory/engine/checks/lock.ts`          | a test edited by another route, such as `Bash`                                               |
-| deny rules          | `.claude/settings.json`                  | reading `.env*` and `.factory/holdout/**`, and `git push *`                                  |
-| sandbox             | `.claude/settings.json`                  | `denyRead` on the same two paths                                                             |
-| plan                | `plan-drift`                             | any file outside the plan                                                                    |
-| per-stage config    | `.factory/config.json`                   | `maxTurns` and `maxBudgetUsd` for the `build` stage                                          |
+| fence               | where                                    | what it stops                                                                                                      |
+| ------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `FACTORY_PHASE=fix` | `.claude/hooks/pretooluse-test-lock.mjs` | an edit to any test file (`.test.ts`, `.e2e.ts`, `.feature`, `tests/`) in a fix step; exit 2                       |
+| `lock` check        | `factory/engine/checks/lock.ts`          | a test edited by another route, such as `Bash`                                                                     |
+| deny rules          | `.claude/settings.json`                  | reading `.env*` and `.factory/holdout/**`, and `git push *`                                                        |
+| sandbox             | `.claude/settings.json`                  | `denyRead` on the same two paths                                                                                   |
+| plan                | `plan-drift`                             | any file outside the plan                                                                                          |
+| pinned commands     | `.factory/config.yaml`                   | a build that edits the gate or test commands; the file is read once, before the first agent                        |
+| run spend cap       | `.factory/config.json` `spend`           | a run that keeps calling the builder: it stops at `stopAt` of `capUsd`, and each call gets only what is left (F13) |
 
 A step with `phase: fix` runs with the test lock on from round one. Any retry of a step runs with it on too (`interpret.ts`).
 
@@ -68,9 +70,13 @@ A step with `phase: fix` runs with the test lock on from round one. Any retry of
 
 For a UI change, `ui-visual.yaml` has the builder work against checks `visual` and `gate`, looping up to a cap. The `visual` check runs `playwright test tests/e2e`. See F4 for what those tests assert. A design contract is the first step, so the builder has words to compare a screenshot against.
 
+## The pinned config
+
+`pinPortable()` in `factory/engine/portable.ts` reads `.factory/config.yaml` and keeps the result. The CLI calls it before the first agent runs, and the checks read the cached copy, so the builder cannot change what `make check` means by editing the file. The test `keeps the commands it read at the start when the file changes later` in `factory/engine/models.test.ts` rewrites the file after pinning and asserts the gate command is unchanged. The same file names the key variable and the file that may define it, and holds no key.
+
 ## Steps
 
-1. Read the `plan` step brief in `.factory/workflows/bug-tdd.yaml` and the three agent files above.
+1. Read `planBrief` in `.factory/config.yaml`, which `bug-tdd.yaml` uses because its `plan` step sets no brief, and the three agent files above.
 2. See the fence refuse an edit:
 
    ```

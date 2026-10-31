@@ -8,24 +8,24 @@ Know which check proves which claim, run it at the right size, and see it fail o
 
 ## The ladder
 
-Every check lives in `factory/engine/checks/index.ts` and declares a size. The engine runs them from the `checks` and `loop.until` lists of a workflow step.
+Every check lives in `factory/engine/checks/index.ts` and declares a size. The engine runs them from the `checks` and `loop.until` lists of a workflow step. The commands behind them are not written in the checks: they come from `.factory/config.yaml` (`tests.unit`, `tests.e2e`, `tests.eval`, `tests.mutation`, `tests.prepush`, `tests.prose`, `gate` and the `contract` and `holdout` paths), read once at the start of the run. A different repo supplies its own file and keeps the checks.
 
-| check                 | size   | claim it proves                           | what it runs                                |
-| --------------------- | ------ | ----------------------------------------- | ------------------------------------------- |
-| `red`                 | small  | the new test fails on the base commit     | `vitest run specs/<n>` at the base worktree |
-| `lock`                | small  | no test moved since it was recorded       | hashes every test file                      |
-| `plan-drift`          | small  | the diff stays in `plan.md`               | reads the plan and the changed files        |
-| `green`               | small  | the locked test passes                    | `vitest run specs/<n>`                      |
-| `acceptance`          | medium | the examples or scenarios pass            | `vitest run specs/<n>`                      |
-| `holdout`             | medium | cases the builder never saw pass          | `vitest run .factory/holdout/<n>`           |
-| `properties`          | medium | a rule holds for generated inputs         | `vitest run specs/<n>/properties`           |
-| `behaviour-unchanged` | medium | recorded output is byte-for-byte the same | `vitest run specs/<n>/golden`               |
-| `contract`            | medium | both sides agree on the wire              | `vitest run tests/contract`                 |
-| `mutation`            | large  | the tests notice a changed line           | Stryker on the changed source files         |
-| `visual`              | large  | layout, overflow and accessibility hold   | `playwright test tests/e2e`                 |
-| `eval`                | large  | model behaviour and its token cost hold   | `tsx scripts/eval.ts`                       |
-| `gate`                | large  | the whole repo is green                   | `make check`                                |
-| `ci`                  | large  | the pull request is green                 | `gh pr checks --watch`                      |
+| check                 | size   | claim it proves                           | what it runs                                 |
+| --------------------- | ------ | ----------------------------------------- | -------------------------------------------- |
+| `red`                 | small  | the new test fails on the base commit     | `vitest run specs/<n>` at the base worktree  |
+| `lock`                | small  | no test moved since it was recorded       | hashes every test file                       |
+| `plan-drift`          | small  | the diff stays in `plan.md`               | reads the plan and the changed files         |
+| `green`               | small  | the locked test passes                    | `vitest run specs/<n>`                       |
+| `acceptance`          | medium | the examples or scenarios pass            | `vitest run specs/<n>`                       |
+| `holdout`             | medium | cases the builder never saw pass          | `vitest run` on `paths.holdout/<n>`          |
+| `properties`          | medium | a rule holds for generated inputs         | `vitest run specs/<n>/properties`            |
+| `behaviour-unchanged` | medium | recorded output is byte-for-byte the same | `vitest run specs/<n>/golden`                |
+| `contract`            | medium | both sides agree on the wire              | `vitest run` on `paths.contract`             |
+| `mutation`            | large  | the tests notice a changed line           | `tests.mutation` on the changed source files |
+| `visual`              | large  | layout, overflow and accessibility hold   | `tests.e2e` (`playwright test tests/e2e`)    |
+| `eval`                | large  | model behaviour and its token cost hold   | `tests.eval` (`tsx api/src/eval.ts`)         |
+| `gate`                | large  | the whole repo is green                   | the `gate` command (`make check`)            |
+| `ci`                  | large  | the pull request is green                 | `gh pr checks --watch`                       |
 
 Sizes follow the Google idea of small, medium and large. A small check is fast and hermetic. The size is a field on every check.
 
@@ -101,14 +101,11 @@ Pick one and revert after.
 - Spec 25, characterization: `specs/25/golden/__snapshots__/`.
 - Spec 36: `specs/36/intent.md` is a vetting report that says the registry was unreachable, so age and maintainer were not checked. The run reported what it could not verify.
 
-## Known wiring gaps
+## Wiring that a test holds
 
-Two checks point at files that are not in this repo, so running them fails.
+Two checks once pointed at files that were not in the repo. Now `eval` runs `tests.eval` and `prepush` runs `tests.prepush` from `.factory/config.yaml`, and `a check names a script that exists` in `factory/engine/wiring.test.ts` runs both against a fake host and asserts that every `.ts` path in the command exists on disk. Point `tests.prepush` at a missing script and that test fails.
 
-- `eval` runs `scripts/eval.ts`, but the eval is `api/src/eval.ts` (`make eval`).
-- `prepush` runs `scripts/git/pre-push`, and `make hooks` installs only `pre-commit`.
-
-No workflow lists either check, so no run hits them. Fixing each is an assignment: wire it, then give it a failing input.
+`llm-eval` lists `eval` in its steps, so that workflow spends tokens through `tests.eval`. No shipped workflow lists `prepush` yet; wiring it into one is an assignment.
 
 ## Exercise
 
