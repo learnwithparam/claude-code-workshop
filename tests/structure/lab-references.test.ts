@@ -34,7 +34,7 @@ function badReferences(
   exists: (path: string) => boolean,
 ): string[] {
   const bad: string[] = [];
-  for (const text of [...lab.steps, ...lab.hints]) {
+  for (const text of [...lab.steps.map((s) => s.text), ...lab.hints]) {
     for (const [, token = ""] of text.matchAll(/`([^`\n]+)`/g)) {
       for (const [, target = ""] of token.matchAll(/\bmake\s+([a-z][\w-]*)/g)) {
         if (!targets.has(target)) bad.push(`make ${target}`);

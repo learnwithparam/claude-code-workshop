@@ -77,7 +77,8 @@ describe("renderBrief window tags", () => {
       2. [in Claude Code] Leave the session with \`/exit\`.
       3. [in your editor] Write \`.labs/work/notes.md\`.
 
-      Hints: 0 of 2 revealed. Reveal the next with: make lab HINT=1"
+      Hints: 0 of 2 revealed. Reveal the next with: make lab HINT=1
+      Stuck? https://github.com/learnwithparam/claude-code-workshop/issues/new?template=lab-feedback.yml&lab=start-01"
     `);
   });
   it("paints each tag with its own colour code", () => {
