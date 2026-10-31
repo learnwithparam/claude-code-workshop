@@ -1,6 +1,7 @@
 # Deny what Claude must never read
 
 **Pairs with:** `docs/levels/boundary.md`
+**Help:** hinted
 
 ## Goal
 
@@ -31,6 +32,7 @@ Write a settings file that denies reading `.env` files, so the rule holds for ev
 1. The shape is `{ "permissions": { "deny": ["..."] } }`.
 2. Each entry is a tool name with a pattern in brackets.
 3. The two entries to write are `Read(./.env)` and `Read(./.env.*)`.
+4. Commands, in order: `cat .claude/settings.json`, `mkdir -p .labs/work`, `node -e "JSON.parse(require('fs').readFileSync('.labs/work/settings.json','utf8'))"`.
 
 ## What you just learned
 

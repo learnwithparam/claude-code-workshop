@@ -1,6 +1,7 @@
 # Continue where you left off
 
 **Pairs with:** `docs/levels/hand-built.md`
+**Help:** hinted
 
 ## Goal
 
@@ -31,6 +32,7 @@ Start a session, leave it, and pick it up again with its context intact.
 1. Two files must exist: `.labs/work/session.json` and `.labs/work/recall.md`.
 2. `--continue` reopens the most recent session in this folder.
 3. In the interactive app the same move is `claude --continue`, or `/resume` to choose from a list.
+4. Commands, in order: `mkdir -p .labs/work`, `claude -p "Remember the word tangerine." --output-format json > .labs/work/session.json`, `claude -p --continue "What word did I ask you to remember?" > .labs/work/recall.md`, `cat .labs/work/recall.md`.
 
 ## What you just learned
 

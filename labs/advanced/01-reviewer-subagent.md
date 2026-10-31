@@ -1,17 +1,18 @@
 # Write a read-only reviewer subagent
 
 **Pairs with:** `docs/levels/execution.md`
+**Help:** goal
 
 ## Goal
 
-Define a subagent that can read and search but cannot write, so a review can never change the code.
+Write a read-only reviewer subagent at .labs/work/agents/reviewer.md: front matter with name, description, tools limited to Read, Grep and Glob, and model, then a short prompt. The proof below must pass.
 
 ## Steps
 
-1. Read a real one: `ls .claude/agents` then `cat` one.
-2. Make the folder: `mkdir -p .labs/work/agents`.
-3. Write `.labs/work/agents/reviewer.md` with front matter `name`, `description`, `tools` and `model`, then a short prompt.
-4. The `tools` line lists only `Read, Grep, Glob`.
+1. Read a real subagent in this repo.
+2. Make the agents folder under the lab work folder.
+3. Write the file with the four front matter keys and a short prompt.
+4. Limit tools to reading and searching only.
 
 ## Proof
 
@@ -46,6 +47,7 @@ Define a subagent that can read and search but cannot write, so a review can nev
 1. Four front matter keys: `name`, `description`, `tools`, `model`.
 2. The tools line is exactly `tools: Read, Grep, Glob`.
 3. Pick a small model for the `model` line. A reviewer reads, it does not need the largest.
+4. Commands: `ls .claude/agents`, then `cat` one file in it, then `mkdir -p .labs/work/agents`.
 
 ## What you just learned
 

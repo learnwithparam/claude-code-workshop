@@ -26,6 +26,11 @@ describe("integrity hash", () => {
     expect(changed(null, after)).toEqual([]);
     expect(changed(before, after)).toEqual([".claude/settings.json"]);
   });
+  it("reports a watched file that was deleted since the baseline", () => {
+    const before = hashes(() => "a", [".claude/settings.json", ".claude/hooks/x.mjs"]);
+    const after = hashes(() => "a", [".claude/settings.json"]);
+    expect(changed(before, after)).toEqual([".claude/hooks/x.mjs"]);
+  });
 });
 
 describe("output scan", () => {

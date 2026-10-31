@@ -1,6 +1,7 @@
 # Plan before you edit
 
 **Pairs with:** `docs/levels/context.md`
+**Help:** guided
 
 ## Goal
 

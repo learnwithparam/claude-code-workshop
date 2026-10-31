@@ -9,6 +9,15 @@ const W = ".labs/work";
 const BLOCK_ENV = `import{readFileSync as r}from"node:fs";const i=JSON.parse(r(0,"utf8"));if((i.tool_input?.file_path??"").endsWith(".env")){console.error("no");process.exit(2)}`;
 const KEBAB = `import{readdirSync as d}from"node:fs";const bad=d(process.argv[2],{recursive:true}).filter(f=>!/^[a-z0-9.-]+$/.test(String(f).split("/").pop()));bad.forEach(f=>console.log(f));process.exitCode=bad.length?1:0`;
 const sh = (...lines: string[]) => lines.join("\n");
+// The cloud-guards proof reads the repo's settings, so a solution needs a settings file beside the work.
+const SETTINGS = `{"permissions":{"deny":["Read(**/.env*)","Bash(git push *)"]},"hooks":{"PreToolUse":[],"Stop":[]}}`;
+const GUARDS = `node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))'`;
+const cloudSolution = sh(
+  `mkdir -p .claude ${W}`,
+  `echo '${SETTINGS}' > .claude/settings.json`,
+  `${GUARDS} > ${W}/cloud-guards.txt`,
+  `printf 'Keep the deny, a person ships.\\nA push is the step that needs a human.\\n' > ${W}/push-route.md`,
+);
 
 // One known-good way to finish each lab, written as shell. Claude-powered steps are replaced by
 // their output, because the proof only reads the artifact, not how it was made.
@@ -74,6 +83,7 @@ const SOLUTIONS: Record<string, string> = {
   ),
   "advanced-03": sh(`mkdir -p ${W}/wt`, `echo 'gitdir: /x' > ${W}/wt/.git`),
   "advanced-04": sh(`mkdir -p ${W} docs`, `cat > ${W}/check-kebab.mjs <<'EOF'\n${KEBAB}\nEOF`),
+  "advanced-05": cloudSolution,
 };
 
 function inTempDir(setup: string | undefined, proof: string) {
@@ -104,4 +114,14 @@ describe("lab proofs", () => {
       expect(inTempDir(SOLUTIONS[lab.id], item.command)).toBe(0);
     },
   );
+
+  it("advanced-05 goes red when the deny list changes after cloud-guards.txt was saved", () => {
+    const lab = labs.find((l) => l.id === "advanced-05");
+    const changed = sh(
+      cloudSolution,
+      `echo '{"permissions":{"deny":["Read(**/.env*)"]},"hooks":{"PreToolUse":[],"Stop":[]}}' > .claude/settings.json`,
+    );
+    expect(lab, "advanced-05 is missing").toBeDefined();
+    expect(inTempDir(changed, lab?.proof ?? "false")).not.toBe(0);
+  });
 });
