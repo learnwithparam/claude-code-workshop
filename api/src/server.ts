@@ -73,6 +73,7 @@ export function createApp({
   const hits = new Map<string, number[]>();
   let spentUsd = 0;
   let day = new Date().toDateString();
+  const capped = () => env.LIVE_SPENT_USD + spentUsd >= LIVE_CAP_USD;
 
   app.use("*", cors({ origin: env.ALLOWED_ORIGIN, allowMethods: ["POST", "GET"] }));
   app.get("/health", (c) => c.json({ ok: true }));
@@ -84,6 +85,7 @@ export function createApp({
     if (!body.success) return c.json({ error: "Bad request" }, 400);
     const known = sheets.get(body.data.sheetId);
     if (!known) return c.json({ error: "Unknown sheet" }, 404);
+    if (!known.prompt.trim()) return c.json({ error: "Sheet does not meet its band" }, 422);
     const result = distillTemplate(known.sheet, known.prompt);
     if (!result.ok) return c.json({ error: "Sheet does not meet its band" }, 422);
     templates.add(result.template);
@@ -142,7 +144,6 @@ export function createApp({
         };
 
         // Cache hits return before this, so a repeat never spends the shared live-run cap.
-        const capped = () => env.LIVE_SPENT_USD + spentUsd >= LIVE_CAP_USD;
         const refuse = () => send("error", { message: "Could not make a worksheet. Try again." });
 
         if (prompt && band) {
@@ -197,6 +198,10 @@ export function createApp({
       const send = (event: string, data: unknown) =>
         stream.writeSSE({ event, data: JSON.stringify(data) });
       try {
+        if (capped()) {
+          await send("error", { message: "Could not make a workbook. Try again." });
+          return;
+        }
         const result = await runWorkbook(client, body.data.sheet);
         const cost = costUsd(result.usage);
         spentUsd += cost;
