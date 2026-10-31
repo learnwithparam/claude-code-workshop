@@ -72,7 +72,10 @@ describe("lab references", () => {
   it("fails when a step names a missing target or file", () => {
     const broken: Lab = {
       ...(labs[0] as Lab),
-      steps: ["Run `make labz`.", "Open `scripts/missing.ts`."],
+      steps: [
+        { where: "shell", text: "Run `make labz`." },
+        { where: "shell", text: "Open `scripts/missing.ts`." },
+      ],
       hints: ["Try `make lab` then `docs/labs/README.md`.", "b"],
     };
     const bad = badReferences(broken, targets, (f) => f !== "scripts/missing.ts");
@@ -80,7 +83,8 @@ describe("lab references", () => {
   });
 
   it("allows a path under .labs/work, since the learner creates it", () => {
-    const lab: Lab = { ...(labs[0] as Lab), steps: ["Write `.labs/work/notes.md`."] };
+    const steps = [{ where: "editor" as const, text: "Write `.labs/work/notes.md`." }];
+    const lab: Lab = { ...(labs[0] as Lab), steps };
     expect(badReferences(lab, targets, present)).toEqual([]);
   });
 });
