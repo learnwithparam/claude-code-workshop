@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { approvalIn } from "../../factory/engine/approvers.ts";
 import { portableSchema } from "../../factory/engine/portable.ts";
-import { approvalIn } from "../../factory/engine/real-host.ts";
 
 // Assignment: two people at a high-risk gate. Skipped until you start: ASSIGNMENT=1 npx vitest run tests/assignments
 const on = process.env.ASSIGNMENT === "1";

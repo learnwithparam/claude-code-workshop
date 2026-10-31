@@ -12,6 +12,7 @@ import {
 import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { query as sdkQuery } from "@anthropic-ai/claude-agent-sdk";
+import { approvalIn, type Comment, writersFrom } from "./approvers.ts";
 import { type Auth, agentEnv, runCap, type SubscriptionCap } from "./auth.ts";
 import type { Usage } from "./metrics.ts";
 import { resolveModel } from "./models.ts";
@@ -26,30 +27,6 @@ export function parseAgent(text: string) {
     if (i > 0) fm[line.slice(0, i).trim()] = line.slice(i + 1).trim();
   }
   return { fm, body: (m?.[2] ?? text).trim() };
-}
-
-type Comment = { body: string; authorAssociation: string; author?: { login: string } };
-// Only a person with write access counts. The agents hold no GitHub token, so they cannot approve.
-export function approvalIn(
-  comments: Comment[],
-  stage: string,
-  digest: string,
-  approvers?: string[],
-  need = 1,
-): boolean {
-  const line = `approve ${stage} ${digest}`;
-  // Distinct people: one person commenting twice is still one approval.
-  const who = new Set(
-    comments
-      .filter(
-        (c) =>
-          ["OWNER", "MEMBER", "COLLABORATOR"].includes(c.authorAssociation) &&
-          (!approvers || approvers.includes(c.author?.login ?? "")) &&
-          c.body.split("\n").some((l) => l.trim() === line),
-      )
-      .map((c) => c.author?.login ?? ""),
-  );
-  return who.size >= need;
 }
 
 export type RealHostOptions = {
@@ -100,6 +77,11 @@ export function realHost(o: RealHostOptions): Host & { usage(): Usage } {
         homedir(),
         process.platform === "darwin" ? "Library/Caches/ms-playwright" : ".cache/ms-playwright",
       ),
+  };
+  // Runner-side call with the real environment: gh needs the person's login, the agents never see it.
+  const issueComments = (n: number): Comment[] | null => {
+    const r = sh("gh", ["issue", "view", String(n), "--json", "comments"], o.cwd, process.env);
+    return r.status === 0 ? (JSON.parse(r.stdout).comments ?? []) : null;
   };
   const sh = (cmd: string, args: string[], cwd = o.cwd, env: NodeJS.ProcessEnv = SAFE_ENV) =>
     spawnSync(cmd, args, { cwd, encoding: "utf8", maxBuffer: 64 << 20, env });
@@ -287,11 +269,25 @@ export function realHost(o: RealHostOptions): Host & { usage(): Usage } {
     setPhase(p) {
       phase = p;
     },
+    async writers(n) {
+      const comments = issueComments(n);
+      if (!comments) return [];
+      return writersFrom(comments, async (login) => {
+        const r = sh(
+          "gh",
+          ["api", `repos/{owner}/{repo}/collaborators/${login}/permission`, "-q", ".permission"],
+          o.cwd,
+          process.env,
+        );
+        return r.status === 0 ? r.stdout.trim() : "none";
+      });
+    },
     async approved(n, stage, digest, need = 1) {
-      // Runner-side call with the real environment: gh needs the person's login, the agents never see it.
-      const r = sh("gh", ["issue", "view", String(n), "--json", "comments"], o.cwd, process.env);
-      if (r.status !== 0) return false;
-      return approvalIn(JSON.parse(r.stdout).comments ?? [], stage, digest, o.approvers, need);
+      const comments = issueComments(n);
+      if (!comments) return false;
+      // An explicit list wins; otherwise the people who can write to the repo and commented here.
+      const approvers = o.approvers ?? (await this.writers(n));
+      return approvalIn(comments, stage, digest, approvers, need);
     },
   };
 }

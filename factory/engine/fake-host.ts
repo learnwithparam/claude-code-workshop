@@ -10,6 +10,8 @@ export type FakeScript = {
   files?: Record<string, string>;
   changed?: string[];
   approvals?: string[];
+  // Logins writers() answers with.
+  writers?: string[];
 };
 
 export function fakeHost(script: FakeScript = {}) {
@@ -50,6 +52,7 @@ export function fakeHost(script: FakeScript = {}) {
     recall: async (k) => state.get(k) ?? null,
     remember: async (k, v) => void state.set(k, v),
     setPhase: (p) => void phases.push(p),
+    writers: async () => script.writers ?? [],
     approved: async (n, stage, digest, need = 1) =>
       (script.approvals?.filter((a) => a === `${n}:${stage}` || a === `${n}:${stage}:${digest}`)
         .length ?? 0) >= need,

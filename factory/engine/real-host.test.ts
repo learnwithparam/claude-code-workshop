@@ -4,8 +4,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Options, query } from "@anthropic-ai/claude-agent-sdk";
 import { describe, expect, it } from "vitest";
+import { approvalIn } from "./approvers.ts";
 import { type Auth, TOKEN_ENV } from "./auth.ts";
-import { approvalIn, parseAgent, realHost } from "./real-host.ts";
+import { parseAgent, realHost } from "./real-host.ts";
 
 const git = (cwd: string, ...a: string[]) => execFileSync("git", a, { cwd, encoding: "utf8" });
 

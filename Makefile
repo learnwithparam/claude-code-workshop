@@ -1,4 +1,4 @@
-.PHONY: lab next progress prove-homework doctor dev check check-affected prove levels claude smoke hooks eval factory exercise
+.PHONY: factory-maintain lab next progress prove-homework doctor dev check check-affected prove levels claude smoke hooks eval factory exercise
 
 doctor:
 	@node -v | grep -qE '^v2[2-9]' && echo "ok node $$(node -v)" || (echo "need Node 22+" && exit 1)
@@ -40,6 +40,10 @@ eval:
 
 factory:
 	npx tsx factory/main.ts $(ISSUE) $(FLAGS)
+
+# Judges the recorded run metrics against .factory/bands.yaml. ISSUE=<n> is where a 3 sigma breach writes intent.md.
+factory-maintain:
+	npx tsx factory/engine/main.ts --maintain $(or $(ISSUE),0)
 
 # PASS or FAIL for one level's proof. TRACK=a adds the hint; TRACK=b prints only the failing line.
 exercise:

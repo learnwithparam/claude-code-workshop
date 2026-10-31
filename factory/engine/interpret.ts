@@ -6,12 +6,15 @@ import {
   dropSpecLines,
   writeArtifact,
 } from "./artifacts.ts";
-import { CHECKS } from "./checks/index.ts";
+import { runDeploy } from "./deploy-step.ts";
 import { resolveModel } from "./models.ts";
 import { portable } from "./portable.ts";
-import { reviewLoop } from "./review.ts";
+import { type RetroOutcome, retro } from "./retro.ts";
+import { runReview } from "./review-step.ts";
 import { APPROVALS, classify } from "./risk.ts";
-import type { CheckResult, Host } from "./types.ts";
+import { failing, runChecks } from "./run-checks.ts";
+import { recordSeries, SERIES } from "./series.ts";
+import type { Host } from "./types.ts";
 import type { Step, Workflow } from "./workflow.ts";
 
 export type Outcome = "done" | "awaiting-approval" | "needs-human";
@@ -31,22 +34,6 @@ export type Result = {
   log: string[];
 };
 
-async function runChecks(
-  host: Host,
-  n: number,
-  names: readonly string[],
-): Promise<Record<string, CheckResult>> {
-  const out: Record<string, CheckResult> = {};
-  for (const name of names) {
-    const check = CHECKS[name];
-    if (!check) throw new Error(`unknown check ${name}`);
-    out[name] = await check.run({ host, n });
-  }
-  return out;
-}
-
-const failing = (r: Record<string, CheckResult>) => Object.entries(r).filter(([, v]) => !v.ok);
-
 // The tier comes from the paths changed so far, and the tier sets how many people must approve.
 async function gateMet(host: Host, n: number, step: Step, log?: string[]): Promise<boolean> {
   const tier = classify(await host.changedFiles());
@@ -60,7 +47,13 @@ async function gateMet(host: Host, n: number, step: Step, log?: string[]): Promi
 // Runs a workflow's steps in order. A step repeats its agent while its loop checks fail, up to the cap;
 // the evidence of the failing checks is the next round's prompt, so the loop learns from the check, not the model.
 // `commitLog` commits specs/<n>/run.log when the run ends, so the log is not left untracked.
-export type RunOptions = { config?: FactoryConfig; ticketType?: string; commitLog?: boolean };
+export type RunOptions = {
+  config?: FactoryConfig;
+  ticketType?: string;
+  commitLog?: boolean;
+  // When set, a finished run ends with one retro. `evalCmd` must print `SCORE <number>`.
+  retro?: { evalCmd: [string, ...string[]]; revert: () => Promise<void> };
+};
 
 export async function runWorkflow(
   host: Host,
@@ -119,7 +112,38 @@ export async function runWorkflow(
       return finish("awaiting-approval", step.stage);
     }
   }
-  return finish("done");
+  const done = await finish("done");
+  const score = opts.retro ? await endWithRetro(host, n, done, opts.retro) : undefined;
+  // Only a finished run joins the history `--maintain` judges; a run that stopped says nothing about the bands.
+  await recordSeries(host, done, score);
+  if (opts.commitLog) await host.commit(`factory series #${n}`, [SERIES]);
+  return done;
+}
+
+// The retro reads run.log, so it runs after the log is saved; its outcome is appended to the log.
+// Returns the eval score the repo stands at afterwards, or undefined when the eval was broken.
+async function endWithRetro(
+  host: Host,
+  n: number,
+  res: Result,
+  r: NonNullable<RunOptions["retro"]>,
+): Promise<number | undefined> {
+  let out: RetroOutcome;
+  try {
+    out = await retro(host, n, r.evalCmd, r.revert);
+  } catch (e) {
+    out = { kind: "error", error: e instanceof Error ? e.message : String(e) };
+  }
+  res.log.push(
+    out.kind === "error"
+      ? `retro error: ${out.error}`
+      : out.kind === "none"
+        ? "retro none"
+        : `retro ${out.kind} ${out.proposal.file} delta ${out.delta.toFixed(2)}`,
+  );
+  await writeArtifact(host, n, "run.log", `${res.log.join("\n")}\n`);
+  if (out.kind === "error") return undefined;
+  return out.kind === "kept" ? out.after : out.before;
 }
 
 // Returns true when the step could not reach its checks within its cap.
@@ -136,6 +160,15 @@ async function runStep(
   const cfg = opts.config;
   // A reply the runner refuses (chat instead of the artifact) gets the reason and two more tries.
   if (step.review) return runReview(host, step, n, res, opts);
+  if (step.deploy) {
+    const d = await runDeploy(host, n, step);
+    res.rounds[step.stage] = 1;
+    res.log.push(`${step.stage} ${step.deploy} ${d.ok ? "ok" : "FAILED"}: ${d.reason}`);
+    if (!d.ok) res.reason = d.reason;
+    return !d.ok;
+  }
+  const agent = step.agent;
+  if (!agent) throw new Error(`step ${step.stage} has no agent`);
   const max = step.loop?.max ?? (step.writes ? 3 : 1);
   let feedback = "";
   // The failing checks and their evidence, last round and how many rounds in a row they repeated.
@@ -158,7 +191,7 @@ async function runStep(
     const model = cfg
       ? resolveModel({ cfg, step: step.stage, type: opts.ticketType ?? wf.name })
       : undefined;
-    const out = await host.agent(step.agent, `${brief}\n${ticket}\n${feedback}`, {
+    const out = await host.agent(agent, `${brief}\n${ticket}\n${feedback}`, {
       stage: step.stage,
       model,
       maxUsd: cap === undefined ? undefined : cap - res.costUsd,
@@ -203,63 +236,4 @@ async function runStep(
     feedback = `${refused}\nChecks failed in ${artifactPath(n, "run.log")}:\n${bad.map(([k, v]) => `${k}: ${v.evidence}`).join("\n")}`;
   }
   return true;
-}
-
-// Lenses hunt in parallel, three verifiers vote, and a builder fixes what survives, up to the round cap.
-// Returns true when an Important finding is left or a lens reply was not findings; the checks still run.
-async function runReview(
-  host: Host,
-  step: Step,
-  n: number,
-  res: Result,
-  opts: RunOptions,
-): Promise<boolean> {
-  const lenses = step.review?.lenses ?? [];
-  const cfg = opts.config;
-  const cap = cfg?.spend.capUsd;
-  // Every lens hunt, ballot and fix goes through here, so the run total and the cap see all of them.
-  const counted: Host = {
-    ...host,
-    async agent(name, prompt, o) {
-      if (cfg && cap !== undefined && res.costUsd >= cap * cfg.spend.stopAt) {
-        res.reason = "spend cap";
-        res.log.push(`${o.stage} not run: $${res.costUsd.toFixed(4)} of $${cap} spent`);
-        // A refused call reads as a failed review, never a clean one.
-        return { text: "", costUsd: 0, failed: "spend cap" };
-      }
-      const out = await host.agent(name, prompt, {
-        ...o,
-        maxUsd: cap === undefined ? undefined : cap - res.costUsd,
-      });
-      res.costUsd += out.costUsd;
-      res.calls.push({
-        stage: o.stage,
-        round: res.rounds[step.stage] ?? 1,
-        model: o.model ?? "frontmatter",
-        costUsd: out.costUsd,
-      });
-      return out;
-    },
-  };
-  let fixed = false;
-  const fixer = async () => {
-    fixed = true;
-    const findings = (await host.read(artifactPath(n, "review.json"))) ?? "";
-    host.setPhase("fix");
-    await counted.agent(
-      "builder",
-      `Fix these verified review findings. Never edit the locked tests.\n${findings}`,
-      { stage: "review-fix" },
-    );
-    host.setPhase(null);
-  };
-  const r = await reviewLoop(counted, n, lenses, fixer);
-  res.rounds[step.stage] = r.rounds;
-  res.log.push(`${step.stage} ${r.clean ? "clean" : "NOT clean"} after ${r.rounds} round(s)`);
-  // A fixer writes code after the build's checks passed, so the gate runs again on what it left.
-  const names = [...new Set([...(step.checks ?? []), ...(fixed ? ["gate"] : [])])];
-  const results = await runChecks(host, n, names);
-  for (const [name, c] of Object.entries(results))
-    res.log.push(`  check ${name} ${c.ok ? "ok" : "FAIL"}: ${c.evidence.split("\n")[0]}`);
-  return !r.clean || failing(results).length > 0;
 }
