@@ -1,6 +1,7 @@
 ---
-name: Assignment: a mod of your own
-about: Workshop assignment. Run it with the feature-atdd workflow.
+
+name: "Assignment: a mod of your own"
+about: "Workshop assignment. Run it with the feature-atdd workflow."
 title: "Assignment: a mod of your own"
 labels: assignment
 ---

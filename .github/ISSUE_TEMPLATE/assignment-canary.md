@@ -1,6 +1,7 @@
 ---
-name: Assignment: canary prompt with rollback
-about: Workshop assignment. Run it with the llm-eval workflow.
+
+name: "Assignment: canary prompt with rollback"
+about: "Workshop assignment. Run it with the llm-eval workflow."
 title: "Assignment: canary prompt with rollback"
 labels: assignment
 ---

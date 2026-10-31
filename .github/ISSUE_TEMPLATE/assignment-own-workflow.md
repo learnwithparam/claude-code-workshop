@@ -1,6 +1,7 @@
 ---
-name: Assignment: a workflow from your own company
-about: Workshop assignment. Run it with the the workflow you write workflow.
+
+name: "Assignment: a workflow from your own company"
+about: "Workshop assignment. Run it with the the workflow you write workflow."
 title: "Assignment: a workflow from your own company"
 labels: assignment
 ---

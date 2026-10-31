@@ -1,6 +1,7 @@
 ---
-name: Assignment: render a worksheet as a HyperFrames video
-about: Workshop assignment. Run it with the ui-visual workflow.
+
+name: "Assignment: render a worksheet as a HyperFrames video"
+about: "Workshop assignment. Run it with the ui-visual workflow."
 title: "Assignment: render a worksheet as a HyperFrames video"
 labels: assignment
 ---

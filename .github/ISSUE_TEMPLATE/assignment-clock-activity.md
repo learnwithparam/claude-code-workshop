@@ -1,6 +1,7 @@
 ---
-name: Assignment: add the clock activity kind
-about: Workshop assignment. Run it with the feature-bdd workflow.
+
+name: "Assignment: add the clock activity kind"
+about: "Workshop assignment. Run it with the feature-bdd workflow."
 title: "Assignment: add the clock activity kind"
 labels: assignment
 ---

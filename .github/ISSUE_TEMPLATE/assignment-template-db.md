@@ -1,6 +1,7 @@
 ---
-name: Assignment: move worksheet templates into a database
-about: Workshop assignment. Run it with the spike, then feature-sdd workflow.
+
+name: "Assignment: move worksheet templates into a database"
+about: "Workshop assignment. Run it with the spike, then feature-sdd workflow."
 title: "Assignment: move worksheet templates into a database"
 labels: assignment
 ---

@@ -1,6 +1,7 @@
 ---
-name: Assignment: an opt-in LLM-judge hook
-about: Workshop assignment. Run it with the feature-atdd workflow.
+
+name: "Assignment: an opt-in LLM-judge hook"
+about: "Workshop assignment. Run it with the feature-atdd workflow."
 title: "Assignment: an opt-in LLM-judge hook"
 labels: assignment
 ---

@@ -1,6 +1,7 @@
 ---
-name: Assignment: add a performance review lens
-about: Workshop assignment. Run it with the llm-eval workflow.
+
+name: "Assignment: add a performance review lens"
+about: "Workshop assignment. Run it with the llm-eval workflow."
 title: "Assignment: add a performance review lens"
 labels: assignment
 ---

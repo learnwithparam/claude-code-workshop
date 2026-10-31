@@ -1,6 +1,7 @@
 ---
-name: Assignment: fuzz the worksheet tool input
-about: Workshop assignment. Run it with the security workflow.
+
+name: "Assignment: fuzz the worksheet tool input"
+about: "Workshop assignment. Run it with the security workflow."
 title: "Assignment: fuzz the worksheet tool input"
 labels: assignment
 ---

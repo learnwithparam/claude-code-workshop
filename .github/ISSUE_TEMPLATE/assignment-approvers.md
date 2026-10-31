@@ -1,6 +1,7 @@
 ---
-name: Assignment: name the approvers for a high-risk gate
-about: Workshop assignment. Run it with the feature-atdd workflow.
+
+name: "Assignment: name the approvers for a high-risk gate"
+about: "Workshop assignment. Run it with the feature-atdd workflow."
 title: "Assignment: name the approvers for a high-risk gate"
 labels: assignment
 ---

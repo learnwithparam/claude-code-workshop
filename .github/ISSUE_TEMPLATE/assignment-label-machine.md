@@ -1,6 +1,7 @@
 ---
-name: Assignment: specify the label state machine
-about: Workshop assignment. Run it with the feature-atdd workflow.
+
+name: "Assignment: specify the label state machine"
+about: "Workshop assignment. Run it with the feature-atdd workflow."
 title: "Assignment: specify the label state machine"
 labels: assignment
 ---

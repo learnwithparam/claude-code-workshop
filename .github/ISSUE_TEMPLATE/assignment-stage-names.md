@@ -1,6 +1,7 @@
 ---
-name: Assignment: a model for every stage name
-about: Workshop assignment. Run it with the llm-eval workflow.
+
+name: "Assignment: a model for every stage name"
+about: "Workshop assignment. Run it with the llm-eval workflow."
 title: "Assignment: a model for every stage name"
 labels: assignment
 ---
