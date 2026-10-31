@@ -31,7 +31,15 @@ describe("metrics", () => {
     expect(r.costByWorkflow["bug-tdd"]).toBe(1);
   });
   it("records the auth mode and usage, and still reads metrics written without them", () => {
-    const result = { outcome: "done", rounds: { fix: 1 }, costUsd: 0 } as unknown as Result;
+    const t = "2026-10-31T10:00:00.000Z";
+    const result = {
+      outcome: "done",
+      rounds: { fix: 1 },
+      costUsd: 0,
+      startedAt: t,
+      finishedAt: t,
+      stages: { fix: { startedAt: t, finishedAt: t } },
+    } as unknown as Result;
     const u = { auth: "subscription" as const, calls: 3, tokens: 900, estimatedUsd: 0.4 };
     const saved = metricsSchema.parse(metricsFor(1, "bug-tdd", result, u));
     expect(saved).toMatchObject({
