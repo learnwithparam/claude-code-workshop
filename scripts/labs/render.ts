@@ -25,6 +25,17 @@ function commands(text: string, color: boolean): string {
   return text.replace(/`([^`]+)`/g, (_m, cmd: string) => `\`${paint(color, "cyan", cmd)}\``);
 }
 
+// A backticked span is a command when it starts with a shell program. File names and keys are not.
+const PROGRAMS = "ls|cat|mkdir|echo|tail|grep|cd|git|claude|make|npm|npx|node|tee";
+export const isCommand = (span: string): boolean => new RegExp(`^(${PROGRAMS})( |$)`).test(span);
+
+// At "hinted" the commands leave the steps; the hints still carry them.
+function hideCommands(text: string): string {
+  return text.replace(/`([^`]+)`/g, (m, span: string) =>
+    isCommand(span) ? "(command in hints)" : m,
+  );
+}
+
 export function renderMap(
   stats: Stat[],
   labs: Lab[],
@@ -44,6 +55,16 @@ export function renderMap(
   return lines.join("\n");
 }
 
+function body(lab: Lab, color: boolean): string[] {
+  if (lab.help === "goal") return [paint(color, "bold", "Done when this passes"), lab.proof, ""];
+  const show = (s: string) => (lab.help === "hinted" ? hideCommands(s) : commands(s, color));
+  const steps = lab.steps.flatMap((s, i) => [
+    `${i + 1}. ${show(s.text)}`,
+    ...(s.expect ? [paint(color, "dim", `   Expect: ${s.expect}`)] : []),
+  ]);
+  return [paint(color, "bold", "Steps"), ...steps, ""];
+}
+
 export function renderBrief(lab: Lab, progress: Progress, color: boolean): string {
   const shown = progress.hints[lab.id] ?? 0;
   const lines = [
@@ -52,12 +73,7 @@ export function renderBrief(lab: Lab, progress: Progress, color: boolean): strin
     "",
     `${paint(color, "bold", "Goal")} ${lab.goal}`,
     "",
-    paint(color, "bold", "Steps"),
-    ...lab.steps.flatMap((s, i) => [
-      `${i + 1}. ${commands(s.text, color)}`,
-      ...(s.expect ? [paint(color, "dim", `   Expect: ${s.expect}`)] : []),
-    ]),
-    "",
+    ...body(lab, color),
     paint(
       color,
       "dim",

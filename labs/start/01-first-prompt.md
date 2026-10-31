@@ -1,6 +1,7 @@
 # Ask Claude about the repo
 
 **Pairs with:** `docs/levels/hand-built.md`
+**Help:** guided
 
 ## Goal
 

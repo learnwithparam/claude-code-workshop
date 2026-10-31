@@ -1,6 +1,7 @@
 # Package a habit as a skill
 
 **Pairs with:** `docs/levels/skills.md`
+**Help:** hinted
 
 ## Goal
 
@@ -27,6 +28,7 @@ f=.labs/work/skills/commit-message/SKILL.md; grep -q '^name: commit-message' $f 
 1. Front matter needs exactly `name: commit-message` and a `description:` that starts with `Use when`.
 2. The body should have at least a few lines of steps.
 3. Good first steps: read the staged diff, write a subject under 60 characters, say why in the body.
+4. Commands, in order: `ls .claude/skills`, then `cat` one SKILL.md, `mkdir -p .labs/work/skills/commit-message`.
 
 ## What you just learned
 

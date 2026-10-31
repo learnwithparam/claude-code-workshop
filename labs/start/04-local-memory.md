@@ -1,6 +1,7 @@
 # Teach Claude a personal habit
 
 **Pairs with:** `docs/levels/context.md`
+**Help:** guided
 
 ## Goal
 

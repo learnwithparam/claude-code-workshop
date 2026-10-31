@@ -1,6 +1,7 @@
 # Run the gate yourself
 
 **Pairs with:** `docs/levels/hand-built.md`
+**Help:** guided
 
 ## Goal
 

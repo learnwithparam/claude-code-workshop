@@ -6,6 +6,10 @@ import { z } from "zod";
 export const LANES = ["start", "daily", "team", "factory", "advanced"] as const;
 export type Lane = (typeof LANES)[number];
 
+// How much the brief gives away: every command, the goal with hints on request, or the goal alone.
+export const HELP = ["guided", "hinted", "goal"] as const;
+export type Help = (typeof HELP)[number];
+
 const oneLine = z
   .string()
   .min(1)
@@ -24,6 +28,7 @@ export const labSchema = z.object({
   lane: z.enum(LANES),
   title: oneLine,
   pairs: z.string().min(1),
+  help: z.enum(HELP),
   goal: oneLine,
   steps: z.array(stepSchema).min(1),
   proof: z.string().min(1),
@@ -74,6 +79,7 @@ export function parseLab(lane: string, file: string, text: string): Lab {
     lane,
     title: /^# (.+)$/m.exec(text)?.[1],
     pairs: /^\*\*Pairs with:\*\* `([^`]+)`/m.exec(text)?.[1],
+    help: /^\*\*Help:\*\* (\w+)\s*$/m.exec(text)?.[1],
     goal: parts.get("goal"),
     steps: listItems(parts.get("steps") ?? "").map(stepOf),
     proof: proofOf(parts.get("proof") ?? ""),

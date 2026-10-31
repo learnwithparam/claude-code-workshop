@@ -1,6 +1,7 @@
 # Block a mistake with a hook
 
 **Pairs with:** `docs/levels/boundary.md`
+**Help:** hinted
 
 ## Goal
 
@@ -30,6 +31,7 @@ echo '{"tool_input":{"file_path":"a.ts"}}' | node $h >/dev/null 2>&1
 1. Read all of stdin first: `const input = JSON.parse(readFileSync(0, "utf8"))`.
 2. Exit code 2 tells Claude Code to block the call and show stderr to the model.
 3. Import `readFileSync` from `node:fs` and end with `process.exit(0)` for the allowed case.
+4. Commands, in order: `cat .claude/hooks/pretooluse-file-guard.mjs`, `mkdir -p .labs/work/hooks`, `echo '{"tool_input":{"file_path":".env"}}' | node .labs/work/hooks/block-env.mjs; echo $?`.
 
 ## What you just learned
 

@@ -1,21 +1,18 @@
 # Check the workflow contract
 
 **Pairs with:** `docs/factory/f8-workflows.md`
+**Help:** goal
 
 ## Goal
 
-Run the workflow contract tests and keep the log, so you know the stages and their artifacts are consistent.
+Run the workflow contract tests and save the log to .labs/work/contract.log, then read what passed or failed. This shows the stages and their artifacts agree. The proof below must pass.
 
 ## Steps
 
-1. Read the module: `cat docs/factory/f8-workflows.md`.
-   Expect: The text of the workflow module, describing stages and the artifacts each one produces.
-2. Make the folder: `mkdir -p .labs/work`.
-   Expect: No output. The folder `.labs/work` now exists.
-3. Run the contract tests: `npx vitest run tests/contract > .labs/work/contract.log 2>&1`.
-   Expect: No output on screen, because it all goes to `contract.log`. It finishes in a few seconds.
-4. Read what failed or passed: `tail -8 .labs/work/contract.log`.
-   Expect: Vitest summary lines near the end, such as `Test Files  N passed` and `Tests  N passed`. The numbers will differ. A `failed` line names the workflow file to open.
+1. Read the workflow module doc.
+2. Make the lab work folder.
+3. Run the contract tests and save the whole log.
+4. Read the end of the log.
 
 ## Proof
 
@@ -28,6 +25,7 @@ grep -q 'passed' .labs/work/contract.log && ! grep -q 'failed' .labs/work/contra
 1. The proof reads `.labs/work/contract.log` for `passed` and no `failed`.
 2. The tests live in `tests/contract/`.
 3. A failure names the workflow file. Open it under `.factory/workflows/`.
+4. Commands: `cat docs/factory/f8-workflows.md`, `mkdir -p .labs/work`, `npx vitest run tests/contract > .labs/work/contract.log 2>&1`, `tail -8 .labs/work/contract.log`.
 
 ## What you just learned
 

@@ -4,6 +4,7 @@ import { LANES, loadLabs, parseLab } from "./catalog.ts";
 const good = `# First prompt
 
 **Pairs with:** \`docs/levels/hand-built.md\`
+**Help:** guided
 
 ## Goal
 Ask Claude one question.
@@ -34,6 +35,7 @@ describe("parseLab", () => {
       lane: "start",
       title: "First prompt",
       pairs: "docs/levels/hand-built.md",
+      help: "guided",
       goal: "Ask Claude one question.",
       proof: "test -f .labs/work/a.md",
       learned: "A prompt is just a question.",
@@ -52,6 +54,13 @@ describe("parseLab", () => {
 
   it("rejects a lab with fewer than two hints", () => {
     expect(() => parseLab("start", "01-x.md", good.replace("2. Create the file.\n", ""))).toThrow();
+  });
+
+  it("rejects a missing or unknown help level", () => {
+    expect(() => parseLab("start", "01-x.md", good.replace("**Help:** guided\n", ""))).toThrow(
+      /help/i,
+    );
+    expect(() => parseLab("start", "01-x.md", good.replace("guided", "easy"))).toThrow(/help/i);
   });
 
   it("rejects a file name that is not kebab-case with a number", () => {

@@ -1,6 +1,7 @@
 # Package your setup as a plugin
 
 **Pairs with:** `docs/levels/sharing.md`
+**Help:** hinted
 
 ## Goal
 
@@ -28,6 +29,7 @@ node -e "const m=require('./.labs/work/plugin/.claude-plugin/plugin.json'); proc
 1. The manifest is plain JSON with three string fields.
 2. The version looks like `0.1.0`.
 3. The name is kebab-case, such as `my-team-kit`.
+4. Commands, in order: `ls plugins`, `cat plugins/factory-kit/.claude-plugin/plugin.json`, `mkdir -p .labs/work/plugin/.claude-plugin`.
 
 ## What you just learned
 
