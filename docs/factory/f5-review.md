@@ -2,6 +2,18 @@
 
 **Stage:** Review. **Layer:** verification. **Workflows:** every workflow ends with a `review` step; `bug-tdd`, `incident` and the others run lenses and voters, then the `plan-drift` check.
 
+## Story
+
+**The ticket.** Issue 35, the build notes in `specs/35/build.md`.
+
+**Without the layer.** The first note says "Blocked: two locked tests cannot pass as written" and proposes changing one. The next update says the blockers "no longer reproduce". A claim with no input that breaks it would have sent a person to chase it.
+
+**What the layer did.** A build note is not held to the review's rule, which is why the rule exists. A review finding must carry `evidence`, "the input that breaks it. No evidence, no finding" (`factory/engine/review.ts`), and two of three verifiers must agree before it reaches a person.
+
+![One review round as a funnel: lenses hunt, findings need evidence, verifiers vote, nits are capped](img/review-funnel.svg)
+
+_Notice:_ the side boxes are where findings drop out. Only what passes every layer is written to `review.json`.
+
 ## Goal
 
 A review that reports few findings and is right about them. Several lenses hunt in parallel, three cheap verifiers vote on each finding, and only a finding with two votes reaches a person. A later round never repeats an old finding, and after three rounds the rest goes to a human.
@@ -12,7 +24,7 @@ Read this before the steps, because the pieces are not all wired the same way.
 
 - Built and tested: `factory/engine/review.ts` (lenses, 3 voters, 2 needed, nit cap, round cap, failed review), `factory/engine/risk.ts`, and `REVIEW.md`. `factory/engine/review.test.ts` proves them.
 - Called by the runner: the `review` step in each workflow YAML carries `review: { lenses: [...] }`, and `factory/engine/interpret.ts` runs `reviewLoop` for it (lenses in parallel, 3 voters, 2 needed, a `builder` fix between rounds, cap of 3) and writes `specs/<n>/review.json`. A surviving Important finding or a lens reply that is not findings stops the run as `needs-human`. The `plan-drift` check still runs after it.
-- Risk at the human gate: `interpret.ts` calls `classify()` on the files changed so far and requires `APPROVALS[tier]` distinct people (docs-only needs none, high needs two) before a `gate: human` step passes.
+- Risk at the human gate: `interpret.ts` calls `classify()` on the files changed so far and requires `Math.max(1, APPROVALS[tier])` distinct people (docs-only still needs one, high needs two) before a `gate: human` step passes.
 - Live on pull requests: `.github/workflows/review.yml` runs the `reviewer` agent, and `design-reviewer` for UI paths, and posts one comment ending in a `VERDICT` line. That review has no voting.
 - The delivery runner (`factory/run.ts`, `make factory ISSUE=n`) has its own loop: `review`, then `build` to fix, at most `reviewLoop.maxRounds` times (3 in `.factory/config.json`), then the `needs-human` label. It reads one `VERDICT: clean` or `VERDICT: blocking`.
 
@@ -42,7 +54,7 @@ Read this before the steps, because the pieces are not all wired the same way.
    npx vitest run factory/engine/review.test.ts
    ```
 
-4. Read the workflow review step in `.factory/workflows/bug-tdd.yaml`: `{ stage: review, agent: reviewer, checks: [plan-drift] }`. Compare it with `reviewRound`.
+4. Read the workflow review step in `.factory/workflows/bug-tdd.yaml`: `review: { lenses: [reviewer, security-reviewer, test-reviewer] }`. Compare it with `reviewRound`.
 5. Open a pull request on your fork. `review.yml` comments with the reviewer's verdict. Compare its comment with the shape `REVIEW.md` asks for.
 6. Run the whole workflows proof:
 
@@ -64,7 +76,7 @@ This is only a design here. The idea from Anthropic's code review post is to run
 
 ## See it on a real run
 
-There is no `review.json` committed in `specs/`; the engine writes it to `specs/<n>/review.json` only when `reviewRound` is called, and the shipped workflows do not call it. Do not expect one. What is committed is the live evidence of the tests above and the `specs/35/ci.md` record used in F6. To see a real voted review, call `reviewRound` from a workflow of your own with a real `Host`, then read the `votes` field of each finding.
+There is no `review.json` committed in `specs/`; the engine writes it to `specs/<n>/review.json` on every review round, through `reviewLoop` in `interpret.ts`, wired in db9032e (#84), and no committed run folder holds one yet. Do not expect one. What is committed is the live evidence of the tests above and the `specs/35/ci.md` record used in F6. To see a real voted review, run any workflow on an issue of your own, then read the `votes` field of each finding in `specs/<n>/review.json`.
 
 ## Discussion
 

@@ -225,7 +225,10 @@
     "docs/factory/f7-maintain.md",
     "docs/factory/f8-workflows.md",
     "docs/factory/harness-retro.md",
-    "docs/factory/faq.md"
+    "docs/factory/faq.md",
+    "docs/factory/visual-guide.md",
+    "docs/factory/img/**",
+    "tests/structure/factory-visuals.test.ts"
   ],
   "capstone": [
     "scripts/prove/capstone.ts",
