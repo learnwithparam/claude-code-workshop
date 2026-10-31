@@ -14,9 +14,15 @@ Ask Claude one question.
 2. Ask it.
 
 ## Proof
-\`\`\`sh
-test -f .labs/work/a.md
-\`\`\`
+
+1. The notes file exists.
+   \`\`\`sh
+   test -f .labs/work/a.md
+   \`\`\`
+2. The notes file is not empty.
+   \`\`\`sh
+   test -s .labs/work/a.md
+   \`\`\`
 
 ## Hints
 1. Look in .labs.
@@ -36,15 +42,23 @@ describe("parseLab", () => {
       pairs: "docs/levels/hand-built.md",
       help: "guided",
       goal: "Ask Claude one question.",
-      proof: "test -f .labs/work/a.md",
       learned: "A prompt is just a question.",
     });
+    expect(lab.proof).toEqual([
+      { text: "The notes file exists.", command: "test -f .labs/work/a.md" },
+      { text: "The notes file is not empty.", command: "test -s .labs/work/a.md" },
+    ]);
     expect(lab.steps).toEqual(["Run `claude`.", "Ask it."]);
     expect(lab.hints).toHaveLength(2);
   });
 
   it("rejects a lab with no proof", () => {
     const text = good.replace(/## Proof[\s\S]*?## Hints/, "## Hints");
+    expect(() => parseLab("start", "01-x.md", text)).toThrow(/proof/i);
+  });
+
+  it("rejects a proof item that has no command", () => {
+    const text = good.replace(/ {3}`{3}sh\n {3}test -s[^\n]*\n {3}`{3}\n/, "");
     expect(() => parseLab("start", "01-x.md", text)).toThrow(/proof/i);
   });
 
