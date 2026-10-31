@@ -17,7 +17,9 @@ Write .labs/work/specs/1/acceptance.md from your intent: two scenarios, each wit
 ## Proof
 
 ```sh
-f=.labs/work/specs/1/acceptance.md; test "$(grep -c '^Given' $f)" -ge 2 && test "$(grep -c '^When' $f)" -ge 2 && test "$(grep -c '^Then' $f)" -ge 2
+f=.labs/work/specs/1/acceptance.md
+for k in Given When Then; do test "$(grep "^$k" $f | awk 'NF>=4' | wc -l)" -ge 2 || exit 1; done
+! grep '^Then' $f | grep -Eqiw 'look(s)? (good|nice|right)|works|fine|correct'
 ```
 
 ## Hints

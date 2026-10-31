@@ -16,7 +16,10 @@ Run the repo's own tests and keep the log, so you know what green looks like bef
 ## Proof
 
 ```sh
-grep -q 'passed' .labs/work/gate.log && ! grep -q 'failed' .labs/work/gate.log
+f=.labs/work/gate.log
+grep -Eq 'Tests +[0-9]+ passed' $f && ! grep -q 'failed' $f || exit 1
+for t in $(grep -Eo 'shared/[A-Za-z0-9_./-]+[.]test[.]ts' $f); do test -f "$t" && exit 0; done
+exit 1
 ```
 
 ## Hints

@@ -16,7 +16,8 @@ Run one level's proof and save the output, so you can show the team it passed.
 ## Proof
 
 ```sh
-grep -q '^PASS hand-built' .labs/work/prove.txt
+line=$(make prove LEVEL=hand-built 2>/dev/null | grep '^PASS hand-built')
+test -n "$line" && grep -qxF "$line" .labs/work/prove.txt
 ```
 
 ## Hints

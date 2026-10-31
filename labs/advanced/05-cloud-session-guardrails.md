@@ -24,7 +24,7 @@ node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.de
 grep -qF 'Bash(git push *)' $f || exit 1
 grep -q PreToolUse $f || exit 1
 grep -qiE 'person ships|teleport|hook' $r || exit 1
-test "$(grep -c . $r)" -ge 2
+test "$(grep -c . $r)" -ge 2 && test "$(awk 'NF>=5' $r | wc -l)" -ge 1
 ```
 
 ## Hints

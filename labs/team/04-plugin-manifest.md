@@ -17,7 +17,7 @@ Write a plugin manifest so a teammate can install your skill and hook in one com
 ## Proof
 
 ```sh
-node -e "const m=require('./.labs/work/plugin/.claude-plugin/plugin.json'); process.exit(m.name && /^\d+\.\d+\.\d+$/.test(m.version) && m.description ? 0 : 1)"
+node -e "const m=require('./.labs/work/plugin/.claude-plugin/plugin.json'); process.exit(/^[a-z0-9]+(-[a-z0-9]+)*$/.test(m.name) && /^\d+\.\d+\.\d+$/.test(m.version) && String(m.description).split(' ').length>=4 ? 0 : 1)" && ls .labs/work/plugin/skills/*/SKILL.md >/dev/null
 ```
 
 ## Hints

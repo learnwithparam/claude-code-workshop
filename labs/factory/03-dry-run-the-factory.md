@@ -17,7 +17,8 @@ Run the factory in dry-run mode for issue 1, save its output to .labs/work/dry-r
 ## Proof
 
 ```sh
-grep -q 'stages that would run' .labs/work/dry-run.txt && grep -q 'review loop' .labs/work/dry-run.txt
+fresh=$(make factory ISSUE=1 FLAGS=--dry-run 2>/dev/null | grep -v '^npx tsx')
+test -n "$fresh" && test "$(grep -v '^npx tsx' .labs/work/dry-run.txt)" = "$fresh"
 ```
 
 ## Hints

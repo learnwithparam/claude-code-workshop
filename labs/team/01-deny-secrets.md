@@ -17,7 +17,7 @@ Write a settings file that denies reading `.env` files, so the rule holds for ev
 ## Proof
 
 ```sh
-node -e "const s=require('./.labs/work/settings.json'); const d=s.permissions.deny; process.exit(d.includes('Read(./.env)') && d.includes('Read(./.env.*)') ? 0 : 1)"
+node -e "const d=require('./.labs/work/settings.json').permissions.deny; const ok=d.includes('Read(./.env)') && d.includes('Read(./.env.*)') && d.every(e => /^[A-Z][A-Za-z]*\(.+\)$/.test(e) && !/[(]\.\/?[*]*[)]|[(]\.\/[*][*]/.test(e)); process.exit(ok ? 0 : 1)"
 ```
 
 ## Hints

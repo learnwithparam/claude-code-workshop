@@ -17,7 +17,7 @@ Start a session, leave it, and pick it up again with its context intact.
 ## Proof
 
 ```sh
-grep -q 'session_id' .labs/work/session.json && grep -qi 'tangerine' .labs/work/recall.md
+node -e "const s=require('./.labs/work/session.json'); process.exit(s.type==='result' && /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(s.session_id) ? 0 : 1)" && grep -qi 'tangerine' .labs/work/recall.md
 ```
 
 ## Hints

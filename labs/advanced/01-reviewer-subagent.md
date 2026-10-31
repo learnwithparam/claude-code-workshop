@@ -17,7 +17,12 @@ Write a read-only reviewer subagent at .labs/work/agents/reviewer.md: front matt
 ## Proof
 
 ```sh
-f=.labs/work/agents/reviewer.md; grep -q '^name: reviewer' $f && grep -q '^description: ' $f && grep -q '^tools: Read, Grep, Glob$' $f && grep -q '^model: ' $f && ! grep -Eq '^tools:.*(Write|Edit|Bash)' $f
+f=.labs/work/agents/reviewer.md
+test "$(sed -n 1p $f)" = '---' && test "$(grep -c '^---$' $f)" -ge 2 || exit 1
+grep -q '^name: reviewer' $f && grep -Eq '^description: [^ ]+ [^ ]+ [^ ]+ [^ ]+' $f || exit 1
+grep -q '^tools: Read, Grep, Glob$' $f && grep -Eq '^model: (haiku|sonnet|opus)$' $f || exit 1
+! grep -Eq '^tools:.*(Write|Edit|Bash)' $f || exit 1
+test "$(awk '/^---$/{n++; next} n>=2 && NF>=5' $f | wc -l)" -ge 1
 ```
 
 ## Hints
