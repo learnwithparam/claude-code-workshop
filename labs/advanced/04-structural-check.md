@@ -16,14 +16,20 @@ Write .labs/work/check-kebab.mjs: given a folder, it walks it, prints each file 
 
 ## Proof
 
-```sh
-s=.labs/work/check-kebab.mjs
-node $s docs >/dev/null 2>&1 || exit 1
-mkdir -p .labs/work/bad && : > .labs/work/bad/BadName.txt
-node $s .labs/work/bad >/dev/null 2>&1; r=$?
-rm -rf .labs/work/bad
-test $r -eq 1
-```
+1. check-kebab.mjs passes on the docs folder.
+
+   ```sh
+   node .labs/work/check-kebab.mjs docs >/dev/null 2>&1
+   ```
+2. check-kebab.mjs fails on a folder that holds BadName.txt.
+
+   ```sh
+   test -f .labs/work/check-kebab.mjs || exit 1
+   d=.labs/work/bad; mkdir -p $d && : > $d/BadName.txt
+   node .labs/work/check-kebab.mjs $d >/dev/null 2>&1; r=$?
+   rm -rf $d
+   test $r -eq 1
+   ```
 
 ## Hints
 

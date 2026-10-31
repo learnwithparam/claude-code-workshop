@@ -20,9 +20,21 @@ Write a rule file scoped to one folder, so Claude reads it only when it works th
 
 ## Proof
 
-```sh
-head -1 .labs/work/rules/api-errors.md | grep -q '^---$' && grep -q '^paths:' .labs/work/rules/api-errors.md && test "$(grep -c '^- ' .labs/work/rules/api-errors.md)" -ge 2
-```
+1. The rule file starts with a --- line.
+
+   ```sh
+   head -1 .labs/work/rules/api-errors.md | grep -q '^---$'
+   ```
+2. The front matter has a paths: key.
+
+   ```sh
+   grep -q '^paths:' .labs/work/rules/api-errors.md
+   ```
+3. The rule has at least two bullet lines.
+
+   ```sh
+   test "$(grep -c '^- ' .labs/work/rules/api-errors.md)" -ge 2
+   ```
 
 ## Hints
 

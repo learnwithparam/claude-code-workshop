@@ -18,9 +18,16 @@ Get a written plan for a small change from Claude without letting it edit a sing
 
 ## Proof
 
-```sh
-grep -qi 'verify' .labs/work/plan.md && test "$(grep -c . .labs/work/plan.md)" -ge 5
-```
+1. The plan mentions how you will verify it.
+
+   ```sh
+   grep -qi 'verify' .labs/work/plan.md
+   ```
+2. The plan has at least five non-empty lines.
+
+   ```sh
+   test "$(grep -c . .labs/work/plan.md)" -ge 5
+   ```
 
 ## Hints
 

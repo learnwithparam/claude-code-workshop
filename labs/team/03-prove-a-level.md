@@ -18,9 +18,11 @@ Run one level's proof and save the output, so you can show the team it passed.
 
 ## Proof
 
-```sh
-grep -q '^PASS hand-built' .labs/work/prove.txt
-```
+1. prove.txt has a line starting with PASS hand-built.
+
+   ```sh
+   grep -q '^PASS hand-built' .labs/work/prove.txt
+   ```
 
 ## Hints
 

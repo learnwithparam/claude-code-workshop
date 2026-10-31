@@ -2,6 +2,18 @@
 
 **Stage:** all of them. **Layer:** every level. **Workflows:** `feature-bdd` for the cache and templates, `feature-sdd` for the workbook, `bug-tdd` for the template id boundary.
 
+## Story
+
+**The ticket.** Issue 37, the template id boundary, run with `bug-tdd`.
+
+**Without the layer.** `specs/37/fix.md`: the golden test "failed on the old schema (404)". A malformed id reached a lookup before anything refused it.
+
+**What the layer did.** `templateIdSchema` is "an allowlist `[A-Za-z0-9_-]{1,100}`", and "a bad id gets the generic 400 before any lookup". The golden test "was not edited". Your factory has to reach the same green without editing it either.
+
+![A timeline of run 35, each event quoted from a file in specs/35](img/run-35-timeline.svg)
+
+_Notice:_ run 35 is one of the features you rebuild here, and each event is a file your own run will write.
+
 ## Goal
 
 You do not write the workbook, template or cache code. Your factory does. You supply the red suites, the factory builds until they are green, and you compare its tree with the reference answer. The score is whether the gates held, not whether code appeared.
@@ -9,7 +21,7 @@ You do not write the workbook, template or cache code. Your factory does. You su
 ## What is built and what is design
 
 - Built and tested: the red suites in `specs/34`, `specs/35` and `specs/37`, the workflows that run them, and the reference code the capstone level owns (see `docs/levels/capstone.md` for the paths).
-- Built, not run for you: the factory runs against your own GitHub issues and your own API key. This guide gives the steps. No run log from a capstone is committed, so do not expect one in this repo.
+- Built, not run for you: the factory runs against your own GitHub issues and your own API key or Claude subscription token ([Auth modes](auth-modes.md)). This guide gives the steps. No run log from a capstone is committed, so do not expect one in this repo.
 - Design: the order of tickets below is a suggestion. Any order works if each ticket's red suite fails first.
 
 ## The setup

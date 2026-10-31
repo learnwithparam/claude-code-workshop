@@ -24,15 +24,26 @@ Show which guardrails a cloud session inherits from this repo, and predict what 
 
 ## Proof
 
-```sh
-f=.labs/work/cloud-guards.txt
-r=.labs/work/push-route.md
-node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' | diff -q - $f >/dev/null || exit 1
-grep -qF 'Bash(git push *)' $f || exit 1
-grep -q PreToolUse $f || exit 1
-grep -qiE 'person ships|teleport|hook' $r || exit 1
-test "$(grep -c . $r)" -ge 2
-```
+1. cloud-guards.txt matches the deny list and hook names that `.claude/settings.json` holds now.
+
+   ```sh
+   f=.labs/work/cloud-guards.txt
+   node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' | diff -q - $f >/dev/null
+   ```
+2. cloud-guards.txt lists the push deny and the PreToolUse hook.
+
+   ```sh
+   f=.labs/work/cloud-guards.txt
+   grep -qF 'Bash(git push *)' $f || exit 1
+   grep -q PreToolUse $f
+   ```
+3. push-route.md gives a route and a reason on separate lines.
+
+   ```sh
+   r=.labs/work/push-route.md
+   grep -qiE 'person ships|teleport|hook' $r || exit 1
+   test "$(grep -c . $r)" -ge 2
+   ```
 
 ## Hints
 

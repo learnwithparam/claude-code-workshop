@@ -10,6 +10,14 @@ export type Lane = (typeof LANES)[number];
 export const HELP = ["guided", "hinted", "goal"] as const;
 export type Help = (typeof HELP)[number];
 
+// One workshop, one path. The lanes match the lists in docs/labs/README.md (a test checks).
+export const PATHS = {
+  pro: ["start", "daily", "team", "advanced"],
+  factory: ["start", "daily", "factory"],
+} as const satisfies Record<string, readonly Lane[]>;
+export type PathId = keyof typeof PATHS;
+export const PATH_IDS = Object.keys(PATHS) as PathId[];
+
 const oneLine = z
   .string()
   .min(1)
@@ -23,6 +31,9 @@ export const stepSchema = z.object({
 });
 export type Step = z.infer<typeof stepSchema>;
 
+const proofItem = z.object({ text: oneLine, command: z.string().min(1) });
+export type ProofItem = z.infer<typeof proofItem>;
+
 export const labSchema = z.object({
   id: z.string().regex(/^[a-z]+-\d{2}$/),
   lane: z.enum(LANES),
@@ -31,7 +42,8 @@ export const labSchema = z.object({
   help: z.enum(HELP),
   goal: oneLine,
   steps: z.array(stepSchema).min(1),
-  proof: z.string().min(1),
+  // Each item says one thing that must be true and checks only that, so a red item names the missing part.
+  proof: z.array(proofItem).min(1),
   // Two or more, so the first nudges and the last gives the answer away.
   hints: z.array(z.string().min(1)).min(2),
   learned: oneLine,
@@ -66,8 +78,18 @@ function stepOf(item: string): Step {
   return expect ? { text: text.trim(), expect } : { text: text.trim() };
 }
 
-function proofOf(body: string): string {
-  return /```sh\n([\s\S]*?)\n```/.exec(body)?.[1]?.trim() ?? "";
+// "1. Sentence." then an indented sh block. A missing block gives an empty command, which zod rejects.
+function proofOf(body: string): ProofItem[] {
+  return listItems(body).map((item) => {
+    const [first = "", ...rest] = item.split(/\n\s*```sh\n/);
+    const block = rest.join("").split(/\n\s*```/)[0] ?? "";
+    const command = block
+      .split("\n")
+      .map((line) => line.replace(/^ {3}/, ""))
+      .join("\n")
+      .trim();
+    return { text: first.trim(), command };
+  });
 }
 
 export function parseLab(lane: string, file: string, text: string): Lab {

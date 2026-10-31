@@ -10,12 +10,14 @@ After a change ships, the factory watches itself. A metric that leaves its band 
 
 - Built and tested: `bands.ts` (`detect`, `actionFor`, `intentFor`), `metrics.ts`, the `incident` workflow, and the engine `retro.ts`.
 - Wired: `runIssue` in `cli.ts` writes `.factory/runs/<n>/metrics.json`, and `--report` rolls them up. Those run folders are gitignored, so no run data is committed.
-- Not wired: nothing calls `detect` on a schedule, and nothing feeds it the three metrics in `.factory/bands.yaml`. The engine `retro()` in `factory/engine/retro.ts` is not called by the runner, and its eval command must print `SCORE <number>`; no script in this repo prints that line. The runner in `factory/run.ts` has its own retro that only posts a proposal comment for a human to apply.
+- Wired: `maintain` in `factory/engine/maintain.ts`, run as `tsx factory/engine/main.ts --maintain <n>`. It reads `.factory/bands.yaml` and the history in `.factory/series.json` (one array per metric, latest value last), logs 1 and 2 sigma, and at 3 sigma writes `specs/<n>/intent.md`. The `incident` workflow's first step is told to start from that file.
+- Wired: `recordSeries` in `factory/engine/series.ts` appends one value per metric to `.factory/series.json` when a run finishes `done` (newest last, last 100 kept) and `runIssue` commits it with the log. `ci-failure-rate` is the share of failed check results in that run, `pr-cycle-time-hours` is the run itself, and `eval-pass-rate` is the retro's score, so it is missing when the retro did not run or its eval broke. `make factory-maintain` runs `--maintain`, and `.github/workflows/maintain.yml` runs it every Monday with no model: a 3 sigma breach opens one `factory:triage` issue, and `make factory-maintain ISSUE=<n>` then writes `specs/<n>/intent.md`. A metric with fewer values than its window plus one is skipped.
+- Wired: `runWorkflow` ends a finished run with one `retro()` when the caller passes a `retro` option, and `runIssue` does, unless `--no-retro` is given. Its outcome is appended to `specs/<n>/run.log`. A run that stopped at a gate or on a failure gets no retro. The eval is `tests.eval` in `.factory/config.yaml`; The retro scores with `tests.score` (`scripts/eval-score.ts`), which prints `SCORE <number>` from the recorded `fixtures/eval.json` and spends nothing, so the score moves only when `make eval` is re-run; the live `tests.eval` is not used by the retro. A revert restores `.claude/skills` and `.claude/rules` only. The runner in `factory/run.ts` has its own retro that only posts a proposal comment for a human to apply.
 - DORA: there is no code for deployment frequency, lead time, change failure rate or time to restore. Treat the mapping below as a design.
 
 ## The pieces
 
-**Sigma bands.** `.factory/bands.yaml` lists `ci-failure-rate`, `pr-cycle-time-hours` (both up is bad) and `eval-pass-rate` (down is bad), each with a window of 14. `detect` takes the history before the latest value, computes mean and standard deviation, and returns a breach of 0, 1, 2 or 3 sigma. No model decides this. `actionFor` maps 1 to log, 2 to diagnose with a read-only agent, 3 to a new `intent.md`, written by `intentFor`.
+**Sigma bands.** `.factory/bands.yaml` lists `ci-failure-rate`, `pr-cycle-time-hours` (both up is bad) and `eval-pass-rate` (down is bad), each with a window of 14. `detect` takes the history before the latest value, computes mean and standard deviation, and returns a breach of 0, 1, 2 or 3 sigma. No model decides this. `actionFor` maps 1 to log, 2 to diagnose with a read-only agent, 3 to a new `intent.md`, written by `intentFor`. `maintain` uses only the log and the `intent.md`; no diagnose agent runs at 2 sigma.
 
 **Incident to eval.** `.factory/workflows/incident.yaml`: `diagnose` (the `verifier` agent writes `intent.md` and changes nothing), `plan`, `eval` (the builder writes a test in `specs/<issue>/golden` that must fail on the base commit, checked by `red` and `lock`), then `fix` (checks `green`, `lock`, `gate`) and `review`. The test exists and fails before the fix is allowed.
 
@@ -44,8 +46,8 @@ Four measures and where they could come from. Deployment frequency and lead time
    npx tsx factory/engine/main.ts --report
    ```
 
-5. Pick a metric from `bands.yaml` and write a script that feeds `detect` its last 14 values. Print the action.
-6. Write a script that prints `SCORE <number>` from your eval and pass it to `retro()` in a scratch test.
+5. Write `.factory/series.json` with 15 values for one metric from `bands.yaml`, then run `npx tsx factory/engine/main.ts --maintain 99`. Print the action.
+6. Run `npx tsx scripts/eval-score.ts` and read the line it prints; then change one row in a copy of `fixtures/eval.json` to `"compliant": false` and run `npx tsx scripts/eval-score.ts <copy>` and compare.
 
 ## Proof that bites
 

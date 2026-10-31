@@ -10,7 +10,7 @@ const lab: Lab = {
   goal: "Ask one question.",
   help: "guided",
   steps: [{ text: "Run `claude`.", expect: "A short reply; wording varies." }],
-  proof: "true",
+  proof: [{ text: "It holds.", command: "true" }],
   hints: ["one", "two"],
   learned: "l",
 };

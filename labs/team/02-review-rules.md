@@ -20,9 +20,16 @@ Write a short `REVIEW.md` that tells a reviewer what to flag, each rule somethin
 
 ## Proof
 
-```sh
-test "$(grep -c '^- Flag' .labs/work/REVIEW.md)" -ge 3 && head -1 .labs/work/REVIEW.md | grep -q '^# '
-```
+1. REVIEW.md has at least three lines starting with - Flag.
+
+   ```sh
+   test "$(grep -c '^- Flag' .labs/work/REVIEW.md)" -ge 3
+   ```
+2. REVIEW.md starts with a # title.
+
+   ```sh
+   head -1 .labs/work/REVIEW.md | grep -q '^# '
+   ```
 
 ## Hints
 

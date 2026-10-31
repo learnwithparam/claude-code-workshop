@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import levels from "../../levels.json" with { type: "json" };
-import { LANES, loadLabs } from "../../scripts/labs/catalog.ts";
+import { LANES, loadLabs, PATHS } from "../../scripts/labs/catalog.ts";
 import { isCommand } from "../../scripts/labs/render.ts";
 
 // A lab without a goal, steps, a proof or hints is a doc, not a lab. loadLabs parses with zod and throws.
@@ -16,6 +16,19 @@ const readme = readFileSync("docs/labs/README.md", "utf8");
 describe("labs", () => {
   it("every lane has labs, noob to advanced", () => {
     for (const lane of LANES) expect(labs.filter((l) => l.lane === lane).length).toBeGreaterThan(0);
+  });
+
+  it("each path's lanes match the lane list in docs/labs/README.md", () => {
+    for (const [id, lanes] of Object.entries(PATHS)) {
+      const line = readme
+        .split("\n")
+        .find((l) => l.startsWith("- ") && l.includes(`PATH_ID=${id}`));
+      expect(line, `README has no line for PATH_ID=${id}`).toBeDefined();
+      const listed = [...(line ?? "").matchAll(/`([a-z]+)`/g)]
+        .map((m) => m[1])
+        .filter((w) => (LANES as readonly (string | undefined)[]).includes(w));
+      expect(listed).toEqual([...lanes]);
+    }
   });
 
   it("no stray files in a lane", () => {
