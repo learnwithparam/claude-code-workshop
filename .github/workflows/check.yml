@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
+        with: { node-version: 22, check-latest: true, cache: npm }
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: make check
@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
+        with: { node-version: 22, check-latest: true, cache: npm }
       - run: npm ci
       - run: make levels LEVEL=${{ matrix.level }}
       - run: npm ci
