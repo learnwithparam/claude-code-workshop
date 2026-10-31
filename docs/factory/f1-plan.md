@@ -18,12 +18,16 @@ Triage here picks a model and a refusal, not the workflow. The engine takes the 
 
 - Anything under `.github/`, `.claude/`, `.factory/`, `factory/`, `scripts/`, plus `CLAUDE.md`, `AGENTS.md`, `REVIEW.md`, the Makefile, `package.json`, the lockfile and any `migrations/` folder is high. Markdown that steers an agent is high on purpose.
 - A diff made only of `docs/` and `fixtures/` is low.
-- The run's own files in `specs/<n>/` (`intent.md`, `spec.md`, `plan.md`, `run.log`, `review.json`, `lock.json`, `incident.md`) are ignored. Any other file there, such as a script, is classified normally.
+- The run's own files in `specs/<n>/` (`intent.md`, `spec.md`, `plan.md`, `constitution.md`, `clarify.md`, `tasks.md`, `analyze.md`, `run.log`, `review.json`, `lock.json`, `incident.md`) are ignored. Any other file there, such as a script, is classified normally.
 - Everything else is medium, and an empty diff is medium.
 
-`APPROVALS` maps the tier to human approvals: low 0, medium 1, high 2. `approvalsMet` counts only approvals of kind `human` on the current head commit, so an agent never counts and a push voids earlier approvals.
+`APPROVALS` maps the tier to human approvals: low 0, medium 1, high 2. An agent's approval never counts.
 
-Be exact about what runs today. `classify` and `approvalsMet` are tested, and `release` in `factory/engine/deploy.ts` takes a `tier` argument and refuses production without the approvals. No code in this checkout calls `classify` for you, so the caller computes the tier. The triage RISK and the path tier are different values: the first is the model's guess used to route models, the second is code over the diff used to gate approvals.
+**Where the tier is applied.** `gateMet` in `factory/engine/interpret.ts` runs at every `gate: human` step. It calls `classify` on the files changed so far, takes `Math.max(1, APPROVALS[tier])` and logs a line such as `gate spec tier high needs 2 approvals`. A gate that says `human` always needs a person, so a docs-only change still needs one; the tier only raises the count. The approvals must be distinct people: `approvalIn` in `factory/engine/real-host.ts` collects the logins of `OWNER`, `MEMBER` or `COLLABORATOR` comments that carry the exact line `approve <stage> <digest>`, so one person commenting twice counts once. The agents hold no GitHub token, so none of their comments can count.
+
+Two limits to know today. First, `runIssue` in `factory/engine/cli.ts` sets the approvers to the one logged-in `gh` user, so a gate whose tier needs two people cannot be met by a real run until more logins are configured. Second, the gate counts approvals bound to the artifact digest. The commit-bound rule in `approvalsMet` (a push after approval voids it) is used by `release` in `factory/engine/deploy.ts`, which only tests call; no real run reaches it.
+
+The triage RISK and the path tier are different values: the first is the model's guess used to route models in the older runner, the second is code over the diff used to gate approvals.
 
 ## Steps you run
 
@@ -31,7 +35,7 @@ Be exact about what runs today. `classify` and `approvalsMet` are tested, and `r
 2. Run `npx vitest run factory/route-ticket.test.ts` and read what each case routes to.
 3. Compute a tier by hand: `npx tsx -e 'import {classify} from "./factory/engine/risk.ts"; console.log(classify([".github/workflows/ci.yml"]), classify(["docs/a.md"]), classify(["shared/src/bands.ts"]))'`. Expect `high low medium`.
 4. File a small docs issue and read its plan without spending: `make factory ISSUE=<n> FLAGS=--dry-run` lists the stages, models and budgets.
-5. For a real plan, label the issue `factory:ready` and run `npx tsx factory/engine/main.ts <n> --workflow=feature-atdd`. It needs `gh` signed in and an API key available to the api workspace, and it spends tokens against the per stage caps in `.factory/config.json`. It stops at the `spec` human gate. Read `specs/<n>/intent.md` and `specs/<n>/spec.md` before you approve.
+5. For a real plan, label the issue `factory:ready` and run `npx tsx factory/engine/main.ts <n> --workflow=feature-atdd`. It needs `gh` signed in and an API key available to the api workspace, and it spends tokens against the per stage caps in `.factory/config.json`. It stops at the `spec` human gate. Read `specs/<n>/intent.md` and `specs/<n>/spec.md` before you approve, then find the `gate spec tier ... needs ... approvals` line in `specs/<n>/run.log` to see how many people the tier asked for.
 
 ## Proof that bites
 
@@ -41,7 +45,7 @@ Both tests are in `make check` through `npm test`. For triage, in `factory/route
 npx vitest run factory/route-ticket.test.ts
 ```
 
-Expect `treats a missing SIZE or RISK as medium size and high risk` to fail with `expected { size: 'medium', risk: 'low' } to deeply equal { size: 'medium', risk: 'high' }`. For the tier, see the `.github/` change in F0: `factory/engine/review.test.ts` fails with `expected 'medium' to be 'high'`. Restore both files afterwards.
+Expect `treats a missing SIZE or RISK as medium size and high risk` to fail with `expected { size: 'medium', risk: 'low' } to deeply equal { size: 'medium', risk: 'high' }`. For the tier, see the `.github/` change in F0: `factory/engine/review.test.ts` fails with `expected 'medium' to be 'high'`. For the gate, in `gateMet` change `Math.max(1, APPROVALS[tier])` to `1` and run `npx vitest run factory/engine/wiring.test.ts`: `needs one approval for a medium change and two for a high one` fails. Restore both files afterwards.
 
 ## See it on a real run
 

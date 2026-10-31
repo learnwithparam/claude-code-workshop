@@ -15,8 +15,8 @@ Choose one assignment, file it as an issue, write its red test first, and make y
 1. Check you can run the factory: `make doctor`, then `npx vitest run factory/engine`.
 2. File the issue with the text in your assignment's section: `gh issue create --title "<title>" --body-file <file>`. Label it `factory:ready` (the label in `.factory/config.json`). `npx tsx factory/engine/main.ts --watch` lists what carries it.
 3. Write the red test and run it. It must fail, and for the reason the issue names. A test that passes before any work proves nothing, which is what the `red` check in `factory/engine/checks/red.ts` refuses.
-4. Run the workflow: `npx tsx factory/engine/main.ts <issue> --workflow=<name>`. The script loads the API key inside its own process, so keep the key off the command line.
-5. Read `specs/<issue>/run.log` and `.factory/runs/<issue>/metrics.json`. If the run ended `needs-human`, the log says which check capped out.
+4. Run the workflow: `npx tsx factory/engine/main.ts <issue> --workflow=<name>`. The script reads the variable named in `keySource` of `.factory/config.yaml` and loads the key inside its own process, so keep the key off the command line. The run stops as `needs-human` with the reason `spend cap` once it has spent `spend.stopAt` of `spend.capUsd` in `.factory/config.json`.
+5. Read `specs/<issue>/run.log`, `specs/<issue>/cost.json` and `.factory/runs/<issue>/metrics.json`. If the run ended `needs-human`, the log says which check capped out or that the spend cap did. If it ended `awaiting-approval`, the log says how many people the risk tier asks for.
 6. Finish with `make check`, zero errors and zero warnings. Revert the fix once and watch your test fail again.
 
 Each red test below is skipped by default in the finished design, as `make prove-homework` is for the take-home (`HOMEWORK=1`). Use an environment variable of your own, such as `ASSIGNMENT=1`, so `make check` stays green until you start.
@@ -72,7 +72,7 @@ Each red test below is skipped by default in the finished design, as `make prove
 
 ## 8. A new review lens
 
-- **Goal:** add a reviewer that hunts one kind of defect. `reviewRound` in `factory/engine/review.ts` takes a list of lens agents, runs them in parallel, and keeps a finding only when two of three verifiers vote yes.
+- **Goal:** add a reviewer that hunts one kind of defect. `reviewRound` in `factory/engine/review.ts` takes a list of lens agents, runs them in parallel, and keeps a finding only when two of three verifiers vote yes. A lens runs only if a workflow's `review: { lenses: [...] }` names it, so the assignment ends with that edit.
 - **Workflow:** `llm-eval`.
 - **Issue:** "Add a `performance-reviewer` agent. It reads the diff and replies with a JSON array of findings with file, line, severity and evidence."
 - **Red test (proposed `tests/assignments/review-lens.test.ts`):** copy the shape of `.claude/agents/security-reviewer.md`, then using the fake host in `factory/engine/fake-host.ts`, assert a one-vote finding is dropped, as `factory/engine/review.test.ts` does for existing lenses. Also feed a diff with a planted defect and assert the lens reports it with evidence.
@@ -90,6 +90,27 @@ Each red test below is skipped by default in the finished design, as `make prove
 - **Workflow:** `feature-atdd`.
 - **Issue:** "Add a mod that shows <something about the run> above the prompt. Acceptance: `claude plugin validate` passes and a test feeds it a fixed state and checks what it draws."
 - **Red test (proposed `tests/assignments/my-mod.test.ts`):** follow `tests/structure/plugin.test.ts` and `tests/structure/commands-and-mod.test.ts`. Assert your mod's manifest is valid and its render function turns a fixed state into the text you expect.
+
+## 11. Two people at a high-risk gate
+
+- **Goal:** `gateMet` in `factory/engine/interpret.ts` asks for two distinct approvers when the changed files are high risk, but `runIssue` in `factory/engine/cli.ts` passes one approver, the logged-in `gh` user. A high-risk gate can therefore never open in a real run. Let a repo name its approvers.
+- **Workflow:** `feature-atdd`.
+- **Issue:** "Read the approver logins from `.factory/config.yaml`. A high-risk gate opens with two of them; a medium one with one. The logged-in user is no longer assumed."
+- **Failing test (proposed `tests/assignments/approvers.test.ts`):** extend the schema in `factory/engine/portable.ts` with an `approvers` list, then use `approvalIn` from `factory/engine/real-host.ts` with comments from two listed logins and assert two approvals pass a need of two, and one login commenting twice does not. `factory/engine/wiring.test.ts` already shows the tier side.
+
+## 12. Count the review calls in the spend cap
+
+- **Goal:** `runReview` in `factory/engine/interpret.ts` adds the cost of the builder's fix to the run total, but not the lens hunts or the verifier ballots, and gives those calls no remaining-budget ceiling. Close the gap so the cap covers every agent call.
+- **Workflow:** `feature-atdd`.
+- **Issue:** "A review step adds every lens and verifier cost to the run total, checks the cap before each round, and stops with the reason `spend cap`."
+- **Failing test (proposed `tests/assignments/review-spend.test.ts`):** with `fakeHost` from `factory/engine/fake-host.ts`, give every agent a `costUsd`, run a `review` step with a small `spend.capUsd`, and assert `cost.json` lists the review calls and the run stops with the reason. `factory/engine/models.test.ts` has the same shape for the other steps.
+
+## 13. A model for every stage name
+
+- **Goal:** a step whose stage name is in neither `stepStages` nor the stage list falls back to the middle model. The `docs` workflow names its build step `write`, so the `routes.docs.build` route to the cheap model never applies to it. Make an unmapped stage name fail a test instead of silently using the middle model.
+- **Workflow:** `llm-eval`.
+- **Issue:** "Every stage name in every workflow resolves to a config stage, or the workflow test fails."
+- **Failing test (proposed `tests/assignments/stage-names.test.ts`):** load each file in `.factory/workflows/`, call `resolveModel` from `factory/engine/models.ts` for every step, and assert each stage name is a key of `stepStages` or one of `STAGE_NAMES`. It fails for `write` until you map it.
 
 ## Discussion
 

@@ -27,7 +27,7 @@ Source: [Use Claude Code in the cloud](https://code.claude.com/docs/en/claude-co
 
 A cloud session clones the repo, so everything committed under `.claude/` comes with it: `settings.json` (hooks and permission rules, for a session with one repository), `rules/`, `skills/`, `agents/` and `commands/`. Your own `~/.claude` does not come, and neither do plugins that only your user settings turn on. Source: [Configure cloud environments](https://code.claude.com/docs/en/cloud-environments.md).
 
-So the factory's guardrails travel with the clone. Check that before you rely on them:
+So the factory's guardrails travel with the clone, and so do `.factory/config.yaml` (the gate and test commands, pinned at the start of a run) and `.factory/config.json` (models and the spend cap). Check the guardrails before you rely on them:
 
 ```bash
 node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))'
@@ -54,7 +54,7 @@ A prompt is stored in the session and can be shared with your team. Treat it as 
 - The proxy never attaches a secret to GitHub, `api.anthropic.com` or the public package registries. A key for those has to stay an environment variable, which is a reason to keep the factory's Anthropic key out of cloud sessions altogether.
 - GitHub credentials stay on Anthropic's servers, and the VM holds a scoped credential that the GitHub proxy swaps for the real one.
 
-This repo says the same at its own boundary. `.claude/hooks/pretooluse-secrets.mjs` blocks a Bash command that names a `.env` file, and `factory/main.ts` loads `api/.env` inside its own process so the key never appears on a command line. Do the same in a cloud prompt: write "the key is in the environment", never the key.
+This repo says the same at its own boundary. `.claude/hooks/pretooluse-secrets.mjs` blocks a Bash command that names a `.env` file, and `factory/engine/main.ts` takes the key from the variable and file named in `keySource` in `.factory/config.yaml`, inside its own process, so the key never appears on a command line. That file is gitignored, so it is not in a cloud clone: a cloud run finds no key unless the environment supplies the variable. Do the same in a cloud prompt: write "the key is in the environment", never the key.
 
 ### 3. Start parallel sessions
 
@@ -99,7 +99,7 @@ claude -p "Status in one line, then stop." --cloud <session-id>
 - A session that asks a question and sits idle can still be answered until its environment expires. After that, reopen it from claude.ai/code and the history returns, but shell commands and subagents that were running do not.
 - Auto-fix (`/autofix-pr` on the PR branch) lets a cloud session react to CI failures and review comments. It posts as you, so read the docs warning about comment-triggered automation before turning it on.
 
-Supervise by artifact, not by chat. The factory already writes them: `specs/<issue>/run.log` and `.factory/runs/<issue>/metrics.json` say which check capped out. A run that ended `needs-human` is a ticket for you, whatever the chat says.
+Supervise by artifact, not by chat. The factory already writes them: `specs/<issue>/run.log` says which check capped out, `specs/<issue>/cost.json` says what the run spent against the cap, and `.factory/runs/<issue>/metrics.json` rolls it up. A run that ended `needs-human` is a ticket for you, whatever the chat says. A run that ended `awaiting-approval` is waiting for a person: the gate needs the approvals its risk tier asks for, and the engine reads comments only from the logged-in `gh` user, which a cloud session may not have. Approve from your own machine.
 
 ### 6. Read the cost
 
@@ -108,7 +108,7 @@ Supervise by artifact, not by chat. The factory already writes them: `specs/<iss
 - `/usage` inside a session shows tokens by model. The dollar figure is an estimate at list price, so the Console usage page or the admin spend report is the bill.
 - Agent teams inside a session multiply this again; the cost page puts it at roughly seven times a standard session in plan mode.
 
-Source: [Manage costs effectively](https://code.claude.com/docs/en/costs.md). F13 covers caps, and F12 covers choosing a cheaper model per stage.
+Source: [Manage costs effectively](https://code.claude.com/docs/en/costs.md). F13 covers the per-run spend cap, which the engine enforces inside a session as well, and F12 covers choosing a cheaper model per stage.
 
 ## Proof that bites
 
