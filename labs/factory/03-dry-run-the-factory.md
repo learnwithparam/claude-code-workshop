@@ -21,10 +21,12 @@ Answer: No. A dry run only reads the config and prints what each stage would get
 
 ## Steps
 
-1. Make the lab work folder.
-2. Run the factory for issue 1 in dry-run mode and save what it prints.
-3. Read the factory config behind it.
-4. Note which stage has the largest budget.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Make the lab work folder.
+3. Run the factory for issue 1 in dry-run mode and save what it prints.
+4. Read the factory config behind it.
+5. Note which stage has the largest budget.
 
 ## Proof
 

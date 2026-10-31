@@ -21,13 +21,15 @@ Answer: Exit code 2 blocks the action. Any other path, including a clean exit 0,
 
 ## Steps
 
-1. Read a real hook: `cat .claude/hooks/pretooluse-file-guard.mjs`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Read a real hook: `cat .claude/hooks/pretooluse-file-guard.mjs`.
    Expect: A short Node script that reads JSON from stdin, checks a path and calls `process.exit`.
-2. Make the folder: `mkdir -p .labs/work/hooks`.
+3. Make the folder: `mkdir -p .labs/work/hooks`.
    Expect: No output. The folder `.labs/work/hooks` now exists.
-3. [editor] Write `.labs/work/hooks/block-env.mjs`. It reads JSON from stdin, looks at `tool_input.file_path`, and exits with code 2 and a message on stderr when the path ends in `.env`. Otherwise it exits 0.
+4. [editor] Write `.labs/work/hooks/block-env.mjs`. It reads JSON from stdin, looks at `tool_input.file_path`, and exits with code 2 and a message on stderr when the path ends in `.env`. Otherwise it exits 0.
    Expect: No output from a command, since you are writing the file. Afterwards it contains an exit with code 2, a message sent to stderr, and an exit with code 0.
-4. Try it: `echo '{"tool_input":{"file_path":".env"}}' | node .labs/work/hooks/block-env.mjs; echo $?`.
+5. Try it: `echo '{"tool_input":{"file_path":".env"}}' | node .labs/work/hooks/block-env.mjs; echo $?`.
    Expect: One message saying the edit is blocked, then `2` on the last line. A `0` means your hook let the edit through.
 
 ## Proof

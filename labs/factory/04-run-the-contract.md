@@ -21,10 +21,12 @@ Answer: Every one, because a test that walks them all catches a break in any wor
 
 ## Steps
 
-1. Read the workflow module doc.
-2. Make the lab work folder.
-3. Run the contract test for the workflows and save the whole log.
-4. Read the end of the log.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Read the workflow module doc.
+3. Make the lab work folder.
+4. Run the contract test for the workflows and save the whole log.
+5. Read the end of the log.
 
 ## Proof
 

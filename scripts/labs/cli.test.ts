@@ -34,7 +34,7 @@ function setup(passes: boolean, withPath = true, guess?: string) {
     status: (s) => out.push(s),
     isTTY: false,
   };
-  if (withPath) saveProgress(deps.progressPath, { done: {}, hints: {}, path: "pro" });
+  if (withPath) saveProgress(deps.progressPath, { done: {}, hints: {}, attempts: {}, path: "pro" });
   return { deps, out, text: () => out.join("\n") };
 }
 
@@ -87,7 +87,7 @@ describe("cli", () => {
   it("a red proof exits 1, shows output and records nothing", () => {
     const s = setup(false);
     expect(run(["lab"], s.deps)).toBe(1);
-    expect(s.text()).toContain("FAIL start-01");
+    expect(s.text()).toContain("RED, as expected");
     expect(s.text()).toContain("boom line");
     expect(s.text()).not.toContain("first hint");
     expect(loadProgress(s.deps.progressPath).done).toEqual({});
@@ -127,6 +127,20 @@ describe("cli", () => {
     run(["lab"], s.deps);
     expect(s.text()).toContain("Because reason start-01.");
     expect(s.text()).toContain("no guess");
+  });
+
+  it("the first red run says RED, as expected; later red runs say FAIL", () => {
+    const s = setup(false);
+    expect(run(["lab"], s.deps)).toBe(1);
+    expect(s.text()).toContain("RED, as expected");
+    expect(s.text()).toContain("boom line");
+    expect(s.text()).not.toContain("FAIL start-01");
+    expect(loadProgress(s.deps.progressPath).attempts["start-01"]).toBe(1);
+    s.out.length = 0;
+    expect(run(["lab"], s.deps)).toBe(1);
+    expect(s.text()).toContain("FAIL start-01");
+    expect(s.text()).not.toContain("RED, as expected");
+    expect(loadProgress(s.deps.progressPath).attempts["start-01"]).toBe(2);
   });
 
   it("lists every item with its sentence, red and green together, and exits 1", () => {
@@ -251,7 +265,7 @@ describe("cli watch", () => {
     s.deps.isTTY = false;
     expect(await runWatch(["lab", "--watch"], s.deps)).toBe(1);
     expect(s.text()).toContain("Watch needs a terminal; running the proof once.");
-    expect(s.text()).toContain("FAIL start-01");
+    expect(s.text()).toContain("FAIL Item for start-01.");
     expect(s.stops).toEqual([]);
   });
 });

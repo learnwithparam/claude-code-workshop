@@ -21,10 +21,12 @@ Answer: No, it would fail. A test that is red first proves it can catch the miss
 
 ## Steps
 
-1. Read the design stage doc.
-2. Reread your intent.
-3. [editor] Write two scenarios, one Given, When and Then line each, at the left edge.
-4. Make each Then something a program can assert, such as a status code or a file.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Read the design stage doc.
+3. Reread your intent.
+4. [editor] Write two scenarios, one Given, When and Then line each, at the left edge.
+5. Make each Then something a program can assert, such as a status code or a file.
 
 ## Proof
 

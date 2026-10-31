@@ -21,13 +21,15 @@ Answer: Everyone who clones the repo, because the committed file travels with th
 
 ## Steps
 
-1. Read the real one: `cat .claude/settings.json`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Read the real one: `cat .claude/settings.json`.
    Expect: JSON with a `permissions` object that has `deny` rules, and probably `allow` rules and `hooks` too.
-2. Make the folder: `mkdir -p .labs/work`.
+3. Make the folder: `mkdir -p .labs/work`.
    Expect: No output. The folder `.labs/work` now exists.
-3. [editor] Write `.labs/work/settings.json` with a `permissions.deny` list that blocks `Read(./.env)` and `Read(./.env.*)`.
+4. [editor] Write `.labs/work/settings.json` with a `permissions.deny` list that blocks `Read(./.env)` and `Read(./.env.*)`.
    Expect: No output from a command, since you are writing the file. Afterwards the `deny` list holds both `Read(./.env)` and `Read(./.env.*)`.
-4. Check it is valid JSON: `node -e "JSON.parse(require('fs').readFileSync('.labs/work/settings.json','utf8'))"`.
+5. Check it is valid JSON: `node -e "JSON.parse(require('fs').readFileSync('.labs/work/settings.json','utf8'))"`.
    Expect: No output when the JSON is valid. A `SyntaxError` with a position means a missing comma or quote.
 
 ## Proof

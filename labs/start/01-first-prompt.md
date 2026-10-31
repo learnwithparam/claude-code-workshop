@@ -15,13 +15,15 @@ Answer: Nothing prints and the answer lands in the file, because -p writes one a
 
 ## Steps
 
-1. Check your machine: `make doctor`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Check your machine: `make doctor`.
    Expect: Lines starting `ok`, such as `ok node` and a `claude` version number. A line starting `warn:` names what to install first. Versions will differ.
-2. Make the lab work folder: `mkdir -p .labs/work`.
+3. Make the lab work folder: `mkdir -p .labs/work`.
    Expect: No output. The folder `.labs/work` now exists.
-3. Ask a question and save the answer: `claude -p "In five bullets, what does this repo do?" > .labs/work/repo-tour.md`.
+4. Ask a question and save the answer: `claude -p "In five bullets, what does this repo do?" > .labs/work/repo-tour.md`.
    Expect: No output on screen. It may take several seconds, and the answer goes to `repo-tour.md`.
-4. Read it: `cat .labs/work/repo-tour.md`.
+5. Read it: `cat .labs/work/repo-tour.md`.
    Expect: About five bullets describing the repo, with words like worksheet, grade band or Claude. The wording will differ.
 
 ## Proof

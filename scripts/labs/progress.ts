@@ -8,6 +8,8 @@ const progressSchema = z.object({
   hints: z.record(z.string(), z.number().int().min(0)),
   // The learner's own guess per lab, kept so the answer can be shown beside it.
   guesses: z.record(z.string(), z.string()).optional(),
+  // Older files have no attempts; they read as zero.
+  attempts: z.record(z.string(), z.number().int().min(0)).default({}),
   // The workshop the learner signed up for. Absent until they pick one.
   path: z.enum(PATH_IDS as [PathId, ...PathId[]]).optional(),
 });
@@ -21,7 +23,7 @@ export function loadProgress(path: string): Progress {
   } catch {
     // fall through to a fresh start
   }
-  return { done: {}, hints: {} };
+  return { done: {}, hints: {}, attempts: {} };
 }
 
 export function saveProgress(path: string, progress: Progress): void {
@@ -35,6 +37,13 @@ export function markDone(progress: Progress, id: string, when: string): Progress
 
 export function saveGuess(progress: Progress, id: string, guess: string): Progress {
   return { ...progress, guesses: { ...progress.guesses, [id]: guess } };
+}
+
+export function recordAttempt(progress: Progress, id: string): Progress {
+  return {
+    ...progress,
+    attempts: { ...progress.attempts, [id]: (progress.attempts[id] ?? 0) + 1 },
+  };
 }
 
 export function revealHint(progress: Progress, lab: Lab): { progress: Progress; revealed: number } {

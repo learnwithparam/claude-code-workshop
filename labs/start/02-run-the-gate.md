@@ -21,11 +21,13 @@ Answer: The full test summary, with a passed line and no failed line, because a 
 
 ## Steps
 
-1. Install once: `npm ci`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Install once: `npm ci`.
    Expect: A progress summary from npm ending with a line like `added N packages`. It may print audit warnings; those are fine.
-2. Run the shared tests and save the log: `mkdir -p .labs/work && npx vitest run shared/ > .labs/work/gate.log 2>&1`.
+3. Run the shared tests and save the log: `mkdir -p .labs/work && npx vitest run shared/ > .labs/work/gate.log 2>&1`.
    Expect: No output on screen, because it all goes to `gate.log`. It finishes in a few seconds.
-3. Read the last lines: `tail -5 .labs/work/gate.log`.
+4. Read the last lines: `tail -5 .labs/work/gate.log`.
    Expect: Vitest summary lines such as `Test Files  N passed` and `Tests  N passed`. The counts will differ. Any line with `failed` means something broke.
 
 ## Proof

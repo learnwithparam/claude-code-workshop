@@ -90,6 +90,10 @@ describe("labs", () => {
     expect(missing).toEqual([]);
   });
 
+  it.each(labs)("$id opens by running make lab to see the proof red", (lab) => {
+    expect(lab.steps[0]?.text, `${lab.id} step 1 must say to run make lab`).toContain("`make lab`");
+  });
+
   it("help never decreases along the lane order", () => {
     const ranks = labs.map((l) => RANK[l.help]);
     expect(ranks).toEqual([...ranks].sort((a, b) => a - b));
@@ -106,7 +110,7 @@ describe("labs", () => {
       const hints = lab.hints.join("\n");
       const missing = lab.steps
         .flatMap((s) => [...s.text.matchAll(/`([^`]+)`/g)].map((m) => m[1] ?? "").filter(isCommand))
-        .filter((c) => !hints.includes(c));
+        .filter((c) => c !== "make lab" && !hints.includes(c));
       expect(missing).toEqual([]);
     },
   );

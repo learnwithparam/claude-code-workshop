@@ -21,11 +21,13 @@ Answer: No. Git allows a branch in only one worktree, so the second worktree nee
 
 ## Steps
 
-1. Make the lab work folder.
-2. Add a worktree there on a new branch.
-3. Open a Claude session inside it, then leave.
-4. Run make lab while the worktree still exists, so the proof can see it.
-5. Then remove the worktree. To redo the lab later, delete the branch too.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Make the lab work folder.
+3. Add a worktree there on a new branch.
+4. Open a Claude session inside it, then leave.
+5. Run make lab while the worktree still exists, so the proof can see it.
+6. Then remove the worktree. To redo the lab later, delete the branch too.
 
 ## Proof
 

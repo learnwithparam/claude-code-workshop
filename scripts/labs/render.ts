@@ -44,7 +44,7 @@ export const isCommand = (span: string): boolean => new RegExp(`^(${PROGRAMS})( 
 // At "hinted" the commands leave the steps; the hints still carry them.
 function hideCommands(text: string): string {
   return text.replace(/`([^`]+)`/g, (m, span: string) =>
-    isCommand(span) ? "(command in hints)" : m,
+    isCommand(span) && span !== "make lab" ? "(command in hints)" : m,
   );
 }
 

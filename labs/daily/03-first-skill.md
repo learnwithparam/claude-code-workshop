@@ -21,13 +21,15 @@ Answer: Its description. Claude reads the descriptions first and opens the body 
 
 ## Steps
 
-1. Read one: `ls .claude/skills` then open a `SKILL.md`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Read one: `ls .claude/skills` then open a `SKILL.md`.
    Expect: A list of skill folder names, then a file starting with `---`, a `name:` line and a `description:` line.
-2. Make the folder: `mkdir -p .labs/work/skills/commit-message`.
+3. Make the folder: `mkdir -p .labs/work/skills/commit-message`.
    Expect: No output. The folder `.labs/work/skills/commit-message` now exists.
-3. [editor] Create `.labs/work/skills/commit-message/SKILL.md` with `name:` and `description:` front matter, then the steps.
+4. [editor] Create `.labs/work/skills/commit-message/SKILL.md` with `name:` and `description:` front matter, then the steps.
    Expect: No output from a command, since you are writing the file. Afterwards it has `---`, `name: commit-message`, a `description: Use when` line and at least a few lines of steps.
-4. The description starts with `Use when` and names the situation, not what the skill is.
+5. The description starts with `Use when` and names the situation, not what the skill is.
 
 ## Proof
 

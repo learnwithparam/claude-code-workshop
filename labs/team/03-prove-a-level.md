@@ -21,11 +21,13 @@ Answer: A saved receipt. The output prints as it runs and also lands in a file y
 
 ## Steps
 
-1. Make the folder: `mkdir -p .labs/work`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Make the folder: `mkdir -p .labs/work`.
    Expect: No output. The folder `.labs/work` now exists.
-2. Run the proof: `make prove LEVEL=hand-built | tee .labs/work/prove.txt`.
+3. Run the proof: `make prove LEVEL=hand-built | tee .labs/work/prove.txt`.
    Expect: A line starting `PASS hand-built:` that says every band renders and lints clean, followed by a count of bands. The count may differ. A line starting `FAIL` names the claim that broke.
-3. Run the exercise view: `make exercise LEVEL=hand-built TRACK=b`. It prints `PASS` when the level is green. On a red level, track `a` adds a hint and track `b` prints only the failing line.
+4. Run the exercise view: `make exercise LEVEL=hand-built TRACK=b`. It prints `PASS` when the level is green. On a red level, track `a` adds a hint and track `b` prints only the failing line.
    Expect: A line reading `PASS`. A `FAIL` line names what to fix.
 
 ## Proof

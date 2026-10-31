@@ -21,10 +21,12 @@ Answer: A "Done when" list of checkable bullets, because a stage can only test w
 
 ## Steps
 
-1. Read the intent stage doc to see what a good one holds.
-2. Make the spec folder under the lab work folder.
-3. [editor] Write the intent with the three headings, spelled as the proof expects.
-4. Under Done when, give two checks a command could run.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Read the intent stage doc to see what a good one holds.
+3. Make the spec folder under the lab work folder.
+4. [editor] Write the intent with the three headings, spelled as the proof expects.
+5. Under Done when, give two checks a command could run.
 
 ## Proof
 

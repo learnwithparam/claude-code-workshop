@@ -21,10 +21,12 @@ Answer: You cannot tell until you plant a bad file. Seeing it exit 1 on that fil
 
 ## Steps
 
-1. Read one: `cat scripts/check-conventions.ts`.
-2. Make the folder: `mkdir -p .labs/work`.
-3. [editor] Write `.labs/work/check-kebab.mjs`. It takes a folder, walks it, prints each file whose name is not lowercase with dashes and dots, and exits 1 if it found any.
-4. Try it on a folder that follows the rule (`docs/` itself holds `README.md`, which your check rightly flags): `node .labs/work/check-kebab.mjs docs/levels; echo $?`.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Read one: `cat scripts/check-conventions.ts`.
+3. Make the folder: `mkdir -p .labs/work`.
+4. [editor] Write `.labs/work/check-kebab.mjs`. It takes a folder, walks it, prints each file whose name is not lowercase with dashes and dots, and exits 1 if it found any.
+5. Try it on a folder that follows the rule (`docs/` itself holds `README.md`, which your check rightly flags): `node .labs/work/check-kebab.mjs docs/levels; echo $?`.
 
 ## Proof
 

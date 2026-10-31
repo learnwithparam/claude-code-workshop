@@ -21,10 +21,12 @@ Answer: No. Without Write or Edit it has no way to change a file, so its report 
 
 ## Steps
 
-1. Read a real subagent in this repo.
-2. Make the agents folder under the lab work folder.
-3. [editor] Write the file with the four front matter keys and a short prompt.
-4. Limit tools to reading and searching only.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Read a real subagent in this repo.
+3. Make the agents folder under the lab work folder.
+4. [editor] Write the file with the four front matter keys and a short prompt.
+5. Limit tools to reading and searching only.
 
 ## Proof
 

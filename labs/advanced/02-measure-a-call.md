@@ -21,10 +21,12 @@ Answer: In the call's own JSON output, as a total_cost_usd field, so you can rea
 
 ## Steps
 
-1. Make the lab work folder.
-2. Ask Claude to list this repo's folders, with a turn cap and JSON output, saved to a file.
-3. Read the cost field out of that JSON.
-4. [editor] Write the number alone into the cost file.
+1. Run `make lab` and read why it is red. It is red because the work is not done yet; this is the state the steps will change.
+   Expect: A red result that names the proof items not true yet, then a hint to reveal. Nothing has changed yet.
+2. Make the lab work folder.
+3. Ask Claude to list this repo's folders, with a turn cap and JSON output, saved to a file.
+4. Read the cost field out of that JSON.
+5. [editor] Write the number alone into the cost file.
 
 ## Proof
 
