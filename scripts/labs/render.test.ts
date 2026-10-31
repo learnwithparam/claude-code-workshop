@@ -148,10 +148,16 @@ describe("renderBrief", () => {
   });
   it("goal: shows the goal and proof but no step list", () => {
     const steps = [{ where: "shell" as const, text: "Run `claude -p hi`." }];
-    const goal: Lab = { ...lab, help: "goal", steps, proof: "test -f x" };
+    const proof = [
+      { text: "The notes file exists.", command: "test -f x" },
+      { text: "The notes file is not empty.", command: "test -s x" },
+    ];
+    const goal: Lab = { ...lab, help: "goal", steps, proof };
     const text = renderBrief(goal, { done: {}, hints: {}, attempts: {} }, false);
     expect(text).toContain("Ask one question.");
-    expect(text).toContain("test -f x");
+    expect(text).toContain("1. The notes file exists.");
+    expect(text).toContain("2. The notes file is not empty.");
+    expect(text).not.toContain("[object Object]");
     expect(text).not.toContain("Steps");
     expect(text).not.toContain("claude -p hi");
     expect(text).toContain("make lab HINT=1");

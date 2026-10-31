@@ -260,6 +260,29 @@ describe("cli watch", () => {
     expect(loadProgress(s.deps.progressPath).done).toEqual({});
   });
 
+  it("runs each proof command and lists the item sentences, never [object Object]", async () => {
+    const s = watching([true]);
+    const commands: string[] = [];
+    s.deps.proof = (command) => {
+      commands.push(command);
+      return { ok: true, output: "" };
+    };
+    expect(await runWatch(["lab", "--watch"], s.deps)).toBe(0);
+    expect(commands).toEqual(["proof-start-01"]);
+    expect(s.text()).toContain("Item for start-01.");
+    expect(s.text()).not.toContain("[object Object]");
+  });
+
+  it("saves GUESS before the first proof run", async () => {
+    const s = watching([false]);
+    s.deps.guess = "my guess";
+    const done = runWatch(["lab", "--watch"], s.deps);
+    s.key("q");
+    await done;
+    expect(loadProgress(s.deps.progressPath).guesses?.["start-01"]).toBe("my guess");
+    expect(s.text()).toContain("my guess");
+  });
+
   it("with no TTY it runs once and prints the fallback line", async () => {
     const s = watching([false]);
     s.deps.isTTY = false;
