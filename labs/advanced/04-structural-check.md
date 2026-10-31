@@ -36,7 +36,7 @@ Write .labs/work/check-kebab.mjs: given a folder, it walks it, prints each file 
 1. Use `readdirSync(dir, { recursive: true })` and test each name with a regular expression.
 2. Test the last path segment only, such as `/^[a-z0-9.-]+$/`. Folders can be tested the same way.
 3. Print each offender, set `process.exitCode = 1` when the list is not empty.
-4. Commands: `cat scripts/check-conventions.ts`, `mkdir -p .labs/work`, `node .labs/work/check-kebab.mjs docs; echo $?`.
+4. Commands: `cat scripts/check-conventions.ts`, `mkdir -p .labs/work`, `node .labs/work/check-kebab.mjs docs/levels; echo $?`.
 
 ## What you just learned
 

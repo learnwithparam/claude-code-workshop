@@ -32,7 +32,7 @@ Write a short `REVIEW.md` that tells a reviewer what to flag, each rule somethin
 1. The first line is a `# ` heading. Then three or more lines starting with `- Flag`.
 2. "Flag a default export outside web/src/pages/" can fail. "Write clean code" cannot.
 3. Reuse the standards in `AGENTS.md` and turn each into a flag.
-4. Commands, in order: `cat REVIEW.md`, `mkdir -p .labs/work`, `claude -p "Review the staged changes using .labs/work/REVIEW.md"`.
+4. Commands, in order: `cat REVIEW.md`, `mkdir -p .labs/work`, `git add`, `claude -p "Review the staged changes using .labs/work/REVIEW.md"`.
 
 ## What you just learned
 
