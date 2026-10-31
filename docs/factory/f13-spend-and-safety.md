@@ -8,17 +8,22 @@ Know which limits actually stop a run, say plainly what the tool cannot control 
 
 ## What stops a run from spending
 
-These limits exist in code. One more does not, and you should say so out loud.
+These limits exist in code. Each is tested.
 
-| Limit                                                  | Where                                                 | What it stops                                          |
-| ------------------------------------------------------ | ----------------------------------------------------- | ------------------------------------------------------ |
-| `maxBudgetUsd` per stage                               | `.factory/config.json`, passed in `factory/stages.ts` | one stage of the config runner                         |
-| `maxBudgetUsd` per agent call, `o.maxUsdPerAgent ?? 3` | `factory/engine/real-host.ts`                         | one agent call of the workflow engine                  |
-| `maxTurns`                                             | the stage config, or the agent's frontmatter          | a call that wanders                                    |
-| loop `max` of 1 to 5, and `reviewLoop.maxRounds`       | `factory/engine/workflow.ts`, `config.json`           | a fix that never converges; the run ends `needs-human` |
-| `withinLiveCap` and `LIVE_CAP_USD`                     | `api/src/agent/live-cap.ts`                           | live eval and smoke runs, shared                       |
+| Limit                                            | Where                                                             | What it stops                                                                                                                                  |
+| ------------------------------------------------ | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `maxBudgetUsd` per stage                         | `.factory/config.json`, passed in `factory/stages.ts`             | one stage of the config runner                                                                                                                 |
+| `spend.capUsd` and `spend.stopAt`                | `.factory/config.json`, enforced in `factory/engine/interpret.ts` | the whole engine run: no step starts a call once spend reaches `stopAt` of the cap, and the run ends `needs-human` with the reason `spend cap` |
+| `maxBudgetUsd` per agent call                    | `factory/engine/real-host.ts`                                     | one agent call of the workflow engine: the smaller of `o.maxUsdPerAgent ?? 3` and what is left of the run cap                                  |
+| `maxTurns`                                       | the stage config, or the agent's frontmatter                      | a call that wanders                                                                                                                            |
+| loop `max` of 1 to 5, and `reviewLoop.maxRounds` | `factory/engine/workflow.ts`, `config.json`                       | a fix that never converges; the run ends `needs-human`                                                                                         |
+| `withinLiveCap` and `LIVE_CAP_USD`               | `api/src/agent/live-cap.ts`                                       | live eval and smoke runs, shared                                                                                                               |
 
-Not in the list: a cap on the total of one workflow run. `docs/factory/faq.md` says the same. The sum of many capped calls is capped only by how many calls the loops allow, so the real ceiling of a run is the per-call budget times the rounds times the steps. Work it out for your workflow before you leave it overnight.
+**How the run cap works.** Before each agent call of a step, `runStep` checks `res.costUsd >= cap * stopAt` (defaults `10` and `0.75`). If so it logs `<stage> not run: $X of $Y spent`, ends the run as `needs-human` with `reason: "spend cap"`, and writes `specs/<n>/run.log` and `specs/<n>/cost.json`. Every call it does make gets `maxUsd = cap - spent`, so one call cannot pass the cap. The count runs across the rounds of a looping step. Four tests in `factory/engine/models.test.ts` pin it: the stop, the per-call ceiling, the loop, and the log and `cost.json` contents.
+
+`cost.json` has `capUsd`, `totalUsd` and one entry per call with its stage, round, model and cost. It is the SDK's estimate, not a bill.
+
+**Review calls count.** In a `review` step every lens hunt, verifier ballot and builder fix is added to the run total, listed in `cost.json`, given the remaining-budget ceiling, and refused with the reason `spend cap` once the run has spent its share (`factory/engine/review-spend.test.ts`). The older runner (`make factory`) has no run cap at all, only the per-stage `maxBudgetUsd`. Work out the worst case for your workflow before you leave it overnight.
 
 ## Credit: what the tool cannot choose
 
@@ -44,7 +49,7 @@ What a team can do:
 npx tsx factory/main.ts 1 --dry-run
 ```
 
-Read the budget column. Then answer for your workflow: how many calls can it make, and what is the per-call cap? Write the product in your notes.
+Read the budget column of the older runner. Then open `spend` in `.factory/config.json` and answer for your workflow: at what dollar figure does the engine stop, and what is the largest single call it may still start? Write both in your notes.
 
 ### 2. Cap one stage, and watch it end
 
@@ -55,9 +60,10 @@ In a scratch branch, set `stages.build.maxBudgetUsd` to a very small value such 
 The rules, each with the file that enforces it:
 
 - The key lives in `api/.env`, and `api/` is the only process that holds `ANTHROPIC_API_KEY` (`AGENTS.md`).
-- `factory/main.ts` calls `process.loadEnvFile` inside its own process, so the key never appears on a command line, in shell history or in `ps`.
+- `factory/engine/main.ts` reads the variable and file named in `keySource` of `.factory/config.yaml`, parses that one variable out of the file inside its own process, and hands it to the agents, so the key never appears on a command line, in shell history or in `ps`. In subscription mode it takes `CLAUDE_CODE_OAUTH_TOKEN` instead and never opens the key file ([Auth modes](auth-modes.md)). `factory/main.ts` does the same with `process.loadEnvFile`. `config.yaml` names the source and holds no key.
+- The engine pins `config.yaml` before the first agent, so a build cannot edit the key source or the commands the gate runs.
 - `.gitignore` lists `.env` and `.env.*`, and `.claude/settings.json` denies `Read(**/.env*)` and `Edit(**/.env*)`, with the sandbox also denying reads of the same paths.
-- In `real-host.ts` the agent gets `ANTHROPIC_API_KEY` and a short allow-list of other variables, a throwaway `HOME` and `GIT_CONFIG_GLOBAL=/dev/null`. The checks that run code the agent wrote get none of the key, no GitHub token and no global git config.
+- In `real-host.ts` the agent gets the one chosen credential (the key or the subscription token, never both, from `agentEnv` in `auth.ts`) and a short allow-list of other variables, a throwaway `HOME` and `GIT_CONFIG_GLOBAL=/dev/null`. The checks that run code the agent wrote get no credential, no GitHub token and no global git config.
 - A key in a cloud session follows F11: an environment variable is readable by anyone who uses the environment, so keep the factory key out of cloud sessions or put the run behind a network secret where the host allows it.
 
 If a key leaks, rotate it. Do not rely on deleting the message.
@@ -101,7 +107,7 @@ Expect the "Blocked" message and `exit 2`. Your own Claude Code session may refu
 
 ## Discussion
 
-- Your per-call cap, rounds and steps give a worst case. Is it an amount you would accept losing on a bad night?
+- The run cap stops new calls at 75 percent by default, and the last call can still use the rest. Is that the share you would choose, and is `capUsd` an amount you would accept losing on a bad night?
 - A promotional balance runs out on a date. What does your team do the week before?
 - The output scan only warns. When is a warning the right strength, and when must a hook block?
 - Which of the hooks above would you remove first, and which test would tell you it mattered?

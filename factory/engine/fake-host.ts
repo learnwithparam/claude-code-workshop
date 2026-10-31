@@ -10,6 +10,8 @@ export type FakeScript = {
   files?: Record<string, string>;
   changed?: string[];
   approvals?: string[];
+  // Logins writers() answers with.
+  writers?: string[];
 };
 
 export function fakeHost(script: FakeScript = {}) {
@@ -45,10 +47,12 @@ export function fakeHost(script: FakeScript = {}) {
     write: async (p, t) => void files.set(p, t),
     list: async (d) => [...files.keys()].filter((k) => k.startsWith(d)),
     changedFiles: async () => script.changed ?? [...files.keys()],
-    commit: async (m) => void calls.push(`commit ${m}`),
+    commit: async (m, paths) =>
+      void calls.push(`commit ${m}${paths ? ` -- ${paths.join(" ")}` : ""}`),
     recall: async (k) => state.get(k) ?? null,
     remember: async (k, v) => void state.set(k, v),
     setPhase: (p) => void phases.push(p),
+    writers: async () => script.writers ?? [],
     approved: async (n, stage, digest, need = 1) =>
       (script.approvals?.filter((a) => a === `${n}:${stage}` || a === `${n}:${stage}:${digest}`)
         .length ?? 0) >= need,

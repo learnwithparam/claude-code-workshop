@@ -61,7 +61,7 @@ describe("run models and spend", () => {
   });
   it("counts one cap across the rounds of a looping step", async () => {
     const loop = wf(
-      "  - {stage: fix, agent: builder, checks: [green], loop: {until: [green], max: 5}}",
+      "  - {stage: fix, agent: builder, checks: [green], loop: {until: [green], max: 5, sameFailure: 5}}",
     );
     const { host, calls } = fakeHost({
       agents: [{ costUsd: 0.4 }],

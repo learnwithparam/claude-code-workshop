@@ -21,9 +21,20 @@ The repo already says this in `.factory/config.json`: triage, verify, adr and re
 
 ## Two places a model gets chosen
 
-This repo has two runners, and they route differently. Know which one you are in.
+This repo has two runners, and both read `.factory/config.json`. Know which one you are in.
 
-**The config runner** (`factory/main.ts`, `factory/run.ts`). `stageFor` in `factory/config.ts` takes the stage's model from `.factory/config.json`, then lets `routes.<type>.<stage>` override it. After triage, `routeTicket` in `factory/route-ticket.ts` can move plan and build by size and risk:
+**The workflow engine** (`factory/engine/`, `npx tsx factory/engine/main.ts <issue> --workflow=<name>`). `runStep` in `factory/engine/interpret.ts` calls `resolveModel` in `factory/engine/models.ts` for every agent call of a step, and hands the result to the host. The order is:
+
+1. `stepStages` in `config.json` maps the step's stage name to a config stage (`intent` to `triage`, `spec` and `plan` to `plan`, `tests`, `build` and `fix` to `build`, `review` to `review`, `ci` to `verify`, and so on). A stage name that is itself a config stage name maps to itself.
+2. `routes.<type>.<stage>` overrides the stage's model for a ticket type. The type is the workflow name, except that `feature-sdd` runs as `epic` (`runIssue` in `factory/engine/cli.ts`). So an epic plans and writes its spec on Opus, and a `docs` run builds on Haiku when its step maps to `build`.
+3. Otherwise `stages.<stage>.model`.
+4. A stage name in neither list falls back to the middle model, not to a stage default. The `docs` workflow's `write` step is mapped to `build` in `stepStages`, so its route to Haiku applies (`factory/engine/docs-routing.test.ts`); other unmapped names, such as `analyze`, still fall back. F10 has the assignment.
+
+`run.log` records the model on every round (`build round 1 model claude-sonnet-5-5 $0.0123`), and `cost.json` lists one entry per call with the model and cost. The test `hands each step its config model and logs it in run.log and cost.json` in `factory/engine/models.test.ts` pins both.
+
+What the engine does not route: the lens and verifier calls inside a `review` step. They pass no model, so `real-host.ts` takes the model from the agent's frontmatter (`reviewer` and the other lenses are Sonnet, `verifier` is Haiku).
+
+**The older runner** (`factory/main.ts`, `factory/run.ts`, `make factory`). `stageFor` in `factory/config.ts` takes the stage's model from `config.json`, then lets `routes.<type>.<stage>` override it. After triage, `routeTicket` in `factory/route-ticket.ts` can move plan and build by size and risk:
 
 - an epic, or any high-risk ticket, plans on `tiers.high` and builds on `tiers.mid`;
 - a docs ticket, or a small low-risk one, plans and builds on `tiers.low`;
@@ -31,24 +42,18 @@ This repo has two runners, and they route differently. Know which one you are in
 
 A missing or odd triage value counts as the costly case: `parseTriage` falls back to risk `high`. A stage that reports a model outside `allowedModels` throws, so a typo in a route cannot spend on a model you did not price.
 
-**The workflow engine** (`factory/engine/`). `real-host.ts` reads the agent's frontmatter and maps `opus`, `sonnet` or `haiku` to a model id. That is the only place the engine chooses a model.
-
 ## Why frontmatter alone piles one model everywhere
 
-An agent file names one model, and a workflow step names an agent, not a stage. Read what that does in this repo:
+An agent file names one model, and a workflow step names an agent, not a stage. Without the resolver:
 
 - `planner`, `builder`, `reviewer`, `design-reviewer`, `security-reviewer` and `test-reviewer` all say `model: sonnet`. Only `verifier` says `model: haiku`. No agent says `opus`.
-- Every workflow in `.factory/workflows/` reuses `planner` for its plan step and `builder` for its build step. So a one-line typo fix and a large feature plan on the same model.
-- `real-host.ts` passes `maxBudgetUsd: o.maxUsdPerAgent ?? 3` to every agent call, whatever the agent. The per-stage budgets in `config.json` do not reach it.
-- The engine ignores `config.json` routes and tiers. A ticket's type, size and risk change nothing about the model.
+- Every workflow reuses `planner` for its plan step and `builder` for its build step, so a one-line typo fix and a large feature would plan on the same model.
 
-You could add `planner-opus.md` and `planner-haiku.md` and point workflows at them. That multiplies agent files, and the choice is still made by whoever wrote the YAML, before the ticket exists. Routing belongs where triage has already said what the ticket is.
-
-An engine change to route models from `.factory/config.json` is in flight. Until it lands, treat this module as: the config runner routes, the engine does not. Do not tell a learner the engine honours `routes`. Check `factory/engine/real-host.ts` for `stageFor` or `routeTicket` before you teach otherwise.
+You could add `planner-opus.md` and `planner-haiku.md` and point workflows at them. That multiplies agent files, and the choice is still made by whoever wrote the YAML, before the ticket exists. The resolver decides from the stage and the ticket type instead, and the agent file's model is only the fallback when no config is passed.
 
 ## Steps
 
-### 1. See the routes the config runner would use
+### 1. See the routes the older runner would use
 
 ```bash
 npx tsx factory/main.ts 1 --dry-run
@@ -76,7 +81,7 @@ It fails. Revert the edit and run it again; it passes. That is the proof that ro
 
 ### 4. Measure the mix from `cost.json`
 
-Each config-runner run writes `.factory/runs/<issue>/cost.json`, built by `buildLedger` in `factory/cost-ledger.ts`. The fields are `totalUsd`, `byStage`, `byModel`, `baselineModel`, `baselineUsd`, `savedUsd`, `savedPct` and `entries`, where each entry holds a stage, a model, token counts and a cost.
+Each older-runner run writes `.factory/runs/<issue>/cost.json`, built by `buildLedger` in `factory/cost-ledger.ts`. The fields are `totalUsd`, `byStage`, `byModel`, `baselineModel`, `baselineUsd`, `savedUsd`, `savedPct` and `entries`, where each entry holds a stage, a model, token counts and a cost.
 
 ```bash
 node -e 'const l=require("./.factory/runs/ISSUE/cost.json");console.log(l.byModel,l.byStage,l.savedPct)'
@@ -90,7 +95,7 @@ Replace `ISSUE` with a run you have. Read it three ways:
 
 `formatReport` in `factory/cost-report.ts` prints the same numbers as text, ending with the saving against all-Opus. When the SDK gives no token counts, `buildLedger` reports zero saved instead of inventing a number.
 
-The workflow engine writes `metrics.json`, which holds `costUsd` per run and per workflow through `rollup`, and no split by model. `npx tsx factory/engine/main.ts --report` prints it. So today the by-model view comes from the config runner's `cost.json` only.
+The workflow engine writes `specs/<issue>/cost.json` with `capUsd`, `totalUsd` and `calls`, one call per entry with `stage`, `round`, `model` and `costUsd`. Group `calls` by `model` to get the mix. Its `metrics.json` holds `costUsd` per run and per workflow through `rollup`, and no split by model; `npx tsx factory/engine/main.ts --report` prints that. The `byModel` and `savedUsd` fields above exist only in the older runner's `cost.json` under `.factory/runs/<issue>/`. Review lens and verifier calls are not in the engine's `calls`.
 
 ### 5. Decide with an experiment, not an opinion
 
@@ -109,7 +114,7 @@ Now break it: in a scratch branch, delete the `claude-haiku-5-5` entry from `pri
 ## Discussion
 
 - Plan is cheap in tokens and expensive when wrong. Why does the config route the plan of an epic to Opus and not its build?
-- If the engine adopts config routing, what should happen when a step names an agent whose frontmatter says another model?
+- The resolver ignores the model in an agent's frontmatter when a config stage exists. Is that the right precedence, or should an agent be able to pin its own model?
 - Triage itself runs on the cheapest model. What goes wrong if triage is wrong, and which way does `parseTriage` fail?
 - `savedPct` compares against all-Opus. Is that the baseline your team would have chosen without the factory?
 

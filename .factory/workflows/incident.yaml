@@ -8,7 +8,7 @@ steps:
       stage: diagnose,
       agent: verifier,
       writes: intent.md,
-      brief: "From the incident in the ticket, state the failing behaviour, the likely cause and the evidence. Change nothing. Reply with the record only.",
+      brief: "If specs/<issue>/intent.md already exists (a band breach wrote it), start from it. From the incident in the ticket, state the failing behaviour, the likely cause and the evidence. Change nothing. Reply with the record only.",
     }
   - { stage: plan, writes: plan.md, agent: planner }
   - {

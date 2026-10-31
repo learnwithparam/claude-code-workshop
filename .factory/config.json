@@ -65,7 +65,8 @@
     "review": "review",
     "ci": "verify",
     "eval": "verify",
-    "reproduce": "verify"
+    "reproduce": "verify",
+    "write": "build"
   },
   "spend": { "capUsd": 10, "stopAt": 0.75 },
   "baselineModel": "claude-opus-5-5",

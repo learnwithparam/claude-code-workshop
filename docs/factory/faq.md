@@ -6,7 +6,7 @@ Each answer starts from a failure someone hit, and points at the file or test th
 
 The plan is an allowlist. `planDrift` in `factory/engine/artifacts.ts` fails any changed file that the plan does not list, apart from files under `specs/<issue>/` and regenerated snapshots. The `plan-drift` check turns that into evidence the loop can read: "files outside plan.md: ... Update plan.md in the same change."
 
-The common miss is a new source file. Each file needs an owner in `levels.json`, so the plan must list `levels.json` too. The plan brief in every workflow says so, and `factory/engine/workflows.test.ts` fails a workflow whose planner brief drops that sentence.
+The common miss is a new source file. Each file needs an owner in `levels.json`, so the plan must list `levels.json` too. The plan brief says so: it lives in `planBrief` of `.factory/config.yaml`, which `loadWorkflow` hands to any plan step with no brief of its own, and `factory/engine/workflows.test.ts` fails a workflow whose planner brief drops that sentence.
 
 Proof: `factory/engine/checks/plan-drift.test.ts`, and "plan-drift fails on a stray file, even when plan.md is in the diff" in `factory/engine/engine.test.ts`.
 
@@ -14,7 +14,9 @@ Proof: `factory/engine/checks/plan-drift.test.ts`, and "plan-drift fails on a st
 
 No. An approval binds to a hash, not to an issue. `artifactDigest` in `factory/engine/artifacts.ts` hashes the stage and the files it was shown, one hash per file so a moved boundary changes the result. Edit the artifact and the old approval does not match.
 
-The spec and plan gates sign only the documents written so far. Run 34 showed the other way: hashing the whole tree made every later stage void an earlier approval. On resume, `runWorkflow` in `factory/engine/interpret.ts` skips every step up to the last approved gate, so the signed artifacts are not regenerated.
+A gate also counts people. At a `gate: human` step, `gateMet` classifies the changed files with `classify` in `factory/engine/risk.ts` and needs `Math.max(1, APPROVALS[tier])` distinct people: one for low and medium, two for high. An approval from an agent never counts, because only owner, member and collaborator comments from the listed approvers do. Today `runIssue` lists one approver, the logged-in `gh` user, so a high-risk gate waits for a second person the run cannot name (assignment 11 in F10).
+
+The spec and plan gates sign only the documents written so far. The Spec Kit documents (constitution, clarify, tasks, analyze) join the hash only if they were written. Run 34 showed the other way: hashing the whole tree made every later stage void an earlier approval. On resume, `runWorkflow` in `factory/engine/interpret.ts` skips every step up to the last approved gate, so the signed artifacts are not regenerated.
 
 In the older runner, posting a new plan clears the `plan:approved` label and never builds in that run.
 
@@ -38,18 +40,20 @@ Proof in `factory/engine/engine.test.ts`: "lets a plan list an older spec's gold
 
 ## What stops a run from spending without limit?
 
-Four limits, none of them the model's judgment:
+These limits, none of them the model's judgment:
 
 - A loop has `max` from 1 to 5, enforced by the schema in `factory/engine/workflow.ts`. At the cap the run ends as `needs-human` ("stops at the cap and writes run.log" in `factory/engine/engine.test.ts`).
 - Each agent call has a ceiling: `maxBudgetUsd: o.maxUsdPerAgent ?? 3` in `factory/engine/real-host.ts`, plus `maxTurns` from the agent file. The older runner takes `maxBudgetUsd` and `maxTurns` per stage from `.factory/config.json`, and `npx tsx factory/main.ts <issue> --dry-run` prints them.
+- A subscription run has no dollar bill, so it sets no `maxBudgetUsd`. `subscriptionCap` in `.factory/config.yaml` caps its agent calls and tokens instead, and `runCap` in `factory/engine/auth.ts` refuses the next call once either is reached ("refuses a subscription call past the run's call cap" in `factory/engine/real-host.test.ts`). See [Auth modes](auth-modes.md).
 - The review loop stops after `reviewLoop.maxRounds` and labels the issue `needs-human` ("caps the review loop at maxRounds" in `factory/run.test.ts`).
 - Live eval and smoke runs share one cap, `withinLiveCap` in `api/src/agent/live-cap.ts`.
+- One engine run has a total cap. `spend.capUsd` and `spend.stopAt` in `.factory/config.json` end the run as `needs-human` with the reason `spend cap` once the cost reaches that share, and each call gets only the budget that remains ("spend cap" cases in `factory/engine/models.test.ts`). The engine writes `specs/<issue>/cost.json` as it goes.
 
-What the repo does not do is cap the total of one workflow run. `factory/cost-ledger.ts` reports spend by stage and model, the run log shows the cost of every round, and `npx tsx factory/engine/main.ts --report` rolls up the saved `metrics.json` files.
+The cap counts the agent calls the engine totals. The review lens and verifier calls are not added to that total (assignment 12 in F10). The older runner has no run total: `factory/cost-ledger.ts` reports its spend by stage and model, and `npx tsx factory/engine/main.ts --report` rolls up the saved `metrics.json` files.
 
 ## Why Sonnet and not Opus for build?
 
-Because build is the longest stage and `.factory/config.json` prices it. Per million tokens Opus is $4 in and $20 out, Sonnet is $2 and $10. The `build` stage is Sonnet with 40 turns and a $3 budget. Opus appears where one plan shapes everything after it: `routes.epic.plan` and the `delivery` stage.
+Because build is the longest stage and `.factory/config.json` prices it. The engine picks the model in `resolveModel` in `factory/engine/models.ts`: `stepStages` maps a step to a stage, then `routes[type][stage]` wins, then `stages[stage].model`. A step whose name maps to no stage gets Sonnet. Per million tokens Opus is $4 in and $20 out, Sonnet is $2 and $10. The `build` stage is Sonnet with 40 turns and a $3 budget. Opus appears where one plan shapes everything after it: `routes.epic.plan` and the `delivery` stage.
 
 The ledger measures the choice instead of asserting it. `buildLedger` re-prices the same tokens at `baselineModel` (Opus) and reports `savedUsd`, so a run shows what an all-Opus run would have cost.
 

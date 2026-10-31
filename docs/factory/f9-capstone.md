@@ -2,6 +2,18 @@
 
 **Stage:** all of them. **Layer:** every level. **Workflows:** `feature-bdd` for the cache and templates, `feature-sdd` for the workbook, `bug-tdd` for the template id boundary.
 
+## Story
+
+**The ticket.** Issue 37, the template id boundary, run with `bug-tdd`.
+
+**Without the layer.** `specs/37/fix.md`: the golden test "failed on the old schema (404)". A malformed id reached a lookup before anything refused it.
+
+**What the layer did.** `templateIdSchema` is "an allowlist `[A-Za-z0-9_-]{1,100}`", and "a bad id gets the generic 400 before any lookup". The golden test "was not edited". Your factory has to reach the same green without editing it either.
+
+![A timeline of run 35, each event quoted from a file in specs/35](img/run-35-timeline.svg)
+
+_Notice:_ run 35 is one of the features you rebuild here, and each event is a file your own run will write.
+
 ## Goal
 
 You do not write the workbook, template or cache code. Your factory does. You supply the red suites, the factory builds until they are green, and you compare its tree with the reference answer. The score is whether the gates held, not whether code appeared.
@@ -9,7 +21,7 @@ You do not write the workbook, template or cache code. Your factory does. You su
 ## What is built and what is design
 
 - Built and tested: the red suites in `specs/34`, `specs/35` and `specs/37`, the workflows that run them, and the reference code the capstone level owns (see `docs/levels/capstone.md` for the paths).
-- Built, not run for you: the factory runs against your own GitHub issues and your own API key. This guide gives the steps. No run log from a capstone is committed, so do not expect one in this repo.
+- Built, not run for you: the factory runs against your own GitHub issues and your own API key or Claude subscription token ([Auth modes](auth-modes.md)). This guide gives the steps. No run log from a capstone is committed, so do not expect one in this repo.
 - Design: the order of tickets below is a suggestion. Any order works if each ticket's red suite fails first.
 
 ## The setup
@@ -57,12 +69,14 @@ npx tsx factory/engine/main.ts <issue> --workflow=feature-bdd
 
 Use the workflow named in the table. Then read, in order:
 
-1. `specs/<issue>/run.log` for each step and round.
+1. `specs/<issue>/run.log` for each step and round, with the model each round ran on, and `specs/<issue>/cost.json` for what each call cost against the cap.
 2. The `red` result: it must say the golden test failed on the base commit.
 3. The `lock` result: it must say no test file changed during the build.
 4. The `plan-drift` result: it must say the diff stayed inside `plan.md`.
 
 A ticket is done only when all three held and the spec folder is green.
+
+Expect the run to stop and wait. The workbook ticket runs `feature-sdd`, which writes a constitution, the spec, a clarify list, the plan, tasks and an analysis. It stops at the `spec` gate and again at the `plan` gate with `awaiting-approval`; comment `approve <stage> <digest>` on the issue as the logged-in `gh` user, then run the same command again, and the engine skips the stages you already signed. The review step of these workflows runs lenses and three voting verifiers, and a surviving Important finding ends the run as `needs-human`. If the spend cap is reached first, the run ends `needs-human` with the reason `spend cap` in `run.log`. Read those lines before you call a ticket stuck.
 
 ## What the red suites teach
 
@@ -96,7 +110,7 @@ Restore each one and confirm the suite is green again. A guard you broke without
 
 ## Exercise
 
-Track A: run all four tickets and record, for each, how many rounds the loop took and where it stopped for a person. Track B: delete the `lock` check from one workflow, run the template ticket, and read whether the builder edited a golden test to get green.
+Track A: run all four tickets and record, for each, how many rounds the loop took, what it cost in `cost.json`, and where it stopped for a person. Track B: delete the `lock` check from one workflow, run the template ticket, and read whether the builder edited a golden test to get green.
 
 ## Discussion
 

@@ -45,11 +45,12 @@ When two settings files disagree, Claude Code's documentation orders them: manag
 
 ## `.factory/`
 
-- `config.json`: per stage model, `maxTurns`, `maxBudgetUsd` and `permissionMode`; the allowed model list; prices; the review round cap; the labels (`factory:ready`, `plan:approved`, `needs-human`).
+- `config.yaml`: what a repo supplies so the engine runs on it unchanged: the gate command, the test commands (`unit`, `e2e`, `eval`, `prose`, `prepush`, `mutation`), the `contract`, `holdout` and `source` paths, the name of the key variable and the file that may define it, the globs a plan may never list, and the one plan brief every plan step uses. `factory/engine/portable.ts` validates it with zod. It holds no key value. The CLI calls `pinPortable()` before the first agent runs, so a build that edits the file cannot change the commands the gate runs: the working tree is not read for it again.
+- `config.json`: per stage model, `maxTurns`, `maxBudgetUsd` and `permissionMode`; which stage each workflow step takes its model from (`stepStages`); `routes` by ticket type; the run's spend cap (`spend.capUsd`, `spend.stopAt`); the allowed model list; prices; the review round cap; the labels (`factory:ready`, `plan:approved`, `needs-human`). `factory/config.ts` holds the schema, and F12 covers how the engine reads it. `runIssue` in `factory/engine/cli.ts` loads it once and hands the object to the run, so an edit during the run changes nothing.
 - `workflows/<name>.yaml`: one workflow each, parsed by `factory/engine/workflow.ts`.
-- `bands.yaml`: metrics with a direction and a window, read by `factory/engine/bands.ts`.
+- `bands.yaml`: metrics with a direction and a window, read by `factory/engine/bands.ts`. Tests exercise it; no real run reads it yet.
 - `holdout/<n>/`: cases the builder must not read. `settings.json` denies reading them, but no `.factory/holdout/` folder is committed in this checkout, so the deny is wiring waiting for a case.
-- `runs/<n>/`: `cost.json`, `run.log` and `metrics.json` per run. Gitignored.
+- `runs/<n>/`: `metrics.json` per engine run, and `cost.json` from the older runner. Gitignored. The engine writes its own `run.log` and `cost.json` to `specs/<n>/`.
 
 ## Hook patterns
 
@@ -92,7 +93,7 @@ Expect `test lock > blocks an edit to api/src/a.test.ts during a fix` to fail, b
 
 ## See it on a real run
 
-`specs/26/` ran `bug-tdd`. Its `reproduce` step wrote `specs/26/golden/font-face.golden.test.ts`, and `specs/26/lock.json` lists the hash of that file. The `fix` step has `phase: fix`, which sets `FACTORY_PHASE=fix` for the hook above, and `specs/26/fix.md` says the locked test "passes", with no edit to it. The same note records that `make check` lint still failed on `specs/26/lock.json` formatting, a runner-owned file the agent left alone. No `run.log` is committed because `.gitignore` excludes `*.log`.
+`specs/26/` ran `bug-tdd`. Its `reproduce` step wrote `specs/26/golden/font-face.golden.test.ts`, and `specs/26/lock.json` lists the hash of that file. The `fix` step has `phase: fix`, which sets `FACTORY_PHASE=fix` for the hook above, and `specs/26/fix.md` says the locked test "passes", with no edit to it. The same note records that `make check` lint still failed on `specs/26/lock.json` formatting, a runner-owned file the agent left alone. The run commits its own `run.log` as an audit artifact; `.gitignore` excludes `*.log` but keeps `specs/*/run.log`, so runs made before that exception have none.
 
 ## Discussion
 
