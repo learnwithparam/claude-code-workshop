@@ -53,7 +53,7 @@ The `plan` step has no brief, so it takes `planBrief` from `.factory/config.yaml
    - change `agent: builder` to `agent: coder`: the "uses only agents that exist" test fails;
    - add `loop: { until: [red], max: 2 }` to the fix step: `loadWorkflow` rejects a loop on a check the step does not run;
    - delete the `plan` step: the "plan-drift needs a plan" test fails.
-5. File an issue, then run it: `npx tsx factory/engine/main.ts <issue> --workflow=typo`. It needs `gh` logged in. The agents need `ANTHROPIC_API_KEY`, which the script loads inside its own process, so never put the key on a command line.
+5. File an issue, then run it: `npx tsx factory/engine/main.ts <issue> --workflow=typo`. It needs `gh` logged in. The agents need one credential: `ANTHROPIC_API_KEY`, which the script loads inside its own process, or `CLAUDE_CODE_OAUTH_TOKEN` from `claude setup-token` with `--auth=subscription`. Never put either on a command line. [Auth modes](auth-modes.md) has both paths.
 6. Open `specs/<issue>/run.log`, `specs/<issue>/cost.json` and `.factory/runs/<issue>/metrics.json`. The log has each step's rounds, the model it ran on, its cost and every check as `ok` or `FAIL`. `cost.json` has the cap, the total and one entry per agent call.
 
 ## Why each rule in the brief exists

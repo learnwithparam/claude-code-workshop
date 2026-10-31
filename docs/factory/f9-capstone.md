@@ -21,7 +21,7 @@ You do not write the workbook, template or cache code. Your factory does. You su
 ## What is built and what is design
 
 - Built and tested: the red suites in `specs/34`, `specs/35` and `specs/37`, the workflows that run them, and the reference code the capstone level owns (see `docs/levels/capstone.md` for the paths).
-- Built, not run for you: the factory runs against your own GitHub issues and your own API key. This guide gives the steps. No run log from a capstone is committed, so do not expect one in this repo.
+- Built, not run for you: the factory runs against your own GitHub issues and your own API key or Claude subscription token ([Auth modes](auth-modes.md)). This guide gives the steps. No run log from a capstone is committed, so do not expect one in this repo.
 - Design: the order of tickets below is a suggestion. Any order works if each ticket's red suite fails first.
 
 ## The setup

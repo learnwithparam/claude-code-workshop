@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { writersFrom } from "./approvers.ts";
+import { approvalIn, writersFrom } from "./approvers.ts";
 import { fakeHost } from "./fake-host.ts";
-import { approvalIn } from "./real-host.ts";
 
 const line = "approve spec abc";
 const by = (login: string, extra = {}) => ({

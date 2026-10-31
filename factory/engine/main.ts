@@ -1,10 +1,11 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { parseEnv } from "node:util";
 import { loadConfig } from "../config.ts";
+import { parseAuthFlag, resolveAuth, storedLogin } from "./auth.ts";
 import { ready, report, runIssue, runMaintain } from "./cli.ts";
 import { portable } from "./portable.ts";
 
-// Usage: tsx factory/engine/main.ts <issue-number> --workflow=<name>
+// Usage: tsx factory/engine/main.ts <issue-number> --workflow=<name> [--auth=api-key|subscription|auto]
 //        tsx factory/engine/main.ts <issue-number> --workflow=<name> --no-retro
 //        tsx factory/engine/main.ts --maintain <issue-number>
 //        tsx factory/engine/main.ts --report | --watch
@@ -18,24 +19,42 @@ else if (first === "--maintain") {
   const r = await runMaintain(Number(process.argv[3]));
   console.log(r.lines.join("\n"));
 } else if (first && workflow) {
-  // The agents need a key. Load it inside this process so it never appears on a command line.
-  // Only that one variable is taken from the file, so nothing else in it reaches the run.
-  const { env, file } = portable().keySource;
-  if (!process.env[env]) {
-    const key = parseEnv(readFileSync(file, "utf8"))[env];
-    if (key) process.env[env] = key;
-  }
-  const r = await runIssue(Number(first), workflow, {
+  // One credential for the agents, resolved here so it never appears on a command line.
+  // The key file is opened only when the key is the chosen credential, and only that variable is taken.
+  const { keySource, auth: configured } = portable();
+  const auth = resolveAuth({
+    mode: parseAuthFlag(process.argv) ?? configured,
+    env: process.env,
+    keyEnv: keySource.env,
+    loadKey: () =>
+      existsSync(keySource.file)
+        ? parseEnv(readFileSync(keySource.file, "utf8"))[keySource.env]
+        : undefined,
+    storedLogin,
+  });
+  const r = await runIssue(Number(first), workflow, auth, {
     retro: !process.argv.includes("--no-retro"),
   });
+  const cap =
+    auth.mode === "subscription"
+      ? `no dollar bill: capped at ${r.subscriptionCap.calls} agent calls and ${r.subscriptionCap.tokens} tokens; estimatedUsd is the SDK's list-price estimate`
+      : "billed per token: capped by spend.capUsd in .factory/config.json";
   console.log(
     JSON.stringify(
-      { outcome: r.outcome, stoppedAt: r.stoppedAt, rounds: r.rounds, costUsd: r.costUsd },
+      {
+        outcome: r.outcome,
+        stoppedAt: r.stoppedAt,
+        rounds: r.rounds,
+        auth: auth.mode,
+        costUsd: r.costUsd,
+        usage: r.usage,
+        cap,
+      },
       null,
       2,
     ),
   );
 } else
   throw new Error(
-    "usage: factory/engine/main.ts <issue> --workflow=<name> | --maintain <issue> | --report | --watch",
+    "usage: factory/engine/main.ts <issue> --workflow=<name> [--auth=<mode>] | --maintain <issue> | --report | --watch",
   );

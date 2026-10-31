@@ -19,7 +19,7 @@ Decide how much human approval a change needs from the files it touches, never f
 
 **Approvals.** `APPROVALS` is low 0, medium 1, high 2. `approvalsMet` counts distinct humans whose approval names the current head commit. An agent's approval never counts, and a push after approval changes the head, so the approval no longer counts.
 
-**Human approval of stages.** Separately, `approvalIn` in `factory/engine/real-host.ts` accepts a stage approval only from a GitHub comment `approve <stage> <digest>` by a configured approver. The agents hold no GitHub token.
+**Human approval of stages.** Separately, `approvalIn` in `factory/engine/approvers.ts` accepts a stage approval only from a GitHub comment `approve <stage> <digest>` by a configured approver. The agents hold no GitHub token.
 
 **Merge queue.** `mergeQueue` runs `git merge --no-commit origin/main`, runs `make check` on the result, then aborts the merge. It fails on a conflict or a red gate.
 

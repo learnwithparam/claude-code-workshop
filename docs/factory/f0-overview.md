@@ -91,7 +91,7 @@ Anthropic also publishes a Founder's playbook. Its page holds only a table of co
 4. Run the engine's offline tests, which run every workflow against a fake host: `npx vitest run factory/engine`.
 5. With `gh` signed in, `npx tsx factory/engine/main.ts --watch` lists issues labelled `factory:ready`. `npx tsx factory/engine/main.ts --report` rolls up saved `metrics.json` files and needs a `.factory/runs` folder from an earlier run.
 
-A real run needs `gh` and the key source named in `.factory/config.yaml`, and it spends tokens up to the cap in `.factory/config.json`, so read F1 first.
+A real run needs `gh` and one credential: an API key from the key source named in `.factory/config.yaml`, or a Claude Pro or Max subscription token from `claude setup-token`. `auth` in that file, or `--auth=` on the run, picks which; [Auth modes](auth-modes.md) covers both, what the terms allow and how each is capped. A key run spends tokens up to the cap in `.factory/config.json` and a subscription run stops at `subscriptionCap`, so read F1 first.
 
 ## Proof that bites
 

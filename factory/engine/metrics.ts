@@ -6,7 +6,11 @@ export const metricsSchema = z.object({
   workflow: z.string(),
   outcome: z.enum(["done", "awaiting-approval", "needs-human"]),
   rounds: z.record(z.string(), z.number()),
+  // Billed dollars: 0 under a subscription, where usage.estimatedUsd is the SDK's list-price guess.
   costUsd: z.number(),
+  // Absent in metrics written before auth modes existed.
+  auth: z.enum(["api-key", "subscription", "none"]).optional(),
+  usage: z.object({ calls: z.number(), tokens: z.number(), estimatedUsd: z.number() }).optional(),
   startedAt: z.iso.datetime(),
   finishedAt: z.iso.datetime(),
   stages: z.record(
@@ -16,12 +20,18 @@ export const metricsSchema = z.object({
 });
 export type Metrics = z.infer<typeof metricsSchema>;
 
-export const metricsFor = (ticket: number, workflow: string, r: Result): Metrics => ({
+// What one run's agents used. Under a subscription costUsd stays 0 and estimatedUsd is the SDK's guess.
+export type Usage = { auth: NonNullable<Metrics["auth"]> } & NonNullable<Metrics["usage"]>;
+
+export const metricsFor = (ticket: number, workflow: string, r: Result, u?: Usage): Metrics => ({
   ticket,
   workflow,
   outcome: r.outcome,
   rounds: r.rounds,
   costUsd: r.costUsd,
+  ...(u
+    ? { auth: u.auth, usage: { calls: u.calls, tokens: u.tokens, estimatedUsd: u.estimatedUsd } }
+    : {}),
   startedAt: r.startedAt,
   finishedAt: r.finishedAt,
   stages: r.stages,

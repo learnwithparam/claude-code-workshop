@@ -16,9 +16,16 @@ Run the factory in dry-run mode for issue 1, save its output to .labs/work/dry-r
 
 ## Proof
 
-```sh
-grep -q 'stages that would run' .labs/work/dry-run.txt && grep -q 'review loop' .labs/work/dry-run.txt
-```
+1. dry-run.txt lists the stages that would run.
+
+   ```sh
+   grep -q 'stages that would run' .labs/work/dry-run.txt
+   ```
+2. dry-run.txt mentions the review loop.
+
+   ```sh
+   grep -q 'review loop' .labs/work/dry-run.txt
+   ```
 
 ## Hints
 

@@ -20,7 +20,7 @@ const lab = (id: string, lane: Lab["lane"]): Lab => ({
   goal: "g",
   help: "guided",
   steps: ["s"],
-  proof: "true",
+  proof: [{ text: "It holds.", command: "true" }],
   hints: ["a", "b"],
   learned: "l",
 });

@@ -16,9 +16,31 @@ Write a read-only reviewer subagent at .labs/work/agents/reviewer.md: front matt
 
 ## Proof
 
-```sh
-f=.labs/work/agents/reviewer.md; grep -q '^name: reviewer' $f && grep -q '^description: ' $f && grep -q '^tools: Read, Grep, Glob$' $f && grep -q '^model: ' $f && ! grep -Eq '^tools:.*(Write|Edit|Bash)' $f
-```
+1. The agent file has the name reviewer.
+
+   ```sh
+   grep -q '^name: reviewer' .labs/work/agents/reviewer.md
+   ```
+2. The agent file has a description.
+
+   ```sh
+   grep -q '^description: ' .labs/work/agents/reviewer.md
+   ```
+3. The tools line lists exactly Read, Grep, Glob.
+
+   ```sh
+   grep -q '^tools: Read, Grep, Glob$' .labs/work/agents/reviewer.md
+   ```
+4. The agent file names a model.
+
+   ```sh
+   grep -q '^model: ' .labs/work/agents/reviewer.md
+   ```
+5. No tool that writes or runs commands (Write, Edit, Bash) is listed.
+
+   ```sh
+   f=.labs/work/agents/reviewer.md; test -f $f && ! grep -Eq '^tools:.*(Write|Edit|Bash)' $f
+   ```
 
 ## Hints
 

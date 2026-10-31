@@ -23,3 +23,26 @@ export async function writersFrom(
   }
   return out;
 }
+
+// Only a person with write access counts. The agents hold no GitHub token, so they cannot approve.
+export function approvalIn(
+  comments: Comment[],
+  stage: string,
+  digest: string,
+  approvers?: string[],
+  need = 1,
+): boolean {
+  const line = `approve ${stage} ${digest}`;
+  // Distinct people: one person commenting twice is still one approval.
+  const who = new Set(
+    comments
+      .filter(
+        (c) =>
+          ["OWNER", "MEMBER", "COLLABORATOR"].includes(c.authorAssociation) &&
+          (!approvers || approvers.includes(c.author?.login ?? "")) &&
+          c.body.split("\n").some((l) => l.trim() === line),
+      )
+      .map((c) => c.author?.login ?? ""),
+  );
+  return who.size >= need;
+}

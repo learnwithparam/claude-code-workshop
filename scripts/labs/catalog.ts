@@ -24,6 +24,9 @@ const oneLine = z
   .max(240)
   .regex(/^[^\n]+$/, "must be one line");
 
+const proofItem = z.object({ text: oneLine, command: z.string().min(1) });
+export type ProofItem = z.infer<typeof proofItem>;
+
 export const labSchema = z.object({
   id: z.string().regex(/^[a-z]+-\d{2}$/),
   lane: z.enum(LANES),
@@ -32,7 +35,8 @@ export const labSchema = z.object({
   help: z.enum(HELP),
   goal: oneLine,
   steps: z.array(z.string().min(1)).min(1),
-  proof: z.string().min(1),
+  // Each item says one thing that must be true and checks only that, so a red item names the missing part.
+  proof: z.array(proofItem).min(1),
   // Two or more, so the first nudges and the last gives the answer away.
   hints: z.array(z.string().min(1)).min(2),
   learned: oneLine,
@@ -58,8 +62,18 @@ function listItems(body: string): string[] {
   return items;
 }
 
-function proofOf(body: string): string {
-  return /```sh\n([\s\S]*?)\n```/.exec(body)?.[1]?.trim() ?? "";
+// "1. Sentence." then an indented sh block. A missing block gives an empty command, which zod rejects.
+function proofOf(body: string): ProofItem[] {
+  return listItems(body).map((item) => {
+    const [first = "", ...rest] = item.split(/\n\s*```sh\n/);
+    const block = rest.join("").split(/\n\s*```/)[0] ?? "";
+    const command = block
+      .split("\n")
+      .map((line) => line.replace(/^ {3}/, ""))
+      .join("\n")
+      .trim();
+    return { text: first.trim(), command };
+  });
 }
 
 export function parseLab(lane: string, file: string, text: string): Lab {

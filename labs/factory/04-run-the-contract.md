@@ -16,9 +16,16 @@ Run the workflow contract tests and save the log to .labs/work/contract.log, the
 
 ## Proof
 
-```sh
-grep -q 'passed' .labs/work/contract.log && ! grep -q 'failed' .labs/work/contract.log
-```
+1. contract.log says passed.
+
+   ```sh
+   grep -q 'passed' .labs/work/contract.log
+   ```
+2. contract.log has no failed.
+
+   ```sh
+   f=.labs/work/contract.log; test -f $f && ! grep -q 'failed' $f
+   ```
 
 ## Hints
 
