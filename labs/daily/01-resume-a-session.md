@@ -1,6 +1,7 @@
 # Continue where you left off
 
 **Pairs with:** `docs/levels/hand-built.md`
+**Help:** hinted
 
 ## Goal
 
@@ -21,15 +22,23 @@ Answer: No. Each call starts with an empty context, so --continue is what reopen
 
 ## Proof
 
-```sh
-grep -q 'session_id' .labs/work/session.json && grep -qi 'tangerine' .labs/work/recall.md
-```
+1. session.json holds a session_id.
+
+   ```sh
+   grep -q 'session_id' .labs/work/session.json
+   ```
+2. recall.md holds the word tangerine.
+
+   ```sh
+   grep -qi 'tangerine' .labs/work/recall.md
+   ```
 
 ## Hints
 
 1. Two files must exist: `.labs/work/session.json` and `.labs/work/recall.md`.
 2. `--continue` reopens the most recent session in this folder.
 3. In the interactive app the same move is `claude --continue`, or `/resume` to choose from a list.
+4. Commands, in order: `mkdir -p .labs/work`, `claude -p "Remember the word tangerine." --output-format json > .labs/work/session.json`, `claude -p --continue "What word did I ask you to remember?" > .labs/work/recall.md`, `cat .labs/work/recall.md`.
 
 ## What you just learned
 

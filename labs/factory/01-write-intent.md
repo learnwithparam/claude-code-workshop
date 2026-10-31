@@ -1,10 +1,11 @@
 # Turn a ticket into an intent
 
 **Pairs with:** `docs/factory/f1-plan.md`
+**Help:** goal
 
 ## Goal
 
-Write the one-page intent a factory run starts from: the problem and how anyone will know it is done.
+Write the intent a factory run starts from, at .labs/work/specs/1/intent.md: a Problem, a Done when with two checks a command could run, and an Out of scope. The proof below must pass.
 
 ## Predict
 
@@ -14,22 +15,40 @@ Answer: A "Done when" list of checkable bullets, because a stage can only test w
 
 ## Steps
 
-1. Read the stage: `cat docs/factory/f1-plan.md`.
-2. Make the folder: `mkdir -p .labs/work/specs/1`.
-3. Write `.labs/work/specs/1/intent.md` with the headings `## Problem`, `## Done when` and `## Out of scope`.
-4. Under Done when, write two checks a command could run.
+1. Read the intent stage doc to see what a good one holds.
+2. Make the spec folder under the lab work folder.
+3. Write the intent with the three headings, spelled as the proof expects.
+4. Under Done when, give two checks a command could run.
 
 ## Proof
 
-```sh
-f=.labs/work/specs/1/intent.md; grep -q '^## Problem' $f && grep -q '^## Done when' $f && grep -q '^## Out of scope' $f && test "$(grep -c '^- ' $f)" -ge 2
-```
+1. intent.md has a Problem heading.
+
+   ```sh
+   grep -q '^## Problem' .labs/work/specs/1/intent.md
+   ```
+2. intent.md has a Done when heading.
+
+   ```sh
+   grep -q '^## Done when' .labs/work/specs/1/intent.md
+   ```
+3. intent.md has an Out of scope heading.
+
+   ```sh
+   grep -q '^## Out of scope' .labs/work/specs/1/intent.md
+   ```
+4. intent.md has at least two bullet lines.
+
+   ```sh
+   test "$(grep -c '^- ' .labs/work/specs/1/intent.md)" -ge 2
+   ```
 
 ## Hints
 
 1. Three headings, spelled exactly, plus at least two bullets.
 2. "Done when" is a list of bullets such as "`make check` exits 0".
 3. Out of scope names one thing you will not do. It stops a run from growing.
+4. Commands: `cat docs/factory/f1-plan.md`, then `mkdir -p .labs/work/specs/1`.
 
 ## What you just learned
 

@@ -1,6 +1,7 @@
 # Teach Claude a personal habit
 
 **Pairs with:** `docs/levels/context.md`
+**Help:** guided
 
 ## Goal
 
@@ -20,9 +21,16 @@ Answer: No. CLAUDE.local.md is gitignored, so the note stays on your machine and
 
 ## Proof
 
-```sh
-grep -q 'lab-note' CLAUDE.local.md && grep -q 'CLAUDE.local.md' .gitignore
-```
+1. CLAUDE.local.md holds a lab-note.
+
+   ```sh
+   grep -q 'lab-note' CLAUDE.local.md
+   ```
+2. CLAUDE.local.md is listed in .gitignore.
+
+   ```sh
+   grep -q 'CLAUDE.local.md' .gitignore
+   ```
 
 ## Hints
 

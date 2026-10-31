@@ -6,6 +6,18 @@ import { z } from "zod";
 export const LANES = ["start", "daily", "team", "factory", "advanced"] as const;
 export type Lane = (typeof LANES)[number];
 
+// How much the brief gives away: every command, the goal with hints on request, or the goal alone.
+export const HELP = ["guided", "hinted", "goal"] as const;
+export type Help = (typeof HELP)[number];
+
+// One workshop, one path. The lanes match the lists in docs/labs/README.md (a test checks).
+export const PATHS = {
+  pro: ["start", "daily", "team", "advanced"],
+  factory: ["start", "daily", "factory"],
+} as const satisfies Record<string, readonly Lane[]>;
+export type PathId = keyof typeof PATHS;
+export const PATH_IDS = Object.keys(PATHS) as PathId[];
+
 const oneLine = z
   .string()
   .min(1)
@@ -15,15 +27,20 @@ const oneLine = z
 // One question and the reason behind its answer, so a learner commits to a guess before running.
 const predictSchema = z.object({ question: oneLine, answer: z.string().min(1).max(400) });
 
+const proofItem = z.object({ text: oneLine, command: z.string().min(1) });
+export type ProofItem = z.infer<typeof proofItem>;
+
 export const labSchema = z.object({
   id: z.string().regex(/^[a-z]+-\d{2}$/),
   lane: z.enum(LANES),
   title: oneLine,
   pairs: z.string().min(1),
+  help: z.enum(HELP),
   goal: oneLine,
   predict: predictSchema,
   steps: z.array(z.string().min(1)).min(1),
-  proof: z.string().min(1),
+  // Each item says one thing that must be true and checks only that, so a red item names the missing part.
+  proof: z.array(proofItem).min(1),
   // Two or more, so the first nudges and the last gives the answer away.
   hints: z.array(z.string().min(1)).min(2),
   learned: oneLine,
@@ -65,8 +82,18 @@ function predictOf(body: string): { question: string; answer: string } {
   };
 }
 
-function proofOf(body: string): string {
-  return /```sh\n([\s\S]*?)\n```/.exec(body)?.[1]?.trim() ?? "";
+// "1. Sentence." then an indented sh block. A missing block gives an empty command, which zod rejects.
+function proofOf(body: string): ProofItem[] {
+  return listItems(body).map((item) => {
+    const [first = "", ...rest] = item.split(/\n\s*```sh\n/);
+    const block = rest.join("").split(/\n\s*```/)[0] ?? "";
+    const command = block
+      .split("\n")
+      .map((line) => line.replace(/^ {3}/, ""))
+      .join("\n")
+      .trim();
+    return { text: first.trim(), command };
+  });
 }
 
 export function parseLab(lane: string, file: string, text: string): Lab {
@@ -78,6 +105,7 @@ export function parseLab(lane: string, file: string, text: string): Lab {
     lane,
     title: /^# (.+)$/m.exec(text)?.[1],
     pairs: /^\*\*Pairs with:\*\* `([^`]+)`/m.exec(text)?.[1],
+    help: /^\*\*Help:\*\* (\w+)\s*$/m.exec(text)?.[1],
     goal: parts.get("goal"),
     predict: predictOf(parts.get("predict") ?? ""),
     steps: listItems(parts.get("steps") ?? ""),

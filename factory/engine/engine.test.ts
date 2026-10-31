@@ -22,7 +22,7 @@ describe("workflow schema", () => {
 
 describe("runWorkflow", () => {
   const loop = wf(
-    "  - {stage: fix, agent: builder, checks: [green], loop: {until: [green], max: 3}}",
+    "  - {stage: fix, agent: builder, checks: [green], loop: {until: [green], max: 3, sameFailure: 3}}",
   );
   it("loops until the check passes, feeding the evidence back", async () => {
     const { host, calls } = fakeHost({
@@ -32,6 +32,46 @@ describe("runWorkflow", () => {
     expect(r.outcome).toBe("needs-human");
     expect(r.rounds.fix).toBe(3);
     expect(calls.filter((c) => c.startsWith("agent"))).toHaveLength(3);
+  });
+  it("stops after two rounds that fail the same check with the same evidence", async () => {
+    const same = wf(
+      "  - {stage: fix, agent: builder, checks: [green], loop: {until: [green], max: 5}}",
+    );
+    const { host, calls } = fakeHost({
+      exec: [{ match: "npx vitest run specs/1", result: { code: 1, output: "boom" } }],
+    });
+    const r = await runWorkflow(host, same, 1, "t");
+    expect(r.outcome).toBe("needs-human");
+    expect(r.reason).toBe("test contradicts ticket");
+    expect(r.rounds.fix).toBe(2);
+    expect(calls.filter((c) => c.startsWith("agent"))).toHaveLength(2);
+  });
+  it("never shows a failing holdout case to the builder or writes it to run.log", async () => {
+    const held = wf(
+      "  - {stage: fix, agent: builder, checks: [holdout], loop: {until: [holdout], max: 3}}",
+    );
+    const { host, prompts, files } = fakeHost({
+      files: { ".factory/holdout/1/a.test.ts": "x" },
+      exec: [{ match: "npx vitest", result: { code: 1, output: "expected 42 to equal SECRET-9" } }],
+    });
+    const r = await runWorkflow(host, held, 1, "t");
+    expect(r.outcome).toBe("needs-human");
+    expect(prompts.join("\n")).not.toContain("SECRET-9");
+    expect(files.get("specs/1/run.log")).not.toContain("SECRET-9");
+    expect(files.get("specs/1/run.log")).toContain("check holdout FAIL");
+  });
+  it("keeps looping while the failing evidence changes", async () => {
+    const same = wf(
+      "  - {stage: fix, agent: builder, checks: [green], loop: {until: [green], max: 3}}",
+    );
+    let round = 0;
+    const { host } = fakeHost();
+    const exec = host.exec;
+    host.exec = async (cmd, args, o) =>
+      cmd === "npx" ? { code: 1, output: `boom ${++round}` } : exec(cmd, args, o);
+    const r = await runWorkflow(host, same, 1, "t");
+    expect(r.rounds.fix).toBe(3);
+    expect(r.reason).toBeUndefined();
   });
   it("saves a read-only agent's reply as the step's artifact, and nothing when it failed", async () => {
     const plan = wf("  - {stage: plan, agent: planner, writes: plan.md}");

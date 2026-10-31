@@ -1,6 +1,7 @@
 # Plan before you edit
 
 **Pairs with:** `docs/levels/context.md`
+**Help:** guided
 
 ## Goal
 
@@ -20,9 +21,16 @@ Answer: No. Plan mode is read-only, so Claude can read and search but the only t
 
 ## Proof
 
-```sh
-grep -qi 'verify' .labs/work/plan.md && test "$(grep -c . .labs/work/plan.md)" -ge 5
-```
+1. The plan mentions how you will verify it.
+
+   ```sh
+   grep -qi 'verify' .labs/work/plan.md
+   ```
+2. The plan has at least five non-empty lines.
+
+   ```sh
+   test "$(grep -c . .labs/work/plan.md)" -ge 5
+   ```
 
 ## Hints
 

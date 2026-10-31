@@ -1,4 +1,4 @@
-.PHONY: lab next progress prove-homework doctor dev check check-affected prove levels claude smoke hooks eval factory exercise
+.PHONY: factory-maintain lab next progress prove-homework doctor dev check check-affected prove levels claude smoke hooks eval factory exercise
 
 doctor:
 	@node -v | grep -qE '^v2[2-9]' && echo "ok node $$(node -v)" || (echo "need Node 22+" && exit 1)
@@ -41,6 +41,10 @@ eval:
 factory:
 	npx tsx factory/main.ts $(ISSUE) $(FLAGS)
 
+# Judges the recorded run metrics against .factory/bands.yaml. ISSUE=<n> is where a 3 sigma breach writes intent.md.
+factory-maintain:
+	npx tsx factory/engine/main.ts --maintain $(or $(ISSUE),0)
+
 # PASS or FAIL for one level's proof. TRACK=a adds the hint; TRACK=b prints only the failing line.
 exercise:
 	npx tsx scripts/exercise.ts $(LEVEL) $(TRACK)
@@ -52,9 +56,9 @@ levels:
 claude:
 	CLAUDE_CONFIG_DIR=$(CURDIR)/.workshop-home claude
 
-# Hands-on labs, start to advanced. HINT=1 reveals one hint; ID=<lab> picks a lab; GUESS="..." saves your answer to the Predict question (make exports it to the script as an environment variable); progress is in .labs/ (gitignored).
+# Hands-on labs, start to advanced. HINT=1 reveals one hint; WATCH=1 reruns the proof on each save; PATH_ID=pro|factory picks your workshop; ID=<lab> picks a lab; GUESS="..." saves your answer to the Predict question (make exports it to the script as an environment variable); progress is in .labs/ (gitignored).
 lab:
-	npx tsx scripts/labs/main.ts lab $(ID) $(if $(HINT),--hint)
+	npx tsx scripts/labs/main.ts lab $(ID) $(if $(PATH_ID),--path=$(PATH_ID)) $(if $(HINT),--hint) $(if $(WATCH),--watch)
 
 next:
 	npx tsx scripts/labs/main.ts next

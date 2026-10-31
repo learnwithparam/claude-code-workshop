@@ -4,6 +4,7 @@ import { LANES, loadLabs, parseLab } from "./catalog.ts";
 const good = `# First prompt
 
 **Pairs with:** \`docs/levels/hand-built.md\`
+**Help:** guided
 
 ## Goal
 Ask Claude one question.
@@ -17,9 +18,15 @@ Answer: It goes to the file, because the redirect catches it before the screen.
 2. Ask it.
 
 ## Proof
-\`\`\`sh
-test -f .labs/work/a.md
-\`\`\`
+
+1. The notes file exists.
+   \`\`\`sh
+   test -f .labs/work/a.md
+   \`\`\`
+2. The notes file is not empty.
+   \`\`\`sh
+   test -s .labs/work/a.md
+   \`\`\`
 
 ## Hints
 1. Look in .labs.
@@ -37,20 +44,29 @@ describe("parseLab", () => {
       lane: "start",
       title: "First prompt",
       pairs: "docs/levels/hand-built.md",
+      help: "guided",
       goal: "Ask Claude one question.",
-      proof: "test -f .labs/work/a.md",
       learned: "A prompt is just a question.",
       predict: {
         question: "Will the answer print to the screen or go to a file?",
         answer: "It goes to the file, because the redirect catches it before the screen.",
       },
     });
+    expect(lab.proof).toEqual([
+      { text: "The notes file exists.", command: "test -f .labs/work/a.md" },
+      { text: "The notes file is not empty.", command: "test -s .labs/work/a.md" },
+    ]);
     expect(lab.steps).toEqual(["Run `claude`.", "Ask it."]);
     expect(lab.hints).toHaveLength(2);
   });
 
   it("rejects a lab with no proof", () => {
     const text = good.replace(/## Proof[\s\S]*?## Hints/, "## Hints");
+    expect(() => parseLab("start", "01-x.md", text)).toThrow(/proof/i);
+  });
+
+  it("rejects a proof item that has no command", () => {
+    const text = good.replace(/ {3}`{3}sh\n {3}test -s[^\n]*\n {3}`{3}\n/, "");
     expect(() => parseLab("start", "01-x.md", text)).toThrow(/proof/i);
   });
 
@@ -66,6 +82,13 @@ describe("parseLab", () => {
   it("rejects a predict section with no Answer line", () => {
     const text = good.replace(/^Answer:.*\n/m, "");
     expect(() => parseLab("start", "01-x.md", text)).toThrow(/predict/i);
+  });
+
+  it("rejects a missing or unknown help level", () => {
+    expect(() => parseLab("start", "01-x.md", good.replace("**Help:** guided\n", ""))).toThrow(
+      /help/i,
+    );
+    expect(() => parseLab("start", "01-x.md", good.replace("guided", "easy"))).toThrow(/help/i);
   });
 
   it("rejects a file name that is not kebab-case with a number", () => {
