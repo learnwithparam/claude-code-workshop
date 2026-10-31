@@ -9,9 +9,13 @@ Write a rule file scoped to one folder, so Claude reads it only when it works th
 ## Steps
 
 1. Read a real one: `ls .claude/rules` then `cat` any file in it.
+   Expect: A list of rule file names, then the text of one. Look for a `paths:` line between two `---` lines, then bullets.
 2. Make a draft folder: `mkdir -p .labs/work/rules`.
+   Expect: No output. The folder `.labs/work/rules` now exists.
 3. Create `.labs/work/rules/api-errors.md` with a `paths:` front matter for `api/**` and two rules about customer-facing errors.
+   Expect: No output from a command, since you are writing the file. Afterwards the first line of the file is `---`.
 4. When you like it, copy it to `.claude/rules/` in your own project.
+   Expect: No output when the copy works. `ls .claude/rules` in your own project then lists `api-errors.md`.
 
 ## Proof
 

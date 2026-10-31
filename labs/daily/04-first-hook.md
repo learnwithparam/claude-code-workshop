@@ -9,9 +9,13 @@ Write a hook that stops Claude from editing `.env`, and prove it by feeding it b
 ## Steps
 
 1. Read a real hook: `cat .claude/hooks/pretooluse-file-guard.mjs`.
+   Expect: A short Node script that reads JSON from stdin, checks a path and calls `process.exit`.
 2. Make the folder: `mkdir -p .labs/work/hooks`.
+   Expect: No output. The folder `.labs/work/hooks` now exists.
 3. Write `.labs/work/hooks/block-env.mjs`. It reads JSON from stdin, looks at `tool_input.file_path`, and exits with code 2 and a message on stderr when the path ends in `.env`. Otherwise it exits 0.
+   Expect: No output from a command, since you are writing the file. Afterwards it contains an exit with code 2, a message sent to stderr, and an exit with code 0.
 4. Try it: `echo '{"tool_input":{"file_path":".env"}}' | node .labs/work/hooks/block-env.mjs; echo $?`.
+   Expect: One message saying the edit is blocked, then `2` on the last line. A `0` means your hook let the edit through.
 
 ## Proof
 

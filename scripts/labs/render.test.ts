@@ -8,7 +8,7 @@ const lab: Lab = {
   title: "First prompt",
   pairs: "docs/README.md",
   goal: "Ask one question.",
-  steps: ["Run `claude`."],
+  steps: [{ text: "Run `claude`.", expect: "A short reply; wording varies." }],
   proof: "true",
   hints: ["one", "two"],
   learned: "l",
@@ -58,8 +58,15 @@ describe("renderBrief", () => {
     const text = renderBrief(lab, { done: {}, hints: {} }, false);
     expect(text).toContain("Ask one question.");
     expect(text).toContain("1. Run `claude`.");
+    expect(text).toContain("   Expect: A short reply; wording varies.");
     expect(text).not.toContain("one\n");
     expect(text).toContain("0 of 2");
+  });
+  it("prints the expect line dim under its step and omits it when absent", () => {
+    const plain = { ...lab, steps: [{ text: "Think." }] };
+    expect(renderBrief(plain, { done: {}, hints: {} }, false)).not.toContain("Expect:");
+    const text = renderBrief(lab, { done: {}, hints: {} }, true);
+    expect(text).toContain("\u001b[2m   Expect: A short reply; wording varies.\u001b[0m");
   });
   it("shows revealed hints only", () => {
     const text = renderBrief(lab, { done: {}, hints: { "start-01": 1 } }, false);

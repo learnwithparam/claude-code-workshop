@@ -25,6 +25,17 @@ describe("labs", () => {
     expect(stray).toEqual([]);
   });
 
+  // A learner who runs a command must be able to tell whether what they see is right.
+  it("every step with a backticked command says what to expect", () => {
+    const missing = labs.flatMap((lab) =>
+      lab.steps
+        .map((step, i) => ({ step, at: `${lab.id} step ${i + 1}` }))
+        .filter(({ step }) => /`[^`]+`/.test(step.text) && !step.expect?.trim())
+        .map(({ at }) => at),
+    );
+    expect(missing).toEqual([]);
+  });
+
   it.each(labs)("$id pairs with a doc that exists and is listed in the path table", (lab) => {
     expect(existsSync(lab.pairs) || isOwned(lab.pairs), `${lab.pairs} is missing`).toBe(true);
     const row = readme.split("\n").find((line) => line.includes(`\`${lab.id}\``));

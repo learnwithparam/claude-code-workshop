@@ -12,13 +12,20 @@ const oneLine = z
   .max(240)
   .regex(/^[^\n]+$/, "must be one line");
 
+// A step may carry an indented `Expect:` line: what the learner sees if it worked.
+export const stepSchema = z.object({
+  text: z.string().min(1),
+  expect: z.string().min(1).optional(),
+});
+export type Step = z.infer<typeof stepSchema>;
+
 export const labSchema = z.object({
   id: z.string().regex(/^[a-z]+-\d{2}$/),
   lane: z.enum(LANES),
   title: oneLine,
   pairs: z.string().min(1),
   goal: oneLine,
-  steps: z.array(z.string().min(1)).min(1),
+  steps: z.array(stepSchema).min(1),
   proof: z.string().min(1),
   // Two or more, so the first nudges and the last gives the answer away.
   hints: z.array(z.string().min(1)).min(2),
@@ -45,6 +52,15 @@ function listItems(body: string): string[] {
   return items;
 }
 
+function stepOf(item: string): Step {
+  const [text = "", ...rest] = item.split(/\n\s+Expect: /);
+  const expect = rest
+    .join(" ")
+    .replace(/\s*\n\s*/g, " ")
+    .trim();
+  return expect ? { text: text.trim(), expect } : { text: text.trim() };
+}
+
 function proofOf(body: string): string {
   return /```sh\n([\s\S]*?)\n```/.exec(body)?.[1]?.trim() ?? "";
 }
@@ -59,7 +75,7 @@ export function parseLab(lane: string, file: string, text: string): Lab {
     title: /^# (.+)$/m.exec(text)?.[1],
     pairs: /^\*\*Pairs with:\*\* `([^`]+)`/m.exec(text)?.[1],
     goal: parts.get("goal"),
-    steps: listItems(parts.get("steps") ?? ""),
+    steps: listItems(parts.get("steps") ?? "").map(stepOf),
     proof: proofOf(parts.get("proof") ?? ""),
     hints: listItems(parts.get("hints") ?? ""),
     learned: parts.get("what you just learned"),

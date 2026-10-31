@@ -53,7 +53,10 @@ export function renderBrief(lab: Lab, progress: Progress, color: boolean): strin
     `${paint(color, "bold", "Goal")} ${lab.goal}`,
     "",
     paint(color, "bold", "Steps"),
-    ...lab.steps.map((s, i) => `${i + 1}. ${commands(s, color)}`),
+    ...lab.steps.flatMap((s, i) => [
+      `${i + 1}. ${commands(s.text, color)}`,
+      ...(s.expect ? [paint(color, "dim", `   Expect: ${s.expect}`)] : []),
+    ]),
     "",
     paint(
       color,

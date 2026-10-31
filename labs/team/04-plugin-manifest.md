@@ -9,9 +9,13 @@ Write a plugin manifest so a teammate can install your skill and hook in one com
 ## Steps
 
 1. See one: `ls plugins` then `cat plugins/factory-kit/.claude-plugin/plugin.json`.
+   Expect: A list of plugin folders, then JSON with `name`, `version` and `description`.
 2. Make the folder: `mkdir -p .labs/work/plugin/.claude-plugin`.
+   Expect: No output. The folder `.labs/work/plugin/.claude-plugin` now exists.
 3. Write `.labs/work/plugin/.claude-plugin/plugin.json` with `name`, `version` and `description`.
+   Expect: No output from a command, since you are writing the file. Afterwards it is valid JSON with those three fields.
 4. Copy your skill from the earlier lab into `.labs/work/plugin/skills/`.
+   Expect: No output when the copy works. `ls .labs/work/plugin/skills` then lists your skill folder.
 
 ## Proof
 

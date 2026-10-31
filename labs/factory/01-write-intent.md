@@ -9,8 +9,11 @@ Write the one-page intent a factory run starts from: the problem and how anyone 
 ## Steps
 
 1. Read the stage: `cat docs/factory/f1-plan.md`.
+   Expect: The text of the planning stage, including what an intent must contain. It prints a page of plain text.
 2. Make the folder: `mkdir -p .labs/work/specs/1`.
+   Expect: No output. The folder `.labs/work/specs/1` now exists.
 3. Write `.labs/work/specs/1/intent.md` with the headings `## Problem`, `## Done when` and `## Out of scope`.
+   Expect: No output from a command, since you are writing the file. Afterwards the file has three headings: Problem, Done when and Out of scope.
 4. Under Done when, write two checks a command could run.
 
 ## Proof

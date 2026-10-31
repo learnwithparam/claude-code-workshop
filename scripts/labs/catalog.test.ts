@@ -10,6 +10,7 @@ Ask Claude one question.
 
 ## Steps
 1. Run \`claude\`.
+   Expect: A reply in plain words; the wording differs each time.
 2. Ask it.
 
 ## Proof
@@ -37,7 +38,10 @@ describe("parseLab", () => {
       proof: "test -f .labs/work/a.md",
       learned: "A prompt is just a question.",
     });
-    expect(lab.steps).toEqual(["Run `claude`.", "Ask it."]);
+    expect(lab.steps).toEqual([
+      { text: "Run `claude`.", expect: "A reply in plain words; the wording differs each time." },
+      { text: "Ask it." },
+    ]);
     expect(lab.hints).toHaveLength(2);
   });
 

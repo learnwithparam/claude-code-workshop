@@ -9,8 +9,11 @@ Write a skill that Claude loads by its description, so you stop pasting the same
 ## Steps
 
 1. Read one: `ls .claude/skills` then open a `SKILL.md`.
+   Expect: A list of skill folder names, then a file starting with `---`, a `name:` line and a `description:` line.
 2. Make the folder: `mkdir -p .labs/work/skills/commit-message`.
+   Expect: No output. The folder `.labs/work/skills/commit-message` now exists.
 3. Create `.labs/work/skills/commit-message/SKILL.md` with `name:` and `description:` front matter, then the steps.
+   Expect: No output from a command, since you are writing the file. Afterwards it has `---`, `name: commit-message`, a `description: Use when` line and at least a few lines of steps.
 4. The description says when to use it, not what it is.
 
 ## Proof

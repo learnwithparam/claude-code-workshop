@@ -9,9 +9,13 @@ Run the workflow contract tests and keep the log, so you know the stages and the
 ## Steps
 
 1. Read the module: `cat docs/factory/f8-workflows.md`.
+   Expect: The text of the workflow module, describing stages and the artifacts each one produces.
 2. Make the folder: `mkdir -p .labs/work`.
+   Expect: No output. The folder `.labs/work` now exists.
 3. Run the contract tests: `npx vitest run tests/contract > .labs/work/contract.log 2>&1`.
+   Expect: No output on screen, because it all goes to `contract.log`. It finishes in a few seconds.
 4. Read what failed or passed: `tail -8 .labs/work/contract.log`.
+   Expect: Vitest summary lines near the end, such as `Test Files  N passed` and `Tests  N passed`. The numbers will differ. A `failed` line names the workflow file to open.
 
 ## Proof
 

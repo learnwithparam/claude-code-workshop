@@ -9,9 +9,13 @@ Write a settings file that denies reading `.env` files, so the rule holds for ev
 ## Steps
 
 1. Read the real one: `cat .claude/settings.json`.
+   Expect: JSON with a `permissions` object that has `deny` rules, and probably `allow` rules and `hooks` too.
 2. Make the folder: `mkdir -p .labs/work`.
+   Expect: No output. The folder `.labs/work` now exists.
 3. Write `.labs/work/settings.json` with a `permissions.deny` list that blocks `Read(./.env)` and `Read(./.env.*)`.
+   Expect: No output from a command, since you are writing the file. Afterwards the `deny` list holds both `Read(./.env)` and `Read(./.env.*)`.
 4. Check it is valid JSON: `node -e "JSON.parse(require('fs').readFileSync('.labs/work/settings.json','utf8'))"`.
+   Expect: No output when the JSON is valid. A `SyntaxError` with a position means a missing comma or quote.
 
 ## Proof
 

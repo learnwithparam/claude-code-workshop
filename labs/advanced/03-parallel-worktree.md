@@ -9,9 +9,13 @@ Create a second checkout of the repo so two Claude sessions can edit at once wit
 ## Steps
 
 1. Make the folder: `mkdir -p .labs/work`.
+   Expect: No output. The folder `.labs/work` now exists.
 2. Add the worktree: `git worktree add .labs/work/wt -b lab/parallel`.
+   Expect: A line starting `Preparing worktree (new branch 'lab/parallel')` and a `HEAD is now at` line with the latest commit. The hash and message will differ.
 3. Start a session in it: `cd .labs/work/wt && claude`, then leave with `/exit`.
+   Expect: Claude opens in the new folder. After `/exit` you are back at your shell, still inside `.labs/work/wt`.
 4. Remove it when you are done: `git worktree remove .labs/work/wt`. Keep it until the proof is green.
+   Expect: No output when it works. If git refuses, it names the files you changed, so commit or discard them first.
 
 ## Proof
 

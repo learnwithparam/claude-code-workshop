@@ -9,8 +9,11 @@ Write one private preference into `CLAUDE.local.md` so Claude follows it in this
 ## Steps
 
 1. See the example: `cat docs/examples/CLAUDE.local.md`.
+   Expect: A short file of personal notes, written as bullets.
 2. Add a line to your own file: `echo "- lab-note: explain each change in two plain sentences." >> CLAUDE.local.md`.
+   Expect: No output. `tail -1 CLAUDE.local.md` then shows your `lab-note` line.
 3. Check it loads: `claude -p "What preferences do my local notes give you?"`.
+   Expect: A short answer that repeats your note, for example to explain each change in two plain sentences. The wording will differ.
 
 ## Proof
 
