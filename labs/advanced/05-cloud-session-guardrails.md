@@ -10,11 +10,17 @@ Show which guardrails a cloud session inherits from this repo, and predict what 
 ## Steps
 
 1. Read the section "What a cloud session reads from the repo" in `docs/factory/f11-cloud-sessions.md`. A cloud session clones the repo, so what is committed in `.claude/` travels with it.
+   Expect: The section explains that a cloud session clones the repo and reads `.claude/`. You are reading, so nothing prints.
 2. Make the folder: `mkdir -p .labs/work`.
+   Expect: No output. The folder `.labs/work` now exists.
 3. Run the command from that section and save what it prints: `node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' > .labs/work/cloud-guards.txt`.
+   Expect: No output on screen, because it goes to `cloud-guards.txt`. The file lists the deny rules, including the push rule, then a line of hook names that includes `PreToolUse`.
 4. Read the file. Find the push deny and the `PreToolUse` hook, and say to yourself what a cloud session does when it runs a push.
+   Expect: You see the push deny in the first list and `PreToolUse` in the second. Nothing is printed for this step.
 5. Write `.labs/work/push-route.md`: name one route from the section "Know why `git push` fails" (a person ships, teleport, or a tested hook) and give one reason you chose it.
+   Expect: No output from a command, since you are writing the file. Afterwards `push-route.md` names one route and one reason.
 6. Optional: start a real session with `claude --cloud` and ask it to run a push and show the exact result, then read the transcript. This needs a claude.ai login, so the proof does not ask for it.
+   Expect: The session starts in the cloud and its push attempt is refused. The exact wording will differ. Skip this step if you have no claude.ai login.
 
 ## Proof
 
