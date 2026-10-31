@@ -52,9 +52,9 @@ levels:
 claude:
 	CLAUDE_CONFIG_DIR=$(CURDIR)/.workshop-home claude
 
-# Hands-on labs, start to advanced. HINT=1 reveals one hint; ID=<lab> picks a lab; progress is in .labs/ (gitignored).
+# Hands-on labs, start to advanced. HINT=1 reveals one hint; PATH_ID=pro|factory picks your workshop; ID=<lab> picks a lab; progress is in .labs/ (gitignored).
 lab:
-	npx tsx scripts/labs/main.ts lab $(ID) $(if $(HINT),--hint)
+	npx tsx scripts/labs/main.ts lab $(ID) $(if $(PATH_ID),--path=$(PATH_ID)) $(if $(HINT),--hint)
 
 next:
 	npx tsx scripts/labs/main.ts next

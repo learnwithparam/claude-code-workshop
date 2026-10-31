@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { Lab } from "./catalog.ts";
 import { type CliDeps, run } from "./cli.ts";
-import { loadProgress } from "./progress.ts";
+import { loadProgress, saveProgress } from "./progress.ts";
 
 const lab = (id: string, lane: Lab["lane"]): Lab => ({
   id,
@@ -18,7 +18,7 @@ const lab = (id: string, lane: Lab["lane"]): Lab => ({
   learned: `Learned ${id}`,
 });
 
-function setup(passes: boolean) {
+function setup(passes: boolean, withPath = true) {
   const out: string[] = [];
   const dir = mkdtempSync(join(tmpdir(), "labs-cli-"));
   const deps: CliDeps = {
@@ -29,10 +29,40 @@ function setup(passes: boolean) {
     now: () => "2026-10-30",
     out: (s) => out.push(s),
   };
+  if (withPath) saveProgress(deps.progressPath, { done: {}, hints: {}, path: "pro" });
   return { deps, out, text: () => out.join("\n") };
 }
 
 describe("cli", () => {
+  it("with no path set, lab prints the choice, exits 2 and runs no proof", () => {
+    const s = setup(true, false);
+    s.deps.proof = () => {
+      throw new Error("must not run");
+    };
+    expect(run(["lab"], s.deps)).toBe(2);
+    expect(s.text()).toContain("PATH_ID=pro");
+    expect(s.text()).toContain("PATH_ID=factory");
+    expect(run(["next"], s.deps)).toBe(2);
+  });
+
+  it("--path sets the path, saves it and then runs the lab", () => {
+    const s = setup(true, false);
+    expect(run(["lab", "--path=factory"], s.deps)).toBe(0);
+    expect(loadProgress(s.deps.progressPath).path).toBe("factory");
+  });
+
+  it("an unknown path exits 2 and saves nothing", () => {
+    const s = setup(true, false);
+    expect(run(["lab", "--path=nope"], s.deps)).toBe(2);
+    expect(loadProgress(s.deps.progressPath).path).toBeUndefined();
+  });
+
+  it("progress shows the chosen path and names the other one", () => {
+    const s = setup(true);
+    run(["progress"], s.deps);
+    expect(s.text()).toContain("PATH_ID=factory");
+  });
+
   it("progress prints the lane map and exits 0", () => {
     const s = setup(true);
     expect(run(["progress"], s.deps)).toBe(0);

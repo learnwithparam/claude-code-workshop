@@ -6,6 +6,14 @@ import { z } from "zod";
 export const LANES = ["start", "daily", "team", "factory", "advanced"] as const;
 export type Lane = (typeof LANES)[number];
 
+// One workshop, one path. The lanes match the lists in docs/labs/README.md (a test checks).
+export const PATHS = {
+  pro: ["start", "daily", "team", "advanced"],
+  factory: ["start", "daily", "factory"],
+} as const satisfies Record<string, readonly Lane[]>;
+export type PathId = keyof typeof PATHS;
+export const PATH_IDS = Object.keys(PATHS) as PathId[];
+
 const oneLine = z
   .string()
   .min(1)
