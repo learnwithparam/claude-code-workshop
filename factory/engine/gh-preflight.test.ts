@@ -10,7 +10,10 @@ afterEach(() => {
   process.env.PATH = PATH;
 });
 
-const fakeAuth = { mode: "api-key" as const, credential: { name: "ANTHROPIC_API_KEY", value: "x" } };
+const fakeAuth = {
+  mode: "api-key" as const,
+  credential: { name: "ANTHROPIC_API_KEY", value: "x" },
+};
 
 describe("gh preflight", () => {
   it("passes when gh answers", () => {
