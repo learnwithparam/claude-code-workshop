@@ -16,6 +16,7 @@ export const ARTIFACTS = [
   "clarify.md",
   "tasks.md",
   "analyze.md",
+  "plan-amendment.md",
 ] as const;
 export const AGENT_ARTIFACTS = [
   "intent.md",
@@ -74,6 +75,9 @@ const PLAN_PATH = /^[A-Za-z0-9_][A-Za-z0-9_.@/-]*$/;
 // levels.json is not here: a new source file needs an owner entry there, so a plan must be able to list it.
 const GATE_OWNED =
   /^((\.github|\.claude|\.factory|factory|scripts)\/|specs\/[^/]+\/golden\/(?![^/]+\.test\.ts$))|^api\/src\/eval\.ts$|(^|\/)(makefile|package(-lock)?\.json|biome\.json|\.npmrc|stryker[^/]*|vitest[^/]*|tsconfig[^/]*|playwright\.config[^/]*)$/i;
+// An amendment never reaches the files the gate is made of, manifests included.
+export const isGateOwned = (path: string) =>
+  !PLAN_PATH.test(path) || path.split("/").includes("..") || GATE_OWNED.test(path);
 const MANIFEST = /(^|\/)package(-lock)?\.json$/;
 // A dependency update must edit the manifests, so that workflow alone may list them; the manifest-deps
 // check then holds the edit to dependency fields.
