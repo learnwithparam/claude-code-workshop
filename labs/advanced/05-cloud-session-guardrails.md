@@ -1,6 +1,7 @@
 # Check the guardrails a cloud session inherits
 
 **Pairs with:** `docs/factory/f11-cloud-sessions.md`
+**Help:** goal
 
 ## Goal
 
