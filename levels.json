@@ -210,6 +210,7 @@
     "tests/structure/f5-review-doc.test.ts",
     "tests/structure/assignments.test.ts",
     "tests/assignments/**",
+    "assignments/**",
     ".factory/bands.yaml",
     "scripts/eval-score.ts",
     "scripts/eval-score.test.ts",
