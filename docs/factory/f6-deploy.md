@@ -61,7 +61,7 @@ Make them fail: in `risk.ts`, change the filter `a.kind === "human"` to accept e
 
 ## See it on a real run
 
-`specs/35/ci.md` is the record a real `ci` stage wrote on run 35. It states that no CI job log was reachable because `gh` was not authenticated in that sandbox, quotes the only recorded failure from `specs/35/run.log` (`check plan-drift FAIL: files outside plan.md: api/src/agent/template-eval.ts`), says the fix was listing the file in `specs/35/plan.md`, and lists two local test failures it attributes to the sandbox. Read it as an honest example: the stage reported what it could not see instead of claiming green.
+`specs/35/ci.md` is the record a real `ci` stage wrote on run 35. It states that no CI job log was reachable because `gh` was not authenticated in that sandbox, quotes the only recorded failure (`check plan-drift FAIL: files outside plan.md: api/src/agent/template-eval.ts`), says the fix was listing the file in `specs/35/plan.md`, and lists two local test failures it attributes to the sandbox. Read it as an honest example: the stage reported what it could not see instead of claiming green.
 
 No production release has run from this repo, since there is no deploy target.
 

@@ -23,11 +23,11 @@ Delete `AGENTS.md` and `.claude/rules/` on a scratch branch and run the prompt. 
 
 ## With
 
-Run the same prompt. Claude adds `formatBand` to `shared/src/bands.ts` with a test beside it. Run `/context` while editing in `web/` and see the web rule loaded, the api rule not.
+Run the same prompt. Claude adds the helper under `shared/src/` with a test beside it. Run `/context` while editing in `web/` and see the web rule loaded, the api rule not.
 
 ## Run it
 
-1. Type `claude`. Say "add a helper that formats grade names". Expect `formatBand` in `shared`.
+1. Type `claude`. Say "add a helper that formats grade names". Expect the new helper and its test in `shared`, not in `api` or `web`.
 2. Type `/context`. Expect `AGENTS.md` and one rule listed.
 3. Type `/compact keep file paths and decisions`. Expect a short summary that keeps both.
 

@@ -53,7 +53,7 @@ Four measures and where they could come from. Deployment frequency and lead time
 
 Tests in `factory/engine/review.test.ts`: `a 3 sigma breach writes an intent` and `a value inside the band does nothing`. In `bands.ts`, change `z >= 3 ? 3` to `z >= 4 ? 3` and the first test fails, since a breach of 30 against a history near 10 no longer reaches the intent action.
 
-Retro: `reverts a lesson that lowered the score` in `factory/engine/retro.test.ts` feeds scores 0.9 then 0.7 and expects `reverted`. Change `delta < 0` to `delta < -1` in `engine/retro.ts` and it fails. `treats a missing SCORE line as a broken eval` fails if a silent eval counts as zero.
+Retro: `reverts a lesson that lowered the score` in `factory/engine/retro.test.ts` feeds scores 0.9 then 0.7 and expects `reverted`. Change `delta < 0` to `delta < -1` in `factory/engine/retro.ts` and it fails. `treats a missing SCORE line as a broken eval` fails if a silent eval counts as zero.
 
 Metrics: `counts a run first-pass only when it finished with no repeat round` in `metrics.test.ts`.
 
