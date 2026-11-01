@@ -63,6 +63,10 @@ Answer: Exit code 2 blocks the action. Any other path, including a clean exit 0,
 3. Import `readFileSync` from `node:fs` and end with `process.exit(0)` for the allowed case.
 4. Commands, in order: `cat .claude/hooks/pretooluse-file-guard.mjs`, `mkdir -p .labs/work/hooks`, `echo '{"tool_input":{"file_path":".env"}}' | node .labs/work/hooks/block-env.mjs; echo $?`.
 
+## Trick
+
+Start Claude Code with `claude --debug=hooks` to see each hook fire, what it received and what it returned.
+
 ## What you just learned
 
 A hook is a program, not a prompt. Exit code 2 blocks the action every time, even when the model would have forgotten the rule.

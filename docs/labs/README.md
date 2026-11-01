@@ -9,6 +9,8 @@ Two workshops share this folder. Pick yours once with `make lab PATH_ID=pro` or 
 
 Each lane has a walkthrough that follows every step with the command, what you should see and why: [start](walkthrough-start.md), [daily](walkthrough-daily.md), [team](walkthrough-team.md), [advanced](walkthrough-advanced.md), [factory](walkthrough-factory.md).
 
+The one-line tricks from every lab sit on one page: [cheat sheet](cheat-sheet.md).
+
 ## Help fades as you go
 
 Every lab declares `**Help:** guided`, `hinted` or `goal`, and the path gets harder on purpose.

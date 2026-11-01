@@ -57,6 +57,10 @@ Answer: No. Each call starts with an empty context, so --continue is what reopen
 3. In the interactive app the same move is `claude --continue`, or `/resume` to choose from a list.
 4. Commands, in order: `mkdir -p .labs/work`, `claude -p "Remember the word tangerine." --output-format json > .labs/work/session.json`, `claude -p --continue "What word did I ask you to remember?" > .labs/work/recall.md`, `cat .labs/work/recall.md`.
 
+## Trick
+
+Run `claude --continue` (or `-c`) to reopen the most recent conversation in this folder, or `claude --resume` to pick an older one.
+
 ## What you just learned
 
 A session is a saved conversation. Resume it instead of re-explaining the task.
