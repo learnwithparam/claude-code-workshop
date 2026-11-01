@@ -70,7 +70,7 @@ The builder is limited by files the runner does not let it edit.
 | ------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `FACTORY_PHASE=fix` | `.claude/hooks/pretooluse-test-lock.mjs` | an edit to any test file (`.test.ts`, `.e2e.ts`, `.feature`, `tests/`) in a fix step; exit 2                       |
 | `lock` check        | `factory/engine/checks/lock.ts`          | a test edited by another route, such as `Bash`                                                                     |
-| deny rules          | `.claude/settings.json`                  | reading `.env*` and `.factory/holdout/**`, and `git push *`                                                        |
+| deny rules          | `.claude/settings.json`                  | reading `.env*` and `.factory/holdout/**`, and `git push` to `main`                                                |
 | sandbox             | `.claude/settings.json`                  | `denyRead` on the same two paths                                                                                   |
 | plan                | `plan-drift`                             | any file outside the plan                                                                                          |
 | pinned commands     | `.factory/config.yaml`                   | a build that edits the gate or test commands; the file is read once, before the first agent                        |
