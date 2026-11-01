@@ -65,6 +65,9 @@ Each step says where to type it: "in your shell", "in Claude Code" or "in your e
 | `factory-05`  | factory  | Run the checks that stop a bad test           | [F4 Test](../factory/f4-test.md)                       |
 | `factory-06`  | factory  | Count the votes behind a review               | [F5 Review](../factory/f5-review.md)                   |
 | `factory-07`  | factory  | Trip a band and read the intent it writes     | [F7 Maintain](../factory/f7-maintain.md)               |
+| `factory-08`  | factory  | Tier a diff and count its approvals           | [F6 Deploy](../factory/f6-deploy.md)                   |
+| `factory-09`  | factory  | Route a step to its model                     | [F12 Model routing](../factory/f12-model-routing.md)   |
+| `factory-10`  | factory  | Hit the spend cap                             | [F13 Spend and safety](../factory/f13-spend-and-safety.md) |
 | `advanced-01` | advanced | Write a read-only reviewer subagent           | [execution](../levels/execution.md)                    |
 | `advanced-02` | advanced | Measure what a call costs                     | [agent SDK](../agent/agent-sdk.md)                     |
 | `advanced-03` | advanced | Work in a parallel worktree                   | [agent teams](../electives/agent-teams.md)             |

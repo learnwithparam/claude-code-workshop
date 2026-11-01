@@ -25,7 +25,7 @@ This picks the Software Factory workshop. Its path runs the `start` and `daily` 
 
 You need no API key for this lane. The dry run and the contract test cost nothing. When you later run a real stage, pick how it signs in with [auth modes](../factory/auth-modes.md).
 
-## Turn a ticket into an intent
+## factory-01: Turn a ticket into an intent
 
 Pairs with [F1 Plan](../factory/f1-plan.md).
 
@@ -65,7 +65,7 @@ make: *** [lab] Error 1
 
 One line, `sh: line 0: test: : integer expression expected`, also appears while the file is missing. It is harmless noise and goes away once the file exists. I did not run the green pass here, because it needs your own intent text.
 
-## Write acceptance before code
+## factory-02: Write acceptance before code
 
 Pairs with [F2 Design](../factory/f2-design.md).
 
@@ -90,7 +90,7 @@ make lab ID=factory-02
 
 The red run fails the same way as the first lab, on `acceptance.md` instead of `intent.md`. I did not run the green pass here, because it needs your own scenarios.
 
-## See what a run would do
+## factory-03: See what a run would do
 
 Pairs with [F3 Build](../factory/f3-build.md).
 
@@ -127,7 +127,7 @@ Issue #1: stages that would run, from .factory/config.json
 
 The largest budget is `build` at $3. The cheap, mechanical stages use Haiku, and only `delivery` uses Opus. See [F12 model routing](../factory/f12-model-routing.md) for why.
 
-## Check the workflow contract
+## factory-04: Check the workflow contract
 
 Pairs with [F8 Workflows](../factory/f8-workflows.md).
 
@@ -200,6 +200,59 @@ You pick a number for `ci-failure-rate` against a fixed history of ten runs, the
 
 **What I got.** With the proof's history, a latest value of 30 gave `3 intent` and a latest value of 10 gave `0 none`. I ran both through `detect` and `actionFor`. I did not run the final green `make lab` here.
 
-## What this lane does not cover yet
+## factory-08: Tier a diff and count its approvals
 
-Deploy has a doc ([F6](../factory/f6-deploy.md)) but no lab of its own yet. For a hands-on run past this lane, use the [cloud sessions](../factory/f11-cloud-sessions.md) lab `advanced-05`, then pick an [assignment](../factory/f10-assignments.md).
+**Pairs with** [F6 Deploy](../factory/f6-deploy.md)
+
+**The problem.** How much review a change needs is a property of its paths, not of who wrote it. `classify` reads the changed paths and `approvalsMet` counts distinct humans on one commit.
+
+You write two small scripts: one prints the tier and count for the paths you pass, one says whether a high tier gate is open for the names you pass.
+
+```sh
+make lab ID=factory-08
+mkdir -p .labs/work
+# write .labs/work/tier.ts and .labs/work/approve.ts from hint 4
+npx tsx .labs/work/tier.ts .github/workflows/check.yml
+npx tsx .labs/work/approve.ts ann ann
+make lab ID=factory-08
+```
+
+**What I got.** `.github/workflows/check.yml` gave `high 2`, `fixtures/worksheets.json` gave `low 0` and `web/src/pages/index.astro` gave `medium 1`. One person named twice gave `false` and two people gave `true`. I ran the lab's proof against a finished work folder and it passed, and against a script that prints `high 2` for every diff and it failed.
+
+## factory-09: Route a step to its model
+
+**Pairs with** [F12 Model routing](../factory/f12-model-routing.md)
+
+**The problem.** The model for a step is not chosen in the workflow file. `resolveModel` reads the step name, maps it to a stage in `.factory/config.json`, and lets a ticket type's route replace the stage's model.
+
+```sh
+make lab ID=factory-09
+mkdir -p .labs/work
+# write .labs/work/route.ts from hint 4
+npx tsx .labs/work/route.ts write docs
+npx tsx .labs/work/route.ts write bug
+make lab ID=factory-09
+```
+
+**What I got.** `build bug` gave `claude-sonnet-5-5`, `intent bug` gave `claude-haiku-5-5`, `write docs` gave `claude-haiku-5-5` and `write bug` gave `claude-sonnet-5-5`. The same step name, `write`, got two models because the ticket type differed. The proof passed on a finished script and failed on one that always prints the build model.
+
+## factory-10: Hit the spend cap
+
+**Pairs with** [F13 Spend and safety](../factory/f13-spend-and-safety.md)
+
+**The problem.** A run that cannot stop is a bill. The runner adds up the cost of each call and stops between steps once the total crosses the share of the cap that the config names.
+
+```sh
+make lab ID=factory-10
+mkdir -p .labs/work
+# write .labs/work/cap.ts from hint 4
+npx tsx .labs/work/cap.ts 0.8
+npx tsx .labs/work/cap.ts 0.1
+make lab ID=factory-10
+```
+
+**What I got.** With a one dollar cap and a stop at 75 percent, a call cost of 0.8 gave `needs-human spend cap build`, 0.5 gave `needs-human spend cap review` and 0.1 gave `done - -`. The proof passed on a finished script and failed on one that always prints the first line.
+
+## Where to go after this lane
+
+Pick the lab that matches your next job. The [cloud sessions](../factory/f11-cloud-sessions.md) lab `advanced-05` shows what a remote run inherits. The [assignments](../../assignments/README.md) each start from a gap in the factory and end in a test you write.

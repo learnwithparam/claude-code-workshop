@@ -25,7 +25,7 @@ make lab PATH_ID=pro
 
 Choose the workshop once. The lane map then follows it. Each lab opens red on purpose, so run `make lab` first and read the failure before you do anything.
 
-## Continue where you left off
+## daily-01: Continue where you left off
 
 Pairs with [hand-built](../levels/hand-built.md).
 
@@ -91,7 +91,7 @@ The session id is a plain uuid, and the second call never mentions it. `--contin
 
 They run the second call from a different folder. `--continue` is per folder, so it opens nothing, or the wrong session. Stay in the same directory for both calls.
 
-## Write a rule that loads only where it applies
+## daily-02: Write a rule that loads only where it applies
 
 Pairs with [context](../levels/context.md).
 
@@ -191,7 +191,7 @@ Write each rule as a check that could fail: "an error to a customer never names 
 
 They put the rule in `AGENTS.md` because it is easy to find. Then it loads on every task, including ones that never touch `api/`.
 
-## Package a habit as a skill
+## daily-03: Package a habit as a skill
 
 Pairs with [skills](../levels/skills.md).
 
@@ -289,7 +289,7 @@ Name the trigger, not the topic. "Use when the user is about to commit staged ch
 
 They put the good advice in the body and a vague label in the description. The body is read only after the description matches, so the advice never arrives.
 
-## Block a mistake with a hook
+## daily-04: Block a mistake with a hook
 
 Pairs with [boundary](../levels/boundary.md).
 

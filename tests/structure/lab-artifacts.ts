@@ -19,6 +19,9 @@ export const NEEDS: Record<string, string[]> = {
   "factory-05": ["factory/engine/checks"],
   "factory-06": ["factory/engine/review.ts"],
   "factory-07": ["factory/engine/bands.ts"],
+  "factory-08": ["factory/engine/risk.ts"],
+  "factory-09": [".factory/config.json", "factory/engine/models.ts"],
+  "factory-10": [".factory/config.json", "factory/engine/fake-host.ts"],
   "advanced-05": [".claude/settings.json"],
 };
 
@@ -103,6 +106,31 @@ export const SOLUTIONS: Record<string, string> = {
     `echo 30 > ${W}/latest.txt`,
     `printf 'import{readFileSync as r}from"node:fs";import{detect,intentFor}from"../../factory/engine/bands.ts";process.stdout.write(intentFor(detect("ci-failure-rate",[10,11,9,10,10,11,9,10,10,11],Number(r(".labs/work/latest.txt","utf8")),"up-is-bad")))' > ${W}/mk.ts`,
     `npx tsx ${W}/mk.ts > ${W}/intent.md`,
+  ),
+  "factory-08": sh(
+    `mkdir -p ${W}`,
+    file(
+      `${W}/tier.ts`,
+      String.raw`import{APPROVALS,classify}from"../../factory/engine/risk.ts";const t=classify(process.argv.slice(2));console.log(t,APPROVALS[t])`,
+    ),
+    file(
+      `${W}/approve.ts`,
+      String.raw`import{approvalsMet}from"../../factory/engine/risk.ts";const a=process.argv.slice(2).map(by=>({by,kind:"human" as const,commit:"h1"}));console.log(approvalsMet("high",a,"h1"))`,
+    ),
+  ),
+  "factory-09": sh(
+    `mkdir -p ${W}`,
+    file(
+      `${W}/route.ts`,
+      String.raw`import{loadConfig}from"../../factory/config.ts";import{resolveModel}from"../../factory/engine/models.ts";const[step="",type=""]=process.argv.slice(2);console.log(resolveModel({cfg:loadConfig(),step,type}))`,
+    ),
+  ),
+  "factory-10": sh(
+    `mkdir -p ${W}`,
+    file(
+      `${W}/cap.ts`,
+      String.raw`import{loadConfig}from"../../factory/config.ts";import{fakeHost}from"../../factory/engine/fake-host.ts";import{runWorkflow}from"../../factory/engine/interpret.ts";import{loadWorkflow}from"../../factory/engine/workflow.ts";const wf=loadWorkflow("name: t\nmethod: m\nsource: s\nfor: f\nsteps:\n  - {stage: intent, agent: planner}\n  - {stage: build, agent: builder}\n  - {stage: review, agent: reviewer}");const{host}=fakeHost({agents:[{costUsd:Number(process.argv[2])}]});runWorkflow(host,wf,7,"t",{config:{...loadConfig(),spend:{capUsd:1,stopAt:0.75}}}).then(r=>console.log(r.outcome,r.reason??"-",r.stoppedAt??"-"))`,
+    ),
   ),
   "advanced-01": sh(
     `mkdir -p ${W}/agents`,
@@ -195,6 +223,16 @@ export const LAZY: Record<string, string> = {
     `echo 'Tests 12 passed' > ${W}/review.log`,
   ),
   "factory-07": sh(`mkdir -p ${W}`, `echo 10 > ${W}/latest.txt`, `echo x > ${W}/intent.md`),
+  "factory-08": sh(
+    `mkdir -p ${W}`,
+    `echo 'console.log("high 2")' > ${W}/tier.ts`,
+    `echo 'console.log("true")' > ${W}/approve.ts`,
+  ),
+  "factory-09": sh(`mkdir -p ${W}`, `echo 'console.log("claude-sonnet-5-5")' > ${W}/route.ts`),
+  "factory-10": sh(
+    `mkdir -p ${W}`,
+    `echo 'console.log("needs-human spend cap build")' > ${W}/cap.ts`,
+  ),
   "advanced-01": sh(
     `mkdir -p ${W}/agents`,
     `printf -- '---\\nname: reviewer\\ndescription: d\\ntools: Read, Grep, Glob\\nmodel: haiku\\n---\\n' > ${W}/agents/reviewer.md`,
