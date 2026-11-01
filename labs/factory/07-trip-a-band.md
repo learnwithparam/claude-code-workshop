@@ -26,8 +26,11 @@ Answer: No. 12 is within about one sigma of the rolling mean, so at most it logs
 2. Read the maintain stage doc.
 3. Make the lab work folder.
 4. [editor] Write one number to `.labs/work/latest.txt` that you expect to be a three sigma breach.
-5. Run the band check script from hint 4, so it prints the sigma and the action for your number.
-6. If the action is not `intent`, pick a bigger number and run it again. Then save the intent it writes.
+   Expect: A file with one number and nothing else.
+5. Print the sigma and the action for your number with the first script in the hints.
+   Expect: Two words, such as `3 intent`. A smaller breach prints a smaller sigma.
+6. If the action is not `intent`, pick a bigger number and run it again. Then save the intent with the second script in the hints.
+   Expect: A short markdown file that says the metric is outside its band.
 
 ## Proof
 
@@ -67,7 +70,7 @@ Answer: No. 12 is within about one sigma of the rolling mean, so at most it logs
 1. The history is fixed at 10, 11, 9, 10, 10, 11, 9, 10, 10, 11. Its mean is about 10 and its spread is small.
 2. Three sigma is three spreads above the mean. A value only a little above 10 will not do.
 3. `intentFor` and `detect` live in `factory/engine/bands.ts`. The proof runs them on your number.
-4. Commands: `cat docs/factory/f7-maintain.md`, `mkdir -p .labs/work`, `echo 30 > .labs/work/latest.txt`, then the proof's two scripts as a guide for printing the sigma and the intent into `.labs/work/intent.md`.
+4. Commands: `cat docs/factory/f7-maintain.md`, `mkdir -p .labs/work`, `echo 30 > .labs/work/latest.txt`, `npx tsx -e 'import("./factory/engine/bands.ts").then(m=>{const b=m.detect("ci-failure-rate",[10,11,9,10,10,11,9,10,10,11],Number(process.argv[1]),"up-is-bad");console.log(b.sigma,m.actionFor(b))})' "$(cat .labs/work/latest.txt)"`, `npx tsx -e 'import("./factory/engine/bands.ts").then(m=>process.stdout.write(m.intentFor(m.detect("ci-failure-rate",[10,11,9,10,10,11,9,10,10,11],Number(process.argv[1]),"up-is-bad"))))' "$(cat .labs/work/latest.txt)" > .labs/work/intent.md`.
 
 ## What you just learned
 

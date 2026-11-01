@@ -26,6 +26,7 @@ Answer: The check. The runner reads the exit code, never the model's word.
 2. Read the test stage doc.
 3. Make the lab work folder.
 4. Run every test under `factory/engine/checks` and save the whole log.
+   Expect: Nothing prints, because the output goes to the log. It takes a few seconds.
 5. Read which check files the log lists.
 
 ## Proof

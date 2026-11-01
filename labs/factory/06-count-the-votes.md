@@ -26,6 +26,7 @@ Answer: No. It has one vote, below the two needed, so it is dropped. An agent's 
 2. Read the review stage doc.
 3. Make the lab work folder.
 4. Print the four review limits from `factory/engine/review.ts` into review-rules.txt.
+   Expect: One line in the file: voters, needed, nits and rounds, each followed by a number.
 5. Run the review tests and save the whole log to review.log.
 
 ## Proof
