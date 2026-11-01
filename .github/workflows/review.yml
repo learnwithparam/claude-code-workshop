@@ -30,4 +30,6 @@ jobs:
             Review this pull request with the reviewer agent. If it touches web/ or
             shared/src/render.ts, also use the design-reviewer agent. Post one comment
             with the blocking findings and a final VERDICT line.
+          # Prints the model's result text; a run that dies in 400 ms with no cost otherwise hides why.
+          show_full_output: true
           claude_args: --model claude-sonnet-5-5 --max-turns 15
