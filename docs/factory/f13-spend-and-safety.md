@@ -83,7 +83,7 @@ A hook is a script the harness runs on an event. Exit code 2 blocks the action. 
 
 Two properties to teach. First, the secrets hook and the test lock treat input they cannot parse as a block. Second, the secrets hook is a best-effort text match: its own header says a command that builds the name at run time slips past, and that the sandbox is the real fix. A hook is a fence, and the permission deny and sandbox are the wall. Use both.
 
-Also: `Bash(git push *)` is denied in the same settings file. F11 explains what that does in a cloud session.
+Also: a force push and a push to `main` are denied in the same settings file. F11 explains what that does in a cloud session.
 
 ### 5. Add your own guard
 
