@@ -53,3 +53,4 @@ A hook that fails the turn is a check you cannot forget. The `design-reviewer` a
 ## Discussion
 
 How many of your bug fixes would still pass their test with the fix removed?
+- **Principal:** Receipts prove a check ran. How would you stop a team from satisfying the receipt while the check itself weakens over time?

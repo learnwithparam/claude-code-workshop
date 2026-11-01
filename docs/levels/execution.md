@@ -59,3 +59,4 @@ The `verifier` runs in plan mode, the `builder` accepts edits inside its own wor
 ## Discussion
 
 What does one runaway stage cost you today?
+- **Principal:** Subagents and worktrees let work run in parallel. Where does parallel work stop paying for itself in your codebase, and what shared state makes it collide?

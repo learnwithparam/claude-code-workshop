@@ -64,6 +64,10 @@ Answer: Its description. Claude reads the descriptions first and opens the body 
 3. Good first steps: read the staged diff, write a subject under 60 characters, say why in the body.
 4. Commands, in order: `ls .claude/skills`, then `cat` one SKILL.md, `mkdir -p .labs/work/skills/commit-message`.
 
+## Trick
+
+Type `/` plus your skill name, such as `/commit-message`, to run it on purpose instead of waiting for Claude to match its description.
+
 ## What you just learned
 
 A skill is loaded on demand. The description is the trigger, so write it as a situation.

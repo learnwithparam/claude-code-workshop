@@ -65,6 +65,10 @@ Answer: Only when Claude reads a file whose path matches. Unmatched rules cost n
 3. Write rules as checks you could fail, such as "an error to a customer never names the model".
 4. Commands, in order: `ls .claude/rules`, then `cat` any file in it, `mkdir -p .labs/work/rules`.
 
+## Trick
+
+A rule file with no `paths:` list loads every session. Add the list and it costs context only when Claude works in matching files.
+
 ## What you just learned
 
 Rules cost context only when their paths match. Scope every rule to the files it governs.

@@ -94,7 +94,20 @@
     "tests/structure/labs.test.ts",
     "tests/structure/lab-artifacts.ts",
     "tests/structure/lab-solutions.test.ts",
-    "tests/structure/lab-references.test.ts"
+    "tests/structure/lab-harness.ts",
+    "tests/structure/lab-solutions-start.test.ts",
+    "tests/structure/lab-solutions-daily.test.ts",
+    "tests/structure/lab-solutions-team.test.ts",
+    "tests/structure/lab-solutions-factory.test.ts",
+    "tests/structure/lab-solutions-advanced.test.ts",
+    "tests/structure/lab-references.test.ts",
+    "tests/structure/repo-roots.ts",
+    "tests/structure/doc-paths.test.ts",
+    "tests/structure/doc-paths.allow.ts",
+    "tests/structure/doc-symbols.test.ts",
+    "tests/structure/doc-links.test.ts",
+    "docs/patterns.md",
+    "tests/structure/patterns.test.ts"
   ],
   "execution": [
     ".claude/agents/**",
@@ -194,7 +207,7 @@
     "scripts/prove/sharing.ts",
     "docs/levels/sharing.md",
     "docs/when-to-use-what.md",
-    "docs/run-of-show.md",
+    "docs/learn-in-two-days.md",
     "tests/structure/when-to-use-what.test.ts",
     "docs/recordings/sharing.cast",
     "docs/recordings/sharing.gif",
@@ -209,7 +222,9 @@
     ".factory/workflows/**",
     "tests/structure/f5-review-doc.test.ts",
     "tests/structure/assignments.test.ts",
+    "tests/structure/workflows-doc.test.ts",
     "tests/assignments/**",
+    "assignments/**",
     ".factory/bands.yaml",
     "scripts/eval-score.ts",
     "scripts/eval-score.test.ts",
@@ -241,7 +256,8 @@
     "docs/factory/faq.md",
     "docs/factory/visual-guide.md",
     "docs/factory/img/**",
-    "tests/structure/factory-visuals.test.ts"
+    "tests/structure/factory-visuals.test.ts",
+    "tests/structure/story-quotes.test.ts"
   ],
   "capstone": [
     "scripts/prove/capstone.ts",

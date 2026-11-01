@@ -2,6 +2,18 @@
 
 **Stage:** setup. **Layers:** context, boundary, skills, execution, sharing. **Workflows:** all of them use these files.
 
+## Story
+
+**The ticket.** An item from the runs that built this repo, recorded in `docs/factory/harness-retro.md` (item 7).
+
+**Without the layer.** "The engine read `.factory/config.yaml` lazily, the first time a check asked. By then an agent had run in the same tree. A build that edited the file could change the gate commands the engine then ran."
+
+**What the layer did.** `e193fc7` (#89) added `pinPortable()`, which reads the file once before the first agent. The test "keeps the commands it read at the start when the file changes later" in `factory/engine/models.test.ts` holds it. Knowing which file is read, and when, is what this module is for.
+
+![The files a run writes in specs/<n>/, with what writes and what reads each one](img/artifact-chain.svg)
+
+_Notice:_ the work moves between stages as files on disk, so you can open any stage's output in an editor.
+
 ## Goal
 
 Know what each file in `.claude/`, `.factory/` and the repo root does, which one wins when two disagree, and which hook pattern guards what. By the end you can open an unfamiliar repo and say which file would change a given behaviour.
@@ -100,3 +112,4 @@ Expect `test lock > blocks an edit to api/src/a.test.ts during a fix` to fail, b
 1. Which of your team's rules sit only in a doc, and which file type above would make each one a check?
 2. The test lock is a hook and `lock` is a check. What does each catch that the other misses?
 3. Who in your org should own managed settings, and what would you put in the deny list first?
+4. **Principal:** Every stage writes a file the next one reads. At fifty teams on one factory, which of those files becomes a contract you can no longer change freely, and how would you version it?

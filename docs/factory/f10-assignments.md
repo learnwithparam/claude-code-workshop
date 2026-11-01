@@ -2,9 +2,21 @@
 
 **Stage:** all of them. **Workflows shown:** whichever you choose below.
 
+## Story
+
+**The ticket.** An open item in `docs/factory/harness-retro.md` (item 8).
+
+**Without the layer.** "`factory/engine/cli.ts` builds `approvers` as a list of one login, the person running the CLI." So "a high-tier gate could never reach two".
+
+**What the layer did.** Nothing yet. That gap is the assignment on naming approvers for a high-risk gate, below. Every assignment here starts from a gap like it.
+
+![The six stages from a ready ticket to a merged pull request, with the artifact and the deciding check under each](img/pipeline.svg)
+
+_Notice:_ each assignment changes one box or one arrow. Name it before you file the issue.
+
 ## What exists
 
-Each assignment below has an issue template in `.github/ISSUE_TEMPLATE/` and a red test in `tests/assignments/`. Every red test is skipped unless `ASSIGNMENT=1`, so `make check` stays green until you start. `tests/structure/assignments.test.ts` checks that every section on this page names a template and a test that exist, that the template carries the `assignment` label, and that the test is gated on `ASSIGNMENT`.
+Each assignment below has a brief in `assignments/` and a red test in `tests/assignments/`. The brief is a markdown file with a walkthrough, so you can read the whole task before you file anything. See [assignments/README.md](../../assignments/README.md) for the table. Every red test is skipped unless `ASSIGNMENT=1`, so `make check` stays green until you start. `tests/structure/assignments.test.ts` checks that every section on this page names a brief and a test that exist, that every brief has its nine headings in order, and that the test is gated on `ASSIGNMENT`.
 
 Each red test imports the module you will write by a dynamic path, so it fails on a missing module until you create it, then on behaviour until you get it right. Because they are skipped, CI has never run them red. Run yours red first, as step 3 says.
 
@@ -15,7 +27,7 @@ Choose one assignment, file it as an issue, write its red test first, and make y
 ## Steps (the same for every assignment)
 
 1. Check you can run the factory: `make doctor`, then `npx vitest run factory/engine`.
-2. File the issue from the template: `gh issue create --template assignment-<name>.md`, or pick it in the web form. Add the `factory:ready` label (the label in `.factory/config.json`) when you want the factory to take it. `npx tsx factory/engine/main.ts --watch` lists what carries it.
+2. File the issue from the brief: `gh issue create --title "Assignment: <title>" --body-file assignments/<name>.md --label assignment`. Add the `factory:ready` label (the label in `.factory/config.json`) when you want the factory to take it. `npx tsx factory/engine/main.ts --watch` lists what carries it.
 3. Run the red test with `ASSIGNMENT=1` and read the failure. It must fail for the reason the issue names. A test that passes before any work proves nothing, which is what the `red` check in `factory/engine/checks/red.ts` refuses.
 4. Run the workflow: `npx tsx factory/engine/main.ts <issue> --workflow=<name>`. The script reads the variable named in `keySource` of `.factory/config.yaml` and loads the key inside its own process, so keep the key off the command line. With a Pro or Max plan, export `CLAUDE_CODE_OAUTH_TOKEN` from `claude setup-token` and add `--auth=subscription` instead ([Auth modes](auth-modes.md)). A key run stops as `needs-human` with the reason `spend cap` once it has spent `spend.stopAt` of `spend.capUsd` in `.factory/config.json`; a subscription run refuses further agent calls at `subscriptionCap`.
 5. Read `specs/<issue>/run.log`, `specs/<issue>/cost.json` and `.factory/runs/<issue>/metrics.json`. If the run ended `needs-human`, the log says which check capped out or that the spend cap did. If it ended `awaiting-approval`, the log says how many people the risk tier asks for.
@@ -25,7 +37,7 @@ Each red test is skipped by default, as `make prove-homework` is for the take-ho
 
 ## 1. A worksheet video with the HyperFrames timeline
 
-- **Issue template:** `.github/ISSUE_TEMPLATE/assignment-worksheet-video.md`
+- **Brief:** `assignments/worksheet-video.md`
 - **Red test:** `tests/assignments/worksheet-video.test.ts`
 - **Workflow:** `ui-visual`.
 - **Goal:** `shared/src/render.ts` turns a worksheet into a HyperFrames still composition, and `hyperframes` is a dependency in `package.json`. Add `renderWorksheetVideo` in `shared/src/render-video.ts` so a worksheet plays as a short video: items appear in order, the answer key last.
@@ -33,7 +45,7 @@ Each red test is skipped by default, as `make prove-homework` is for the take-ho
 
 ## 2. Templates in a database
 
-- **Issue template:** `.github/ISSUE_TEMPLATE/assignment-template-db.md`
+- **Brief:** `assignments/template-db.md`
 - **Red test:** `tests/assignments/template-db.test.ts`
 - **Workflow:** `spike` first, then `feature-sdd`.
 - **Goal:** `api/src/templates/template-store.ts` keeps templates in a `Map`. Replace its storage with a database after a spike on which one. File the spike alone first and read its decision record before filing the build.
@@ -41,7 +53,7 @@ Each red test is skipped by default, as `make prove-homework` is for the take-ho
 
 ## 3. A canary prompt with rollback when the eval drops
 
-- **Issue template:** `.github/ISSUE_TEMPLATE/assignment-canary.md`
+- **Brief:** `assignments/canary.md`
 - **Red test:** `tests/assignments/canary.test.ts`
 - **Workflow:** `llm-eval`.
 - **Goal:** serve a changed prompt from `api/src/agent/prompt.ts` to a small share of requests, compare its eval score to the current one, and roll back by itself when it drops.
@@ -49,7 +61,7 @@ Each red test is skipped by default, as `make prove-homework` is for the take-ho
 
 ## 4. Fuzzing the tool input
 
-- **Issue template:** `.github/ISSUE_TEMPLATE/assignment-fuzz-tool-input.md`
+- **Brief:** `assignments/fuzz-tool-input.md`
 - **Red test:** `tests/assignments/fuzz-tool-input.test.ts`
 - **Workflow:** `security`.
 - **Goal:** the model's tool input is validated with zod (`worksheetSchema` in `shared/src/schema.ts`) before it renders. Fuzz that boundary and find an input that gets through and breaks a page.
@@ -57,7 +69,7 @@ Each red test is skipped by default, as `make prove-homework` is for the take-ho
 
 ## 5. The label state machine as a property
 
-- **Issue template:** `.github/ISSUE_TEMPLATE/assignment-label-machine.md`
+- **Brief:** `assignments/label-machine.md`
 - **Red test:** `tests/assignments/label-machine.test.ts`
 - **Workflow:** `feature-atdd`.
 - **Goal:** the labels in `.factory/config.json` (`factory:ready`, `factory:planned`, `plan:approved`, `needs-human`, `factory:protected-ok`) form a state machine that `factory/run.ts` drives. State its rules in `factory/label-machine.ts` as `applyEvent(labels, event)` and `canBuild(labels)`, and check them with generated event sequences. TLA+ is the heavier option; a `fast-check` model-based test is enough.
@@ -65,7 +77,7 @@ Each red test is skipped by default, as `make prove-homework` is for the take-ho
 
 ## 6. A new activity kind
 
-- **Issue template:** `.github/ISSUE_TEMPLATE/assignment-clock-activity.md`
+- **Brief:** `assignments/clock-activity.md`
 - **Red test:** `tests/assignments/clock-activity.test.ts`
 - **Workflow:** `feature-bdd`.
 - **Goal:** add a new kind of activity to a worksheet, for example a clock face. `ACTIVITY_KINDS` and `activitySchema` live in `shared/src/activity-kinds.ts`, `renderActivity` in `shared/src/render-activity.ts`, and each band lists the kinds it allows in `shared/src/bands.ts`.
@@ -73,7 +85,7 @@ Each red test is skipped by default, as `make prove-homework` is for the take-ho
 
 ## 7. A workflow from your own company
 
-- **Issue template:** `.github/ISSUE_TEMPLATE/assignment-own-workflow.md`
+- **Brief:** `assignments/own-workflow.md`
 - **Red test:** `tests/assignments/own-workflow.test.ts`
 - **Workflow:** the one you write (see F8).
 - **Goal:** encode how your team really ships one kind of change.
@@ -81,7 +93,7 @@ Each red test is skipped by default, as `make prove-homework` is for the take-ho
 
 ## 8. A new review lens
 
-- **Issue template:** `.github/ISSUE_TEMPLATE/assignment-review-lens.md`
+- **Brief:** `assignments/review-lens.md`
 - **Red test:** `tests/assignments/review-lens.test.ts`
 - **Workflow:** `llm-eval`.
 - **Goal:** add a reviewer that hunts one kind of defect. `reviewRound` in `factory/engine/review.ts` takes a list of lens agents, runs them in parallel, and keeps a finding only when two of three verifiers vote yes. A lens runs only if a workflow's `review: { lenses: [...] }` names it, so the assignment ends with that edit.
@@ -89,7 +101,7 @@ Each red test is skipped by default, as `make prove-homework` is for the take-ho
 
 ## 9. An LLM-judge pre-commit hook
 
-- **Issue template:** `.github/ISSUE_TEMPLATE/assignment-judge-hook.md`
+- **Brief:** `assignments/judge-hook.md`
 - **Red test:** `tests/assignments/judge-hook.test.ts`
 - **Workflow:** `feature-atdd`.
 - **Goal:** the opt-in paid pattern. A hook asks a model to judge a staged change, and only runs when the person turns it on.
@@ -97,7 +109,7 @@ Each red test is skipped by default, as `make prove-homework` is for the take-ho
 
 ## 10. A mod of your own
 
-- **Issue template:** `.github/ISSUE_TEMPLATE/assignment-my-mod.md`
+- **Brief:** `assignments/my-mod.md`
 - **Red test:** `tests/assignments/my-mod.test.ts`
 - **Workflow:** `feature-atdd`.
 - **Goal:** build a small change to the Claude interface. `plugins/factory-status` is the working example in this repo.
@@ -105,7 +117,7 @@ Each red test is skipped by default, as `make prove-homework` is for the take-ho
 
 ## 11. Two people at a high-risk gate
 
-- **Issue template:** `.github/ISSUE_TEMPLATE/assignment-approvers.md`
+- **Brief:** `assignments/approvers.md`
 - **Red test:** `tests/assignments/approvers.test.ts`
 - **Workflow:** `feature-atdd`.
 - **Goal:** `gateMet` in `factory/engine/interpret.ts` asks for as many approvals as the risk tier needs, and `approvalIn` in `factory/engine/real-host.ts` already counts distinct listed logins. But `runIssue` in `factory/engine/cli.ts` passes one approver, the logged-in `gh` user, so a high-risk gate can never open in a real run. Let a repo name its approvers.
@@ -113,11 +125,27 @@ Each red test is skipped by default, as `make prove-homework` is for the take-ho
 
 ## 12. A model for every stage name
 
-- **Issue template:** `.github/ISSUE_TEMPLATE/assignment-stage-names.md`
+- **Brief:** `assignments/stage-names.md`
 - **Red test:** `tests/assignments/stage-names.test.ts`
 - **Workflow:** `llm-eval`.
 - **Goal:** a step whose stage name is in neither `stepStages` nor `STAGE_NAMES` falls back to the agent's frontmatter model. The `docs` workflow's `write` step is already mapped (`factory/engine/docs-routing.test.ts`), but names such as `analyze` and `characterize` are not. Make an unmapped stage name fail a test instead of silently using the fallback.
 - **What the test asserts:** it loads every file in `.factory/workflows/` and lists each stage name that is neither a key of `stepStages` in `.factory/config.json` nor in `STAGE_NAMES`. The list must be empty, so it is red for the names still unmapped. A second check resolves each step through `resolveModel` in `factory/engine/models.ts` to a model in `allowedModels`.
+
+## 13. Record each factory module from a real run log
+
+- **Brief:** `assignments/recording-from-run-log.md`
+- **Red test:** `tests/assignments/recording-from-run-log.test.ts`
+- **Workflow:** `docs`.
+- **Goal:** a recording is evidence only when it quotes a run that happened. Record one module from its own `run.log`, with nothing typed by hand.
+- **What the test asserts:** run it with `RUN=<n>`. `specs/<n>/run.log` and `docs/recordings/run-<n>.md` exist, every line in the recording's fenced `log` block is a verbatim line of that `run.log`, and the recording has the headings `## What happened` and `## What it proves`.
+
+## 14. Seed a 3-sigma breach and run the incident workflow
+
+- **Brief:** `assignments/three-sigma-incident.md`
+- **Red test:** `tests/assignments/three-sigma-incident.test.ts`
+- **Workflow:** `incident`.
+- **Goal:** the factory turns a metric that leaves its band into an `intent.md`. Seed a breach on purpose and follow it through the `incident` workflow.
+- **What the test asserts:** run it with `ISSUE=<n>`. `fixtures/incidents/breach.json` holds a metric, a direction, a history and a latest value. `detect` in `factory/engine/bands.ts` reports at least 3 sigma for it and `actionFor` answers `intent`. The `specs/<n>/intent.md` your run wrote names the metric.
 
 ## Worked example: review calls in the spend cap
 
@@ -126,3 +154,4 @@ Each red test is skipped by default, as `make prove-homework` is for the take-ho
 ## Discussion
 
 Which assignment would change what your team ships next month? Which red test would you be unable to write, and what does that say about the issue?
+- **Principal:** A learner's change passes its red test. What else would you need to see before you trusted that they understood the idea and did not only satisfy the test?

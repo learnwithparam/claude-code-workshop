@@ -57,3 +57,4 @@ Track A: install the kit into a fresh empty repo and run `/factory-kit:issue-tri
 ## Discussion
 
 A plugin's hooks run with your rights, outside the sandbox. Who reviews a marketplace before your team adds it, and what stops a later commit from changing what a hook does?
+- **Principal:** A plugin spreads one person's habits to a team. What review and versioning would you require before a plugin can change what every engineer's agent may do?

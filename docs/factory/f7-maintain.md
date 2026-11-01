@@ -2,6 +2,18 @@
 
 **Stage:** Maintain. **Layer:** sharing and feedback. **Workflows:** `incident` (diagnose, plan, eval, fix, review).
 
+## Story
+
+**The ticket.** None yet. Nothing feeds `detect` its metrics, so no run has breached a band. The story is the test.
+
+**Without the layer.** A drifting metric needs someone to notice it on a chart.
+
+**What the layer did.** `a 3 sigma breach writes an intent` in `factory/engine/review.test.ts` feeds a value of 30 against a history near 10 and expects a new `intent.md`. Arithmetic turns the drift into a ticket, with no model deciding.
+
+![The maintain loop: band metrics feed detect, the sigma level picks an action, and a breach starts the incident workflow](img/sigma-loop.svg)
+
+_Notice:_ the dashed parts are the ones only tests reach today.
+
 ## Goal
 
 After a change ships, the factory watches itself. A metric that leaves its band becomes a ticket. An incident becomes a failing test before it becomes a fix. A lesson from a run is kept only if the eval score did not fall.
@@ -53,7 +65,7 @@ Four measures and where they could come from. Deployment frequency and lead time
 
 Tests in `factory/engine/review.test.ts`: `a 3 sigma breach writes an intent` and `a value inside the band does nothing`. In `bands.ts`, change `z >= 3 ? 3` to `z >= 4 ? 3` and the first test fails, since a breach of 30 against a history near 10 no longer reaches the intent action.
 
-Retro: `reverts a lesson that lowered the score` in `factory/engine/retro.test.ts` feeds scores 0.9 then 0.7 and expects `reverted`. Change `delta < 0` to `delta < -1` in `engine/retro.ts` and it fails. `treats a missing SCORE line as a broken eval` fails if a silent eval counts as zero.
+Retro: `reverts a lesson that lowered the score` in `factory/engine/retro.test.ts` feeds scores 0.9 then 0.7 and expects `reverted`. Change `delta < 0` to `delta < -1` in `factory/engine/retro.ts` and it fails. `treats a missing SCORE line as a broken eval` fails if a silent eval counts as zero.
 
 Metrics: `counts a run first-pass only when it finished with no repeat round` in `metrics.test.ts`.
 
@@ -66,3 +78,4 @@ No `metrics.json`, `incident.md` or retro result is committed, because `.factory
 1. Why is the sigma check plain arithmetic and not a model's opinion?
 2. A retro lesson raised the eval score by a little on one run. What would make you keep it, and what would make you distrust it?
 3. Which DORA measure would your team be most embarrassed to see, and which data would you need to compute it?
+4. **Principal:** A sigma band opens tickets by itself. At what ticket volume does that become noise the team ignores, and how would you tune the band without hiding a real regression?

@@ -14,7 +14,7 @@ Run `npm ci` once. Then pick your workshop with `make lab PATH_ID=pro`.
 
 In this sandbox no earlier lane was done, so plain `make lab` pointed at `start-01`. Every command below uses `ID=` to name the lab. On your own machine, after the earlier lanes, plain `make lab` lands on the right one.
 
-## Deny what Claude must never read (`team-01`)
+## team-01: Deny what Claude must never read
 
 Pairs with [boundary](../levels/boundary.md).
 
@@ -243,7 +243,7 @@ PreToolUse:Bash hook error: [node "$CLAUDE_PROJECT_DIR/.claude/hooks/pretooluse-
 
 The lab says to write this file in your editor, and that works. The hook is doing its job, so use the editor instead of reaching for a way round it.
 
-## Write the review rules (`team-02`)
+## team-02: Write the review rules
 
 Pairs with [verification](../levels/verification.md).
 
@@ -371,7 +371,7 @@ They write taste: "write clean code", "keep functions small". A reviewer cannot 
 
 Also unstage the scratch change when you are done: `git rm --cached` on the file, then delete it. A forgotten staged file ends up in your next commit.
 
-## Run a proof and keep the receipt (`team-03`)
+## team-03: Run a proof and keep the receipt
 
 Pairs with [verification](../levels/verification.md) and, for the level it proves, [hand-built](../levels/hand-built.md).
 
@@ -438,7 +438,7 @@ Run the exercise view with `TRACK=b` when you only want the failing line. Track 
 
 They edit or paste the receipt by hand. The proof reruns the command and compares the line exactly, so an old or hand-made receipt goes red. If it prints `FAIL`, fix the claim it names, not the check.
 
-## Package your setup as a plugin (`team-04`)
+## team-04: Package your setup as a plugin
 
 Pairs with [sharing](../levels/sharing.md).
 

@@ -2,6 +2,18 @@
 
 **Stage:** test. **Layer:** verification. **Workflows:** `bug-tdd`, `feature-atdd`, `feature-bdd`, `feature-sdd`, `refactor`, `contract`, `ui-visual`, `llm-eval`.
 
+## Story
+
+**The ticket.** Issue 35, the red stage, in `specs/35/red.md`.
+
+**Without the layer.** On the branch, "all 33 pass because the build is already here". A red check run on the branch would have seen green tests and proved nothing.
+
+**What the layer did.** Checked on `main`: "31 of 33 fail, 2 pass", and the two that pass are guards that hold on both sides. So "the `red` check must run with `ref: base`", which is what `factory/engine/checks/red.ts` does.
+
+![The checks grouped by size: small, medium and large](img/test-ladder.svg)
+
+_Notice:_ `red` and `lock` sit on the cheapest rung, and they decide whether the expensive checks above mean anything.
+
 ## Goal
 
 Know which check proves which claim, run it at the right size, and see it fail on purpose. An agent optimises for whatever grades it, so each check below also names the trick it stops.
@@ -118,3 +130,4 @@ Track B: add a case under `.factory/holdout/<n>/` for a finished spec, check tha
 1. A test passes on both base and branch. Is it a guard or a mistake? How would you tell?
 2. Mutation score is 50 at the floor. What does it cost to push it to 90, and who pays?
 3. Which check on the ladder would you drop first for a prototype, and which for a payment flow?
+4. **Principal:** Each check on the ladder costs time or money. Which would you run on every push, which per pull request and which nightly, and what bug class escapes at each cut?

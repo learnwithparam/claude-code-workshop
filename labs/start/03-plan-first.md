@@ -57,6 +57,10 @@ Answer: No. Plan mode is read-only, so Claude can read and search but the only t
 2. Plan mode is read-only. Claude can look but not write.
 3. Your prompt must ask for verification, or the plan may leave it out.
 
+## Trick
+
+Add `--permission-mode plan` to `claude -p` for any change you want to read before it happens. Claude plans and edits nothing.
+
 ## What you just learned
 
 Plan mode turns "do it" into "show me first". You review a plan for free instead of reviewing a diff.

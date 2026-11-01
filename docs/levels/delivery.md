@@ -52,3 +52,4 @@ Track A: file a bug ticket for the Kindergarten parser and run it through the dr
 ## Discussion
 
 Which step in your delivery should never be automated, and who owns it?
+- **Principal:** Automation that opens pull requests moves the bottleneck to review. How would you size the review load before turning it on, and what would you cap?

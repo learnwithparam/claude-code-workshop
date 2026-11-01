@@ -48,3 +48,4 @@ Track A: add a `typo` workflow for a one-line docs fix with only the `prose` che
 ## Discussion
 
 Which check would your team trust to say done, and what would it have to read to earn that?
+- **Principal:** A workflow chains stages that each pass or fail. Where would you put a human in the chain for a regulated change, and what evidence should that person see?

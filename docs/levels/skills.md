@@ -46,3 +46,4 @@ Track A: change a skill file and watch the lock fail. Track B: add an eighth eva
 ## Discussion
 
 What would you package as a skill in your own team, and who reviews changes to it?
+- **Principal:** A skill is prose an agent chooses to follow. Which of your team's rules belong in a skill, which in a hook and which in a test, and what is the test for choosing?

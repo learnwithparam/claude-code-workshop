@@ -6,7 +6,7 @@
 
 **The ticket.** Issue 35, the build notes in `specs/35/build.md`.
 
-**Without the layer.** The first note says "Blocked: two locked tests cannot pass as written" and proposes changing one. The next update says the blockers "no longer reproduce". A claim with no input that breaks it would have sent a person to chase it.
+**Without the layer.** The first note in `specs/35/build.md` says "Blocked: two locked tests cannot pass as written" and proposes changing one. The next update says the blockers "no longer reproduce". A claim with no input that breaks it would have sent a person to chase it.
 
 **What the layer did.** A build note is not held to the review's rule, which is why the rule exists. A review finding must carry `evidence`, "the input that breaks it. No evidence, no finding" (`factory/engine/review.ts`), and two of three verifiers must agree before it reaches a person.
 
@@ -83,3 +83,4 @@ There is no `review.json` committed in `specs/`; the engine writes it to `specs/
 1. Two of three voters is a threshold. What does a team lose by moving it to three of three, and what do they lose at one of three?
 2. Why must an Important finding carry the input that breaks it, and who checks that input?
 3. After three rounds the loop stops and a human decides. What would you want written in that handoff?
+4. **Principal:** Reviewers that vote can agree on the same wrong thing. How would you detect a correlated blind spot across voters, and would you diversify the models, the prompts or the evidence they see?

@@ -2,6 +2,18 @@
 
 **Stage:** all of them. **Layer:** boundary, with a price on it. **Prerequisite:** F11 (cloud sessions) and F12 (model routing).
 
+## Story
+
+**The ticket.** Issue 35, the live spend limit for the worksheet api.
+
+**Without the layer.** `specs/35/build.md`: "`/chat` never read `LIVE_SPENT_USD`". The limit existed in the environment, and no code checked it.
+
+**What the layer did.** `server.ts` now refuses when `LIVE_SPENT_USD + spent >= 60`, before the model is called. The factory's own cap works the same way: `runStep` checks the run total before every agent call. This module shows where that check is and where it is not.
+
+![A bar from zero to the run cap, with the stop point and the spend the cap does not count](img/spend-cap.svg)
+
+_Notice:_ the dashed box is spend the cap does not see today.
+
 ## Goal
 
 Know which limits actually stop a run, say plainly what the tool cannot control about credit, keep the API key out of every place a model or a log can read it, and use hooks as guardrails that fail closed.
@@ -122,6 +134,7 @@ A failed agent job is a signal, not a blocker: the gate jobs do not depend on it
 - A promotional balance runs out on a date. What does your team do the week before?
 - The output scan only warns. When is a warning the right strength, and when must a hook block?
 - Which of the hooks above would you remove first, and which test would tell you it mattered?
+- **Principal:** A spend cap stops one run. What stops a hundred small runs from adding up to the same bill, and at what level would you put that limit?
 
 ## Sources
 
