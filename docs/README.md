@@ -81,9 +81,12 @@ Which lab goes with which module:
 | `factory-02`  | [F2 Design](factory/f2-design.md)                   |
 | `factory-03`  | [F3 Build](factory/f3-build.md)                     |
 | `factory-04`  | [F8 Workflows](factory/f8-workflows.md)             |
+| `factory-05`  | [F4 Test](factory/f4-test.md)                       |
+| `factory-06`  | [F5 Review](factory/f5-review.md)                   |
+| `factory-07`  | [F7 Maintain](factory/f7-maintain.md)               |
 | `advanced-05` | [F11 Cloud sessions](factory/f11-cloud-sessions.md) |
 
-Modules with no lab yet are read-only: F0, F4 to F7, F9, F10, F12 and F13.
+Modules with no lab yet are read-only: F0, F6, F9, F10, F12 and F13.
 
 ## 4. Cloud sessions
 

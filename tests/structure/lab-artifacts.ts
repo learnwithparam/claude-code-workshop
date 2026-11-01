@@ -15,7 +15,10 @@ const file = (path: string, body: string) => `cat > ${path} <<'EOF'\n${body}\nEO
 export const NEEDS: Record<string, string[]> = {
   "daily-02": ["api"],
   "factory-03": [".factory/config.json", "factory/main.ts"],
-  "factory-04": ["tests/contract/sse-events.test.ts"],
+  "factory-04": ["factory/engine/workflows.test.ts"],
+  "factory-05": ["factory/engine/checks"],
+  "factory-06": ["factory/engine/review.ts"],
+  "factory-07": ["factory/engine/bands.ts"],
   "advanced-05": [".claude/settings.json"],
 };
 
@@ -84,9 +87,22 @@ export const SOLUTIONS: Record<string, string> = {
     `printf 'Given a university prompt\\nWhen the agent builds the worksheet\\nThen the worksheet band is university\\nGiven an empty prompt\\nWhen the agent builds the worksheet\\nThen the api returns status 400\\n' > ${W}/specs/1/acceptance.md`,
   ),
   "factory-03": sh(`mkdir -p ${W}`, `make factory ISSUE=1 FLAGS=--dry-run > ${W}/dry-run.txt`),
+  // The command the lab's own hint gives, so the proof is checked against the output a learner gets.
   "factory-04": sh(
     `mkdir -p ${W}`,
-    `printf ' ✓ tests/contract/sse-events.test.ts (2 tests) 4ms\\n Test Files  1 passed (1)\\n      Tests  2 passed (2)\\n' > ${W}/contract.log`,
+    `npx vitest run factory/engine/workflows.test.ts > ${W}/contract.log 2>&1`,
+  ),
+  "factory-05": sh(`mkdir -p ${W}`, `npx vitest run factory/engine/checks > ${W}/checks.log 2>&1`),
+  "factory-06": sh(
+    `mkdir -p ${W}`,
+    `npx tsx -e 'import("./factory/engine/review.ts").then(m=>console.log("voters",m.VOTERS,"needed",m.NEEDED,"nits",m.MAX_NITS,"rounds",m.MAX_ROUNDS))' > ${W}/review-rules.txt`,
+    `npx vitest run factory/engine/review.test.ts > ${W}/review.log 2>&1`,
+  ),
+  "factory-07": sh(
+    `mkdir -p ${W}`,
+    `echo 30 > ${W}/latest.txt`,
+    `printf 'import{readFileSync as r}from"node:fs";import{detect,intentFor}from"../../factory/engine/bands.ts";process.stdout.write(intentFor(detect("ci-failure-rate",[10,11,9,10,10,11,9,10,10,11],Number(r(".labs/work/latest.txt","utf8")),"up-is-bad")))' > ${W}/mk.ts`,
+    `npx tsx ${W}/mk.ts > ${W}/intent.md`,
   ),
   "advanced-01": sh(
     `mkdir -p ${W}/agents`,
@@ -172,6 +188,13 @@ export const LAZY: Record<string, string> = {
     `printf 'stages that would run\\nreview loop\\n' > ${W}/dry-run.txt`,
   ),
   "factory-04": sh(`mkdir -p ${W}`, `echo 'Tests 4 passed' > ${W}/contract.log`),
+  "factory-05": sh(`mkdir -p ${W}`, `echo 'Tests 38 passed' > ${W}/checks.log`),
+  "factory-06": sh(
+    `mkdir -p ${W}`,
+    `echo 'voters 3 needed 2 nits 3 rounds 3' > ${W}/review-rules.txt`,
+    `echo 'Tests 12 passed' > ${W}/review.log`,
+  ),
+  "factory-07": sh(`mkdir -p ${W}`, `echo 10 > ${W}/latest.txt`, `echo x > ${W}/intent.md`),
   "advanced-01": sh(
     `mkdir -p ${W}/agents`,
     `printf -- '---\\nname: reviewer\\ndescription: d\\ntools: Read, Grep, Glob\\nmodel: haiku\\n---\\n' > ${W}/agents/reviewer.md`,
