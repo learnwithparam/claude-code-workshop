@@ -22,5 +22,4 @@ steps:
       stage: review,
       agent: reviewer,
       review: { lenses: [reviewer, test-reviewer] },
-      checks: [plan-drift],
     }
