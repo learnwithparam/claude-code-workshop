@@ -51,7 +51,7 @@ The same path as a ticket-to-merge pipeline. Questions: [factory FAQ](factory/fa
 
 ## 3. Labs, noob to advanced
 
-The labs are hands-on, one goal and one proof each. Full table and rules: [labs](labs/README.md). Step-by-step walkthroughs: [start](labs/walkthrough-start.md), [daily](labs/walkthrough-daily.md), [team](labs/walkthrough-team.md), [advanced](labs/walkthrough-advanced.md). Progress sits in `.labs/`, which git ignores.
+The labs are hands-on, one goal and one proof each. Full table and rules: [labs](labs/README.md). Step-by-step walkthroughs: [start](labs/walkthrough-start.md), [daily](labs/walkthrough-daily.md), [team](labs/walkthrough-team.md), [advanced](labs/walkthrough-advanced.md), [factory](labs/walkthrough-factory.md). Progress sits in `.labs/`, which git ignores.
 
 ```
 make lab PATH_ID=pro   choose your workshop once (pro or factory)
