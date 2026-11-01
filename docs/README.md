@@ -1,6 +1,6 @@
 # Workshop map
 
-One app, Worksheet Studio, learned in a straight line: the levels, then the Software Factory modules, then the labs that make you do each step. Take each part in order.
+One app, Worksheet Studio, with two workshops: Claude Code, beginner to pro, and the Software Factory. Both share the levels and the labs. Pick yours with `make lab PATH_ID=pro` or `make lab PATH_ID=factory`, then take its parts in order.
 
 ## Set up
 
@@ -51,9 +51,10 @@ The same path as a ticket-to-merge pipeline. Questions: [factory FAQ](factory/fa
 
 ## 3. Labs, noob to advanced
 
-The labs are hands-on, one goal and one proof each. Full table and rules: [labs](labs/README.md). Progress sits in `.labs/`, which git ignores.
+The labs are hands-on, one goal and one proof each. Full table and rules: [labs](labs/README.md). Step-by-step walkthroughs: [start](labs/walkthrough-start.md), [daily](labs/walkthrough-daily.md), [team](labs/walkthrough-team.md), [advanced](labs/walkthrough-advanced.md). Progress sits in `.labs/`, which git ignores.
 
 ```
+make lab PATH_ID=pro   choose your workshop once (pro or factory)
 make progress          the lane map with a bar per lane
 make next              show the next lab without running anything
 make lab               show the current lab, run its proof, record a pass
