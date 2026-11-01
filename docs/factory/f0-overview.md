@@ -45,7 +45,7 @@ A model writes `intent.md`, `spec.md`, `plan.md`, the tests and the fix. Code de
 - `review.ts` keeps a finding only when at least two of its three verifiers vote for it. The `review` step of a real run calls it.
 - `risk.ts` turns changed paths into a tier, and a human gate needs that tier's approvals: none for low, one for medium, two for high. An agent's approval never counts.
 - `interpret.ts` stops a run once its spend reaches the configured share of the cap in `.factory/config.json`, and hands each call the money that is left.
-- `bands.ts` turns a metric breach into an action with no model involved. Only tests call it so far.
+- `bands.ts` turns a metric breach into an action with no model involved. `maintain.ts` calls it from `make factory-maintain` and from `.github/workflows/maintain.yml`, which runs weekly.
 
 The rule behind the list: a gate reads an exit code or a hash, never the model's word that it is done.
 

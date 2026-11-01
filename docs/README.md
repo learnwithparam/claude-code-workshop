@@ -34,6 +34,8 @@ The same path as a ticket-to-merge pipeline. Questions: [factory FAQ](factory/fa
 | Module                                                  | What you learn                                        | Open or run                            |
 | ------------------------------------------------------- | ----------------------------------------------------- | -------------------------------------- |
 | [F0 Overview](factory/f0-overview.md)                   | the whole path from a ticket to a merged pull request | `make factory ISSUE=1 FLAGS=--dry-run` |
+| [Auth modes](factory/auth-modes.md)                     | sign in with an API key or a subscription token       | `docs/factory/auth-modes.md`           |
+| [Visual guide](factory/visual-guide.md)                 | the factory in pictures                               | `docs/factory/visual-guide.md`         |
 | [F0.1 Anatomy](factory/f0-1-anatomy.md)                 | every file the factory reads                          | `docs/factory/f0-1-anatomy.md`         |
 | [F1 Plan](factory/f1-plan.md)                           | intent, triage and the risk tier                      | `docs/factory/f1-plan.md`              |
 | [F2 Design](factory/f2-design.md)                       | the spec is the first test                            | `docs/factory/f2-design.md`            |
@@ -71,10 +73,21 @@ make lab ID=daily-03   work on any lab, in any order
 | `factory`  | ticket to intent, acceptance first, dry run, workflow contract | `make lab ID=factory-01`  |
 | `advanced` | reviewer subagent, cost per call, worktrees, tree-wide checks  | `make lab ID=advanced-01` |
 
+Which lab goes with which module:
+
+| Lab           | Module                                              |
+| ------------- | --------------------------------------------------- |
+| `factory-01`  | [F1 Plan](factory/f1-plan.md)                       |
+| `factory-02`  | [F2 Design](factory/f2-design.md)                   |
+| `factory-03`  | [F3 Build](factory/f3-build.md)                     |
+| `factory-04`  | [F8 Workflows](factory/f8-workflows.md)             |
+| `advanced-05` | [F11 Cloud sessions](factory/f11-cloud-sessions.md) |
+
+Modules with no lab yet are read-only: F0, F4 to F7, F9, F10, F12 and F13.
+
 ## 4. Cloud sessions
 
-- [F11 Cloud sessions](factory/f11-cloud-sessions.md): connect GitHub, make an environment, run a session, pull it back with `claude --teleport <session-id>`.
-- [F12 Model routing](factory/f12-model-routing.md) and [F13 Spend and safety](factory/f13-spend-and-safety.md): pick the model per stage, then cap spend before you leave a session unattended.
+F11 to F13 are in the table above. Read F13 before you leave a session unattended, and pull a finished session back with `claude --teleport <session-id>`.
 
 ## 5. Agent track
 
