@@ -168,6 +168,7 @@
     "scripts/impact.ts",
     "scripts/impact.test.ts",
     "scripts/check-affected.ts",
+    "scripts/fast.test.ts",
     "tests/structure/impact.test.ts",
     "scripts/dependencies.ts",
     "tests/structure/dependency-drift.test.ts",

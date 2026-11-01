@@ -1,4 +1,4 @@
-.PHONY: factory-maintain lab next progress prove-homework doctor dev check check-affected prove levels claude smoke hooks eval factory exercise
+.PHONY: fast factory-maintain lab next progress prove-homework doctor dev check check-affected prove levels claude smoke hooks eval factory exercise
 
 doctor:
 	@node -v | grep -qE '^v2[2-9]' && echo "ok node $$(node -v)" || (echo "need Node 22+" && exit 1)
@@ -21,6 +21,12 @@ check:
 # Only the checks the change reaches, from the impact map in repo.json. BASE=origin/main before a PR.
 check-affected:
 	npx tsx scripts/check-affected.ts $(if $(BASE),--base $(BASE))
+
+# Quickest local read on the first red CI step: lint, types, then only the affected checks. make check stays the gate.
+fast:
+	npm run lint
+	npm run typecheck
+	npx tsx scripts/check-affected.ts --base origin/main
 
 prove:
 	npm run prove -- $(LEVEL)
