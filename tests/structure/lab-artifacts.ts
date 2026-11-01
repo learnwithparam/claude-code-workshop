@@ -15,7 +15,7 @@ const file = (path: string, body: string) => `cat > ${path} <<'EOF'\n${body}\nEO
 export const NEEDS: Record<string, string[]> = {
   "daily-02": ["api"],
   "factory-03": [".factory/config.json", "factory/main.ts"],
-  "factory-04": ["tests/contract/sse-events.test.ts"],
+  "factory-04": ["factory/engine/workflows.test.ts"],
   "advanced-05": [".claude/settings.json"],
 };
 
@@ -84,9 +84,10 @@ export const SOLUTIONS: Record<string, string> = {
     `printf 'Given a university prompt\\nWhen the agent builds the worksheet\\nThen the worksheet band is university\\nGiven an empty prompt\\nWhen the agent builds the worksheet\\nThen the api returns status 400\\n' > ${W}/specs/1/acceptance.md`,
   ),
   "factory-03": sh(`mkdir -p ${W}`, `make factory ISSUE=1 FLAGS=--dry-run > ${W}/dry-run.txt`),
+  // The command the lab's own hint gives, so the proof is checked against the output a learner gets.
   "factory-04": sh(
     `mkdir -p ${W}`,
-    `printf ' ✓ tests/contract/sse-events.test.ts (2 tests) 4ms\\n Test Files  1 passed (1)\\n      Tests  2 passed (2)\\n' > ${W}/contract.log`,
+    `npx vitest run factory/engine/workflows.test.ts > ${W}/contract.log 2>&1`,
   ),
   "advanced-01": sh(
     `mkdir -p ${W}/agents`,
