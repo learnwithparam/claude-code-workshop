@@ -345,4 +345,3 @@ make: *** [Makefile:61: lab] Error 1
 - Package what you built so a team gets it: [sharing](../levels/sharing.md).
 - Prove changes with receipts instead of claims: [verification](../levels/verification.md).
 - Pick your next lab with `make next`, or see the whole map with `make progress`.
-
