@@ -20,6 +20,16 @@ Go top to bottom. The full map with every link is [docs/README.md](docs/README.m
 5. Agent track and electives: [docs/README.md](docs/README.md#5-agent-track).
 6. After the workshop: [take-home](docs/take-home.md).
 
+## Use this template
+
+This repo is a GitHub template. Click "Use this template", then set these in your copy before CI is useful:
+
+- Secret `CLAUDE_CODE_OAUTH_TOKEN` (your own subscription) or `ANTHROPIC_API_KEY` (a team workspace key). The review job needs one; without it that job fails and the rest still run. See [auth modes](docs/factory/auth-modes.md).
+- Labels `factory:triage`, `factory:planned`, `factory:ready`, `plan:approved` and `assignment`. The factory moves a ticket between them.
+- `levels.json` owns every file a level ships. A new source file needs an owner there, or `make check` fails.
+
+Teaching it? Use the [run of show](docs/run-of-show.md).
+
 ## Install the factory in your own repo
 
 ```

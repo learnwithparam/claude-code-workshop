@@ -105,6 +105,17 @@ printf '%s' '{"tool_input":{"command":"cat .env"}}' > /tmp/call.json && node .cl
 
 Expect the "Blocked" message and `exit 2`. Your own Claude Code session may refuse to run this line for the same reason. If so, run it in a plain terminal.
 
+## When a CI agent fails at zero dollars
+
+A review job can fail while the account shows credit. Four things this repo hit:
+
+- **"Credit balance is too low".** The API key's balance did not cover the Claude Code client in CI. `review.yml` uses `CLAUDE_CODE_OAUTH_TOKEN` for that reason. Check the error text before you top up anything.
+- **A shared token is not individual use.** A team should put an API key from its own workspace in the secret ([auth modes](auth-modes.md)).
+- **`push` events are refused** by the review action. Trigger it on `pull_request`, as `review.yml` does.
+- **`show_full_output: true` leaks.** It prints the agent's tool output into a public log. Never merge it to a public repo.
+
+A failed agent job is a signal, not a blocker: the gate jobs do not depend on it.
+
 ## Discussion
 
 - The run cap stops new calls at 75 percent by default, and the last call can still use the rest. Is that the share you would choose, and is `capUsd` an amount you would accept losing on a bad night?
