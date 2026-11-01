@@ -11,7 +11,7 @@ Answer: Each stage with its model, turn cap and budget.
 
 ## Goal
 
-Run the factory's own check tests and save the whole log to .labs/work/checks.log, then read which checks they cover. These checks (plan-drift, holdout, mutation, manifest-deps) are the evidence the model cannot talk its way past. The proof below must pass.
+Run the factory's own check tests and save the whole log to .labs/work/checks.log. These checks (plan-drift, holdout, mutation, manifest-deps) are evidence the model cannot talk past. The proof below must pass.
 
 ## Predict
 

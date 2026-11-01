@@ -11,7 +11,7 @@ Answer: Delivery. The mechanical stages use Haiku.
 
 ## Goal
 
-A metric called ci-failure-rate has run between 9 and 11 for ten runs. Pick a new value that is a three sigma breach, save it to .labs/work/latest.txt, and save the intent the factory writes for it to .labs/work/intent.md. No model decides this. The proof below must pass.
+ci-failure-rate has run between 9 and 11 for ten runs. Save a three sigma breach to .labs/work/latest.txt and the intent the factory writes for it to .labs/work/intent.md. No model decides this. The proof must pass.
 
 ## Predict
 
