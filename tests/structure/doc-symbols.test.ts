@@ -1,13 +1,14 @@
 import { execFileSync } from "node:child_process";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { fullRepo } from "./repo-roots.ts";
 
 // A doc that names a function must name one the code has. Only camelCase words are checked,
 // since those are the ones a rename can strand.
 const DIRS = ["api", "shared", "web", "factory", "scripts", "tests", ".claude", "plugins"];
 const NOT_OURS = new Set(["apiKeyHelper"]); // a Claude Code setting, not a symbol in this repo
 
-const docs = ["docs/factory", "docs/levels"].flatMap((dir) =>
+const docs = ["docs/factory", "docs/levels"].filter(existsSync).flatMap((dir) =>
   readdirSync(dir)
     .filter((f) => f.endsWith(".md"))
     .map((f) => `${dir}/${f}`),
@@ -29,7 +30,7 @@ const known = (names: string[]): Set<string> => {
   return hits;
 };
 
-describe("doc symbols", () => {
+describe.skipIf(!fullRepo)("doc symbols", () => {
   it("names only camelCase symbols the code has", () => {
     const named = new Map(docs.map((d) => [d, [...new Set(symbolsIn(readFileSync(d, "utf8")))]]));
     const all = [...new Set([...named.values()].flat())].filter((s) => !NOT_OURS.has(s));

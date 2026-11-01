@@ -34,4 +34,6 @@ const isOwned = (f: string) => {
     (g) => g === f || (g.endsWith("/**") && f.startsWith(g.slice(0, -2))) || g.startsWith(dir),
   );
 };
+// These tests read prose across every level, so they run on the full repo and not on a snapshot.
+export const fullRepo = existsSync(".git");
 export const present = (f: string) => existsSync(f) || (!existsSync(".git") && isOwned(f));

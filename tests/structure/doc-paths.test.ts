@@ -3,11 +3,11 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { ALLOWED } from "./doc-paths.allow.ts";
-import { present, ROOTS, targetsOf } from "./repo-roots.ts";
+import { fullRepo, present, ROOTS, targetsOf } from "./repo-roots.ts";
 
 // A doc that names a file or a make target that is not there is a claim the code does not keep.
 const walk = (dir: string): string[] =>
-  readdirSync(dir).flatMap((name) => {
+  (existsSync(dir) ? readdirSync(dir) : []).flatMap((name) => {
     const p = join(dir, name);
     return statSync(p).isDirectory() ? walk(p) : p.endsWith(".md") ? [p] : [];
   });
@@ -37,7 +37,7 @@ function problems(file: string, text: string): string[] {
   return bad;
 }
 
-describe("doc paths", () => {
+describe.skipIf(!fullRepo)("doc paths", () => {
   it("names only make targets and paths that exist", () => {
     const bad = docs.flatMap((f) => problems(f, readFileSync(f, "utf8")));
     expect(bad).toEqual([]);

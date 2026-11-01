@@ -1,10 +1,11 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { fullRepo } from "./repo-roots.ts";
 
 // Every relative markdown link must reach a file, and every #anchor a heading in that file.
 const walk = (dir: string): string[] =>
-  readdirSync(dir).flatMap((name) => {
+  (existsSync(dir) ? readdirSync(dir) : []).flatMap((name) => {
     const p = join(dir, name);
     return statSync(p).isDirectory() ? walk(p) : p.endsWith(".md") ? [p] : [];
   });
@@ -41,7 +42,7 @@ function brokenLinks(file: string, text: string): string[] {
   return bad;
 }
 
-describe("doc links", () => {
+describe.skipIf(!fullRepo)("doc links", () => {
   it("reach a file and, when they name one, a heading in it", () => {
     expect(docs.flatMap((f) => brokenLinks(f, readFileSync(f, "utf8")))).toEqual([]);
   });

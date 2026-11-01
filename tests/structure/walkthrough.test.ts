@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { LANES, loadLabs } from "../../scripts/labs/catalog";
+import { fullRepo } from "./repo-roots.ts";
 
 // A learner who falls behind lands on any level doc, so every one has the same steps.
 const ALWAYS = ["Goal", "The problem", "Without", "Run it", "Prove it", "Exercise", "Discussion"];
@@ -38,12 +39,12 @@ describe("lane walkthroughs", () => {
 
 // Every Discussion also asks the question a principal engineer or team lead would raise: a trade-off, a failure at scale or a rollout.
 const discussed = [
-  ...readdirSync("docs/factory")
+  ...(existsSync("docs/factory") ? readdirSync("docs/factory") : [])
     .filter((f) => /^f\d.*\.md$/.test(f))
     .map((f) => `docs/factory/${f}`),
   ...docs.filter((d) => d.startsWith("docs/levels/")),
 ];
-describe("principal prompts", () => {
+describe.skipIf(!fullRepo)("principal prompts", () => {
   it.each(discussed)("%s ends its Discussion with a Principal bullet", (doc) => {
     const text = readFileSync(doc, "utf8");
     const section = text.slice(text.indexOf("## Discussion")).split(/\n## /)[0] ?? "";
@@ -52,8 +53,8 @@ describe("principal prompts", () => {
 });
 
 // The two-day plan has one track per reader, each with a day one and a day two, and names only labs that exist.
-describe("learn in two days", () => {
-  const text = readFileSync("docs/learn-in-two-days.md", "utf8");
+describe.skipIf(!fullRepo)("learn in two days", () => {
+  const text = fullRepo ? readFileSync("docs/learn-in-two-days.md", "utf8") : "";
   const TRACKS = ["New to Claude Code", "Senior engineer", "Staff and principal", "Team lead"];
   it.each(TRACKS)("%s has Day 1 and Day 2", (track) => {
     const section = text.split(/^## /m).find((s) => s.startsWith(`${track}\n`)) ?? "";
