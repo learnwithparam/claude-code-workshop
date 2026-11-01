@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Lab } from "./catalog.ts";
-import { bar, colorEnabled, renderBrief, renderMap, WIDTH } from "./render.ts";
+import { bar, colorEnabled, renderBrief, renderMap, renderTrick, WIDTH } from "./render.ts";
 
 const lab: Lab = {
   id: "start-01",
@@ -202,5 +202,24 @@ describe("screens fit the terminal", () => {
     const stripped = renderBrief(lab, none, true).replace(COLOUR, "");
     // Colour swaps the [window] brackets for a colour, so only the brackets and backticks differ.
     expect(stripped.replace(/`/g, "")).toBe(plain.replace(/[`[\]]/g, ""));
+  });
+});
+
+describe("renderTrick", () => {
+  it("is one plain line with colour off and fits 70 columns for a 200-character trick", () => {
+    const plain = renderTrick("Press Esc twice to rewind.", false);
+    expect(plain).toBe("Trick to keep: Press Esc twice to rewind.");
+    expect(ESC.test(plain)).toBe(false);
+    expect(
+      renderTrick("word ".repeat(40).trim(), false)
+        .split("\n")
+        .every((l) => l.length <= WIDTH),
+    ).toBe(true);
+  });
+
+  it("paints the label with colour on and strips back to the same text", () => {
+    const coloured = renderTrick("Press Esc twice to rewind.", true);
+    expect(ESC.test(coloured)).toBe(true);
+    expect(coloured.replace(COLOUR, "")).toBe(renderTrick("Press Esc twice to rewind.", false));
   });
 });

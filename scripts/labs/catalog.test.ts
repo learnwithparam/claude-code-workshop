@@ -73,6 +73,25 @@ describe("parseLab", () => {
     expect(lab.hints).toHaveLength(2);
   });
 
+  it("reads an optional one-line trick and defaults to none", () => {
+    expect(parseLab("start", "01-first-prompt.md", good).trick).toBeUndefined();
+    const withTrick = good.replace(
+      "## What you just learned",
+      "## Trick\nPress Esc twice to rewind.\n\n## What you just learned",
+    );
+    expect(parseLab("start", "01-first-prompt.md", withTrick).trick).toBe(
+      "Press Esc twice to rewind.",
+    );
+  });
+
+  it("rejects a trick over 200 characters or on more than one line", () => {
+    const put = (t: string) =>
+      good.replace("## What you just learned", `## Trick\n${t}\n\n## What you just learned`);
+    expect(() => parseLab("start", "01-first-prompt.md", put("x".repeat(201)))).toThrow();
+    expect(() => parseLab("start", "01-first-prompt.md", put("one\ntwo"))).toThrow();
+    expect(parseLab("start", "01-first-prompt.md", put("x".repeat(200))).trick).toHaveLength(200);
+  });
+
   it("rejects an unknown window tag", () => {
     expect(() => parseLab("start", "01-x.md", good.replace("[claude]", "[browser]"))).toThrow(
       /window tag/,

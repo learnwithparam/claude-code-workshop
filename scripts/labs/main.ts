@@ -1,12 +1,15 @@
 import { spawnSync } from "node:child_process";
 import { mkdirSync, watch } from "node:fs";
+import { createInterface } from "node:readline";
 import { pathToFileURL } from "node:url";
 import { loadLabs } from "./catalog.ts";
-import { type CliDeps, run, runWatch } from "./cli.ts";
+import { type CliDeps, runLab, runWatch } from "./cli.ts";
 import { colorEnabled } from "./render.ts";
 
 // Gitignored, so progress stays on the learner's machine and never reaches a commit.
 const PROGRESS_FILE = ".labs/progress.json";
+
+let lines: AsyncIterator<string> | undefined;
 
 const WORK_DIR = ".labs/work";
 const DEBOUNCE_MS = 300;
@@ -27,6 +30,12 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
     out: (text) => console.log(text),
     status: (text) => console.log(`\x1b[2K${text}`),
     isTTY: Boolean(process.stdout.isTTY && process.stdin.isTTY),
+    env: process.env,
+    enter: async () => {
+      // One reader for the whole run: a reader per step would drop lines already buffered.
+      lines ??= createInterface({ input: process.stdin })[Symbol.asyncIterator]();
+      await lines.next();
+    },
     watch: (onChange) => {
       mkdirSync(WORK_DIR, { recursive: true });
       let timer: NodeJS.Timeout | undefined;
@@ -56,6 +65,6 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
       };
     },
   };
-  const code = args.includes("--watch") ? await runWatch(args, deps) : run(args, deps);
+  const code = args.includes("--watch") ? await runWatch(args, deps) : await runLab(args, deps);
   process.exit(code);
 }

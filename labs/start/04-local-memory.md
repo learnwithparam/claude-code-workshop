@@ -54,6 +54,10 @@ Answer: No. CLAUDE.local.md is gitignored, so the note stays on your machine and
 2. The file is already in `.gitignore`, so it never reaches a commit.
 3. Use `>>` to append. A single `>` replaces the file.
 
+## Trick
+
+Type `/memory` in Claude Code to see which instruction files loaded, so you can confirm your `CLAUDE.local.md` came in.
+
 ## What you just learned
 
 `AGENTS.md` is for the team and `CLAUDE.local.md` is for you. Private habits never belong in a shared file.
