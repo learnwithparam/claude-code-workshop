@@ -11,13 +11,13 @@ Answer: Every clone gets the committed file, so the rule protects the whole team
 
 ## Goal
 
-Show which guardrails a cloud session inherits from this repo, and predict what happens when it tries to push.
+Show which guardrails a cloud session inherits from this repo, and predict what happens when it pushes a branch and when it pushes `main`.
 
 ## Predict
 
-A cloud session clones this repo and runs a push. Does the push go through?
+A cloud session clones this repo and runs `git push origin main`. Does the push go through?
 
-Answer: No. The committed settings deny the push and travel with the clone, so a cloud session inherits the block.
+Answer: No. The committed settings deny a push to `main` and a force push, and they travel with the clone. A push of its own branch is allowed.
 
 ## Steps
 
@@ -28,13 +28,13 @@ Answer: No. The committed settings deny the push and travel with the clone, so a
 3. Make the folder: `mkdir -p .labs/work`.
    Expect: No output. The folder `.labs/work` now exists.
 4. Run the command from that section and save what it prints: `node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' > .labs/work/cloud-guards.txt`.
-   Expect: No output on screen, because it goes to `cloud-guards.txt`. The file lists the deny rules, including the push rule, then a line of hook names that includes `PreToolUse`.
-5. Read the file. Find the push deny and the `PreToolUse` hook, and say to yourself what a cloud session does when it runs a push.
+   Expect: No output on screen, because it goes to `cloud-guards.txt`. The file lists the deny rules, including the push-to-main rule, then a line of hook names that includes `PreToolUse`.
+5. Read the file. Find the push-to-main deny and the `PreToolUse` hook, and say to yourself what a cloud session does when it pushes `main` and when it pushes its own branch.
    Expect: You see the push deny in the first list and `PreToolUse` in the second. Nothing is printed for this step.
-6. [editor] Write `.labs/work/push-route.md`: name one route from the section "Know why `git push` fails" (a person ships, teleport, or a tested hook) and give one reason you chose it.
+6. [editor] Write `.labs/work/push-route.md`: name one route from the section "Know what a push can and cannot do" (a person merges, teleport, or a tested hook) and give one reason you chose it.
    Expect: No output from a command, since you are writing the file. Afterwards `push-route.md` names one route and one reason.
-7. Optional: start a real session with `claude --cloud` and ask it to run a push and show the exact result, then read the transcript. This needs a claude.ai login, so the proof does not ask for it.
-   Expect: The session starts in the cloud and its push attempt is refused. The exact wording will differ. Skip this step if you have no claude.ai login.
+7. Optional: start a real session with `claude --cloud` and ask it to push a new branch and then `main`, and show the exact result of each, then read the transcript. This needs a claude.ai login, so the proof does not ask for it.
+   Expect: The session starts in the cloud, the branch push goes through and the push to `main` is refused. The exact wording will differ. Skip this step if you have no claude.ai login.
 
 ## Proof
 
@@ -44,18 +44,18 @@ Answer: No. The committed settings deny the push and travel with the clone, so a
    f=.labs/work/cloud-guards.txt
    node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' | diff -q - $f >/dev/null
    ```
-2. cloud-guards.txt lists the push deny and the PreToolUse hook.
+2. cloud-guards.txt lists the push-to-main deny and the PreToolUse hook.
 
    ```sh
    f=.labs/work/cloud-guards.txt
-   grep -qF 'Bash(git push *)' $f || exit 1
+   grep -qF 'Bash(git push * main*)' $f || exit 1
    grep -q PreToolUse $f
    ```
 3. push-route.md gives a route and a reason on separate lines.
 
    ```sh
    r=.labs/work/push-route.md
-   grep -qiE 'person ships|teleport|hook' $r || exit 1
+   grep -qiE 'person merges|person ships|teleport|hook' $r || exit 1
    test "$(grep -c . $r)" -ge 2
    ```
 4. The saved files match the repo now, and push-route.md names a route with a reason.
@@ -64,17 +64,17 @@ Answer: No. The committed settings deny the push and travel with the clone, so a
    f=.labs/work/cloud-guards.txt
    r=.labs/work/push-route.md
    node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' | diff -q - $f >/dev/null || exit 1
-   grep -qF 'Bash(git push *)' $f || exit 1
+   grep -qF 'Bash(git push * main*)' $f || exit 1
    grep -q PreToolUse $f || exit 1
-   grep -qiE 'person ships|teleport|hook' $r || exit 1
+   grep -qiE 'person merges|person ships|teleport|hook' $r || exit 1
    test "$(grep -c . $r)" -ge 2 && test "$(awk 'NF>=5' $r | wc -l)" -ge 1
    ```
 
 ## Hints
 
-1. The command prints two things: the deny list, then the names of the hooks. Redirect both into the file with `>`. The commands are `mkdir -p .labs/work` and `node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' > .labs/work/cloud-guards.txt`. For the optional step, run `claude --cloud` and ask it to run `git push`.
+1. The command prints two things: the deny list, then the names of the hooks. Redirect both into the file with `>`. The commands are `mkdir -p .labs/work` and `node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))' > .labs/work/cloud-guards.txt`. For the optional step, run `claude --cloud` and ask it to push a branch and then `main`.
 2. The proof compares your file with what `.claude/settings.json` holds right now, so save it again after any change to that file.
-3. `push-route.md` needs a route and a reason on separate lines, for example: "Keep the deny, a person ships." then "A push is the step that needs a human."
+3. `push-route.md` needs a route and a reason on separate lines, for example: "Keep the deny, a person merges." then "Merging to main is the step that needs a human."
 
 ## What you just learned
 
