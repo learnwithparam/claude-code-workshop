@@ -200,6 +200,7 @@ describe("screens fit the terminal", () => {
   it("draws the same structure with colour off", () => {
     const plain = renderBrief(lab, none, false);
     const stripped = renderBrief(lab, none, true).replace(COLOUR, "");
-    expect(stripped.replace(/`/g, "")).toBe(plain.replace(/`/g, ""));
+    // Colour swaps the [window] brackets for a colour, so only the brackets and backticks differ.
+    expect(stripped.replace(/`/g, "")).toBe(plain.replace(/[`[\]]/g, ""));
   });
 });

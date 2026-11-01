@@ -22,7 +22,9 @@ export function schedule(tickets: Ticket[], max = 3) {
   for (const t of tickets) {
     const mine = touches(t);
     const free = mine.length > 0 && now.length < max && taken.every((o) => !overlaps(o, mine));
-    if (free || now.length === 0) {
+    // Whatever runs with an unknown file area blocks everything behind it.
+    const blocked = taken.some((o) => o.length === 0);
+    if ((free && !blocked) || now.length === 0) {
       now.push(t);
       taken.push(mine);
     } else queued.push(t);
