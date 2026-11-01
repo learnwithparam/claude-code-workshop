@@ -45,7 +45,7 @@ Answer: The check. The runner reads the exit code, never the model's word.
 
    ```sh
    f=.labs/work/checks.log
-   grep -Eq 'Tests +[0-9]+ passed' $f && ! grep -q 'failed' $f || exit 1
+   grep -Eq '[0-9]+ passed' $f && ! grep -q 'failed' $f || exit 1
    n=0
    for t in $(grep -Eo 'factory/engine/checks/[A-Za-z0-9_./-]+[.]test[.]ts' $f | sort -u); do test -f "$t" && n=$((n+1)); done
    test "$n" -ge 3

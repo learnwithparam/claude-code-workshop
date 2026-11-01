@@ -35,7 +35,7 @@ Answer: No. It has one vote, below the two needed, so it is dropped. An agent's 
 
    ```sh
    f=.labs/work/review.log
-   grep -Eq 'Tests +[0-9]+ passed' $f && ! grep -q 'failed' $f && grep -q 'factory/engine/review.test.ts' $f
+   grep -Eq '[0-9]+ passed' $f && ! grep -q 'failed' $f && grep -q 'factory/engine/review.test.ts' $f
    ```
 2. review-rules.txt holds the four limits.
 

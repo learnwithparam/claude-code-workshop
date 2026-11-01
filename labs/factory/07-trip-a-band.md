@@ -62,7 +62,7 @@ Answer: No. 12 is within about one sigma of the rolling mean, so at most it logs
    const latest = Number(readFileSync(".labs/work/latest.txt", "utf8"));
    process.stdout.write(intentFor(detect("ci-failure-rate", history, latest, "up-is-bad")));
    TS
-   test "$(npx tsx .labs/work/want.ts)" = "$(cat .labs/work/intent.md)"
+   test -s .labs/work/intent.md && test "$(npx tsx .labs/work/want.ts)" = "$(cat .labs/work/intent.md)"
    ```
 
 ## Hints

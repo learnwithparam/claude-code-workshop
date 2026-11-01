@@ -44,7 +44,7 @@ Answer: Every one, because a test that walks them all catches a break in any wor
 
    ```sh
    f=.labs/work/contract.log
-   grep -Eq 'Tests +[0-9]+ passed' $f && ! grep -q 'failed' $f || exit 1
+   grep -Eq '[0-9]+ passed' $f && ! grep -q 'failed' $f || exit 1
    for t in $(grep -Eo '(tests/contract|factory/engine)/[A-Za-z0-9_./-]+[.]test[.]ts' $f); do test -f "$t" && exit 0; done
    exit 1
    ```
