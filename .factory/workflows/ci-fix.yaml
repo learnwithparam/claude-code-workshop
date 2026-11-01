@@ -18,4 +18,9 @@ steps:
       checks: [ci],
       loop: { until: [ci], max: 2 },
     }
-  - { stage: review, agent: reviewer, review: { lenses: [reviewer, test-reviewer] } }
+  - {
+      stage: review,
+      agent: reviewer,
+      brief: "Review only the repair diff. Reject a change that edits a test to pass or hides the failure.",
+      review: { lenses: [reviewer, test-reviewer] },
+    }
