@@ -71,17 +71,46 @@ export function renderMap(
   return lines.join("\n");
 }
 
+// The step line alone; the Expect line is separate so live mode can hold it back.
+export function renderStep(lab: Lab, s: Step, i: number, color: boolean): string {
+  const text = lab.help === "hinted" ? hideCommands(s.text) : commands(s.text, color);
+  return `${i + 1}. ${tag(s.where, color)} ${text}`;
+}
+
+export const renderExpect = (s: Step, color: boolean): string =>
+  paint(color, "dim", `   Expect: ${s.expect ?? ""}`);
+
+export function renderGoalItems(lab: Lab, color: boolean): string[] {
+  const items = lab.proof.map((item, i) => `${i + 1}. ${item.text}`);
+  return [paint(color, "bold", "Done when all of these pass"), ...items, ""];
+}
+
 function body(lab: Lab, color: boolean): string[] {
-  if (lab.help === "goal") {
-    const items = lab.proof.map((item, i) => `${i + 1}. ${item.text}`);
-    return [paint(color, "bold", "Done when all of these pass"), ...items, ""];
-  }
-  const show = (s: string) => (lab.help === "hinted" ? hideCommands(s) : commands(s, color));
+  if (lab.help === "goal") return renderGoalItems(lab, color);
   const step = (s: Step, i: number) => [
-    `${i + 1}. ${tag(s.where, color)} ${show(s.text)}`,
-    ...(s.expect ? [paint(color, "dim", `   Expect: ${s.expect}`)] : []),
+    renderStep(lab, s, i, color),
+    ...(s.expect ? [renderExpect(s, color)] : []),
   ];
   return [paint(color, "bold", "Steps"), ...lab.steps.flatMap(step), ""];
+}
+
+const TRICK_LABEL = "Trick to keep:";
+
+// Wraps at WIDTH so a long trick never runs past the 70 columns; later lines hang under the text.
+export function renderTrick(trick: string, color: boolean): string {
+  const pad = " ".repeat(TRICK_LABEL.length + 1);
+  const lines: string[] = [];
+  let line = TRICK_LABEL;
+  for (const word of trick.split(" ")) {
+    if (line.length + 1 + word.length > WIDTH && line.trim() !== TRICK_LABEL) {
+      lines.push(line);
+      line = pad.slice(0, -1);
+    }
+    line += ` ${word}`;
+  }
+  lines.push(line);
+  lines[0] = (lines[0] ?? "").replace(TRICK_LABEL, paint(color, "bold", TRICK_LABEL));
+  return lines.join("\n");
 }
 
 // The form's `lab` field is prefilled from the query string, so a report names its lab.

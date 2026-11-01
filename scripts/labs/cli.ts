@@ -1,4 +1,5 @@
 import { type Lab, PATH_IDS, type PathId } from "./catalog.ts";
+import { runLive } from "./live.ts";
 import {
   currentLab,
   laneStats,
@@ -10,7 +11,7 @@ import {
   saveGuess,
   saveProgress,
 } from "./progress.ts";
-import { paint, renderBrief, renderMap } from "./render.ts";
+import { paint, renderBrief, renderMap, renderTrick } from "./render.ts";
 
 export type CliDeps = {
   labs: Lab[];
@@ -27,6 +28,10 @@ export type CliDeps = {
   watch?: (onChange: () => void) => () => void;
   /** Calls onKey for each key typed; returns a stop function. */
   keys?: (onKey: (key: string) => void) => () => void;
+  /** The process environment; `LIVE=1` turns on live mode. */
+  env?: Record<string, string | undefined>;
+  /** Resolves when the learner presses Enter. Injected so tests need no terminal. */
+  enter?: () => Promise<void>;
 };
 
 const tail = (text: string, n: number) => text.trimEnd().split("\n").slice(-n).join("\n");
@@ -50,13 +55,14 @@ function showMap(deps: CliDeps, progress: Progress): void {
   deps.out(`\nThe other workshop's labs are hidden. Switch with: make lab PATH_ID=${other}`);
 }
 
-function finish(deps: CliDeps, progress: Progress, lab: Lab): void {
+export function finish(deps: CliDeps, progress: Progress, lab: Lab): void {
   const c = deps.color;
   deps.out(`${paint(c, "green", `PASS ${lab.id}`)} ${lab.title}`);
   const guess = progress.guesses?.[lab.id];
   deps.out(guess ? `Your guess: ${guess}` : "You saved no guess for this lab.");
   deps.out(`${paint(c, "bold", "Answer")} ${lab.predict.answer}`);
   deps.out(`${paint(c, "bold", "What you just learned")} ${lab.learned}`);
+  if (lab.trick) deps.out(renderTrick(lab.trick, c));
   const after = markDone(progress, lab.id, deps.now());
   saveProgress(deps.progressPath, after);
   const next = currentLab(deps.labs, after);
@@ -72,7 +78,10 @@ function hint(deps: CliDeps, progress: Progress, lab: Lab): void {
   deps.out(renderBrief(lab, loadProgress(deps.progressPath), deps.color));
 }
 
-export function run(args: string[], deps: CliDeps): number {
+type Picked = { lab: Lab; progress: Progress };
+
+/** Everything before the proof: parse, pick the path, find the lab. A number is an early exit code. */
+function prepare(args: string[], deps: CliDeps): number | Picked {
   const [command = "progress", ...rest] = args;
   const id = rest.find((a) => !a.startsWith("--"));
   let progress = loadProgress(deps.progressPath);
@@ -119,6 +128,14 @@ export function run(args: string[], deps: CliDeps): number {
     hint(deps, progress, lab);
     return 0;
   }
+  return { lab, progress };
+}
+
+export function run(args: string[], deps: CliDeps): number {
+  const picked = prepare(args, deps);
+  if (typeof picked === "number") return picked;
+  const { lab } = picked;
+  let { progress } = picked;
 
   const guess = deps.guess?.trim();
   if (guess) {
@@ -154,6 +171,15 @@ export function run(args: string[], deps: CliDeps): number {
     );
   }
   return 1;
+}
+
+/** `make lab` with `LIVE=1` walks the lab step by step; anything else is the plain run. */
+export async function runLab(args: string[], deps: CliDeps): Promise<number> {
+  const { enter } = deps;
+  if (deps.env?.LIVE !== "1" || !enter) return run(args, deps);
+  const picked = prepare(args, deps);
+  if (typeof picked === "number") return picked;
+  return runLive(picked.lab, picked.progress, { ...deps, enter });
 }
 
 const failLine = (deps: CliDeps, lab: Lab) =>
