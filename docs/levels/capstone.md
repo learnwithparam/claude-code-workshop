@@ -46,3 +46,4 @@ Track A: from a clean `supplied/workflows`, get `specs/37` green through the bug
 ## Discussion
 
 Where did your factory stop and ask a person, and was that the right place? Which gate would you add before running it on a feature you could not check yourself?
+- **Principal:** A capstone proves a learner can follow a path. What would you change in the path so it also shows whether they can recover when a step fails?

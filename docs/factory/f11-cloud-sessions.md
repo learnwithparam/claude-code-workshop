@@ -139,6 +139,7 @@ If step 2 pushes `main`, stop. A different settings file is winning, and the doc
 - The deny makes every cloud run end with a person. Is that a cost or the point?
 - What does a network secret protect against that an environment variable does not?
 - Your plan's limits are shared. What should wait for the night, when you are not using them?
+- **Principal:** A cloud run inherits the repo's settings and has no person nearby. Which of your local safeguards would stop applying there, and what would you add before the first unattended run?
 
 ## Sources
 

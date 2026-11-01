@@ -129,6 +129,7 @@ Now break it: in a scratch branch, delete the `claude-haiku-5-5` entry from `pri
 - The resolver ignores the model in an agent's frontmatter when a config stage exists. Is that the right precedence, or should an agent be able to pin its own model?
 - Triage itself runs on the cheapest model. What goes wrong if triage is wrong, and which way does `parseTriage` fail?
 - `savedPct` compares against all-Opus. Is that the baseline your team would have chosen without the factory?
+- **Principal:** Routing saves money until a cheap model is wrong in a way that costs more than it saved. How would you find that point from your own runs, and who decides when to move a stage up a tier?
 
 ## Sources
 

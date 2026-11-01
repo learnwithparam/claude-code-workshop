@@ -28,7 +28,7 @@ This repo is a GitHub template. Click "Use this template", then set these in you
 - Labels `factory:triage`, `factory:planned`, `factory:ready`, `plan:approved` and `assignment`. The factory moves a ticket between them.
 - `levels.json` owns every file a level ships. A new source file needs an owner there, or `make check` fails.
 
-Teaching it? Use the [run of show](docs/run-of-show.md).
+Learning on your own or with a team? Follow [learn in two days](docs/learn-in-two-days.md). The ideas worth keeping are on one page: [patterns](docs/patterns.md).
 
 ## Install the factory in your own repo
 

@@ -2,7 +2,7 @@
 
 One app, Worksheet Studio, with two workshops: Claude Code, beginner to pro, and the Software Factory. Both share the levels and the labs. Pick yours with `make lab PATH_ID=pro` or `make lab PATH_ID=factory`, then take its parts in order.
 
-Teaching a room? Open the [run of show](run-of-show.md).
+Learning on your own or with a team? Follow [learn in two days](learn-in-two-days.md), then keep the [patterns](patterns.md).
 
 ## Set up
 

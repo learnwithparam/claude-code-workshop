@@ -105,7 +105,9 @@
     "tests/structure/doc-paths.test.ts",
     "tests/structure/doc-paths.allow.ts",
     "tests/structure/doc-symbols.test.ts",
-    "tests/structure/doc-links.test.ts"
+    "tests/structure/doc-links.test.ts",
+    "docs/patterns.md",
+    "tests/structure/patterns.test.ts"
   ],
   "execution": [
     ".claude/agents/**",
@@ -205,7 +207,7 @@
     "scripts/prove/sharing.ts",
     "docs/levels/sharing.md",
     "docs/when-to-use-what.md",
-    "docs/run-of-show.md",
+    "docs/learn-in-two-days.md",
     "tests/structure/when-to-use-what.test.ts",
     "docs/recordings/sharing.cast",
     "docs/recordings/sharing.gif",

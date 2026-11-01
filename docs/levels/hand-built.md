@@ -49,3 +49,4 @@ Run `make doctor` before anything else. It names what is missing instead of fail
 ## Discussion
 
 Which parts of your own product are decided by a person and should stay that way?
+- **Principal:** The app is built by hand before any agent touches it. What would you want a team to hand-build first in their own system so that later agent output has something to be measured against?

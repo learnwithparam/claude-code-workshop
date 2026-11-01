@@ -126,3 +126,4 @@ Track B: the builder has `Bash`, and the test lock hook matches only `Edit|Write
 1. The plan is written by a model and used as an allowlist. What stops it from listing everything, and what would you add?
 2. A fix needs a file the plan did not list. Who should be allowed to grow the plan, and when?
 3. `isolation: worktree` protects your tree from the builder. What does it not protect you from?
+4. **Principal:** The builder is confined to the files in the plan. When a real fix needs one more file, is the right move to widen the plan, loosen the check or hand the ticket to a human, and what does each cost over a year?

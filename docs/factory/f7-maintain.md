@@ -78,3 +78,4 @@ No `metrics.json`, `incident.md` or retro result is committed, because `.factory
 1. Why is the sigma check plain arithmetic and not a model's opinion?
 2. A retro lesson raised the eval score by a little on one run. What would make you keep it, and what would make you distrust it?
 3. Which DORA measure would your team be most embarrassed to see, and which data would you need to compute it?
+4. **Principal:** A sigma band opens tickets by itself. At what ticket volume does that become noise the team ignores, and how would you tune the band without hiding a real regression?

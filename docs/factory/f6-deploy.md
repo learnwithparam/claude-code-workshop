@@ -83,3 +83,4 @@ No production release has run from this repo, since there is no deploy target.
 1. The tier is set by paths, not by author. Which path in your repo would you add to the high list first, and what happened that made you pick it?
 2. Why should an approval stop counting when a new commit is pushed?
 3. The merge queue checks the change on the latest `main`. What does a green branch tell you that this does not, and the reverse?
+4. **Principal:** Risk is read from paths, so a team can lower it by moving code into a low path. How would you stop that drift, and would you put the rule in a test, a code owner file or a review?

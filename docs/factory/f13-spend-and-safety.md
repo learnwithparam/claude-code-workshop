@@ -134,6 +134,7 @@ A failed agent job is a signal, not a blocker: the gate jobs do not depend on it
 - A promotional balance runs out on a date. What does your team do the week before?
 - The output scan only warns. When is a warning the right strength, and when must a hook block?
 - Which of the hooks above would you remove first, and which test would tell you it mattered?
+- **Principal:** A spend cap stops one run. What stops a hundred small runs from adding up to the same bill, and at what level would you put that limit?
 
 ## Sources
 

@@ -35,3 +35,37 @@ describe("lane walkthroughs", () => {
     expect(found.sort()).toEqual(want.sort());
   });
 });
+
+// Every Discussion also asks the question a principal engineer or team lead would raise: a trade-off, a failure at scale or a rollout.
+const discussed = [
+  ...readdirSync("docs/factory")
+    .filter((f) => /^f\d.*\.md$/.test(f))
+    .map((f) => `docs/factory/${f}`),
+  ...docs.filter((d) => d.startsWith("docs/levels/")),
+];
+describe("principal prompts", () => {
+  it.each(discussed)("%s ends its Discussion with a Principal bullet", (doc) => {
+    const text = readFileSync(doc, "utf8");
+    const section = text.slice(text.indexOf("## Discussion")).split(/\n## /)[0] ?? "";
+    expect(section).toMatch(/^(\d+\.|-) \*\*Principal:\*\* /m);
+  });
+});
+
+// The two-day plan has one track per reader, each with a day one and a day two, and names only labs that exist.
+describe("learn in two days", () => {
+  const text = readFileSync("docs/learn-in-two-days.md", "utf8");
+  const TRACKS = ["New to Claude Code", "Senior engineer", "Staff and principal", "Team lead"];
+  it.each(TRACKS)("%s has Day 1 and Day 2", (track) => {
+    const section = text.split(/^## /m).find((s) => s.startsWith(`${track}\n`)) ?? "";
+    expect(section).toContain("### Day 1");
+    expect(section).toContain("### Day 2");
+  });
+
+  it("names only labs that exist", () => {
+    const real = new Set(loadLabs("labs").map((l) => l.id));
+    const named = [...text.matchAll(/\b(?:start|daily|team|factory|advanced)-\d{2}\b/g)].map(
+      (m) => m[0],
+    );
+    expect(named.filter((id) => !real.has(id))).toEqual([]);
+  });
+});

@@ -57,3 +57,4 @@ Besides the secrets guard, five hooks each show one pattern: a prompt router tha
 ## Discussion
 
 Where does a secret live in your stack today, and which processes can read it?
+- **Principal:** Permissions, hooks and a sandbox each stop a different failure. If you could keep only one for a shared repo, which would it be, and what would you accept losing?

@@ -57,3 +57,4 @@ Two files here are not shared. Copy `docs/examples/CLAUDE.local.md` to `CLAUDE.l
 ## Discussion
 
 Which of your team's unwritten rules would Claude break today?
+- **Principal:** A context file is read by every session, so every line costs tokens and shapes behaviour. Who is allowed to change it in your team, and how do you notice a line that no longer holds?

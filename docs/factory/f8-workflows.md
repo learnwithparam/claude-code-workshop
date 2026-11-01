@@ -117,3 +117,4 @@ Ask what evidence the task can honestly give.
 ## Discussion
 
 Which of these would your team delete first, and what evidence would you lose? Which task in your backlog fits none of them?
+- **Principal:** Workflows are data, so any team can add one. What review does a new workflow need before it can touch a repo, and how do you retire one that nobody owns?

@@ -83,3 +83,4 @@ There is no `review.json` committed in `specs/`; the engine writes it to `specs/
 1. Two of three voters is a threshold. What does a team lose by moving it to three of three, and what do they lose at one of three?
 2. Why must an Important finding carry the input that breaks it, and who checks that input?
 3. After three rounds the loop stops and a human decides. What would you want written in that handoff?
+4. **Principal:** Reviewers that vote can agree on the same wrong thing. How would you detect a correlated blind spot across voters, and would you diversify the models, the prompts or the evidence they see?

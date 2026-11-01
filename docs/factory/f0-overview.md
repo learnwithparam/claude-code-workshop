@@ -114,3 +114,4 @@ Expect `risk > is high for a CI workflow and low for docs` to fail with `expecte
 1. Which stage in your team's flow commits nothing the next stage can read, and what would you commit?
 2. The OpenAI description has an agent assist the deploy after a human approves. `deploy.ts` holds the approval check but no run calls it yet. Where would you call it, and what would you add before you let an agent run `make deploy`?
 3. Which gate here would you most want to turn off under deadline, and what does its failing test say you would lose?
+4. **Principal:** The factory spends tokens to save engineer hours. What would you measure in the first month to decide whether to widen it, narrow it or stop, and what result would make you stop?

@@ -154,3 +154,4 @@ Each red test is skipped by default, as `make prove-homework` is for the take-ho
 ## Discussion
 
 Which assignment would change what your team ships next month? Which red test would you be unable to write, and what does that say about the issue?
+- **Principal:** A learner's change passes its red test. What else would you need to see before you trusted that they understood the idea and did not only satisfy the test?

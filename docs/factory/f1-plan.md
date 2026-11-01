@@ -70,3 +70,4 @@ Expect `treats a missing SIZE or RISK as medium size and high risk` to fail with
 1. Triage fails closed to high risk. Which fallback would you choose for a field the model left out, and what does it cost on a busy day?
 2. `scripts/` and `.claude/` are high even when only a comment changed. What would you gain and lose by classifying inside the file instead?
 3. If the tier came from the model's RISK line instead of the paths, which diff would slip through?
+4. **Principal:** A plan approval is bound to a digest of the plan. What breaks for a team that edits plans in the pull request instead, and where would you move the approval so the edit is not lost?

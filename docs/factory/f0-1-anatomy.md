@@ -112,3 +112,4 @@ Expect `test lock > blocks an edit to api/src/a.test.ts during a fix` to fail, b
 1. Which of your team's rules sit only in a doc, and which file type above would make each one a check?
 2. The test lock is a hook and `lock` is a check. What does each catch that the other misses?
 3. Who in your org should own managed settings, and what would you put in the deny list first?
+4. **Principal:** Every stage writes a file the next one reads. At fifty teams on one factory, which of those files becomes a contract you can no longer change freely, and how would you version it?

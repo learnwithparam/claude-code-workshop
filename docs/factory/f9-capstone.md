@@ -117,3 +117,4 @@ Track A: run all four tickets and record, for each, how many rounds the loop too
 1. Which ticket needed a person, and which gate told you so?
 2. Your tree is green and differs from the reference. What evidence would make you trust it anyway?
 3. Which red suite would you write first for the next feature, before any code exists?
+4. **Principal:** You have run one ticket end to end. What would you have to be true about your own repo, tests and permissions before you let the factory take a ticket without you watching?

@@ -130,3 +130,4 @@ Track B: add a case under `.factory/holdout/<n>/` for a finished spec, check tha
 1. A test passes on both base and branch. Is it a guard or a mistake? How would you tell?
 2. Mutation score is 50 at the floor. What does it cost to push it to 90, and who pays?
 3. Which check on the ladder would you drop first for a prototype, and which for a payment flow?
+4. **Principal:** Each check on the ladder costs time or money. Which would you run on every push, which per pull request and which nightly, and what bug class escapes at each cut?

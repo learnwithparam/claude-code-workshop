@@ -138,3 +138,4 @@ Track B: the `analyze` stage is a model's reading. Add a code check named `requi
 1. A scenario says "the page loads quickly". What would the three methods force you to write instead?
 2. The gate is bound to a hash of the documents. Who is hurt if it were bound to the issue number only?
 3. Your team already has a product spec in a wiki. Which part of it belongs in `spec.md`, and which part stays out because no check can grade it?
+4. **Principal:** A design stage adds a day to a small change. Which routing rule keeps small changes out of it without letting a risky one slip through, and who owns that rule?
