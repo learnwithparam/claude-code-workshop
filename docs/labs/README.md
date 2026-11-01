@@ -44,35 +44,35 @@ Each step says where to type it: "in your shell", "in Claude Code" or "in your e
 
 ## The path
 
-| Lab           | Lane     | Goal                                          | Pairs with                                             |
-| ------------- | -------- | --------------------------------------------- | ------------------------------------------------------ |
-| `start-01`    | start    | Ask Claude about the repo                     | [hand-built](../levels/hand-built.md)                  |
-| `start-02`    | start    | Run the gate yourself                         | [hand-built](../levels/hand-built.md)                  |
-| `start-03`    | start    | Plan before you edit                          | [context](../levels/context.md)                        |
-| `start-04`    | start    | Teach Claude a personal habit                 | [context](../levels/context.md)                        |
-| `daily-01`    | daily    | Continue where you left off                   | [hand-built](../levels/hand-built.md)                  |
-| `daily-02`    | daily    | Write a rule that loads only where it applies | [context](../levels/context.md)                        |
-| `daily-03`    | daily    | Package a habit as a skill                    | [skills](../levels/skills.md)                          |
-| `daily-04`    | daily    | Block a mistake with a hook                   | [boundary](../levels/boundary.md)                      |
-| `team-01`     | team     | Deny what Claude must never read              | [boundary](../levels/boundary.md)                      |
-| `team-02`     | team     | Write the review rules                        | [verification](../levels/verification.md)              |
-| `team-03`     | team     | Run a proof and keep the receipt              | [verification](../levels/verification.md)              |
-| `team-04`     | team     | Package your setup as a plugin                | [sharing](../levels/sharing.md)                        |
-| `factory-01`  | factory  | Turn a ticket into an intent                  | [F1 Plan](../factory/f1-plan.md)                       |
-| `factory-02`  | factory  | Write acceptance before code                  | [F2 Design](../factory/f2-design.md)                   |
-| `factory-03`  | factory  | See what a run would do                       | [F3 Build](../factory/f3-build.md)                     |
-| `factory-04`  | factory  | Check the workflow contract                   | [F8 Workflows](../factory/f8-workflows.md)             |
-| `factory-05`  | factory  | Run the checks that stop a bad test           | [F4 Test](../factory/f4-test.md)                       |
-| `factory-06`  | factory  | Count the votes behind a review               | [F5 Review](../factory/f5-review.md)                   |
-| `factory-07`  | factory  | Trip a band and read the intent it writes     | [F7 Maintain](../factory/f7-maintain.md)               |
-| `factory-08`  | factory  | Tier a diff and count its approvals           | [F6 Deploy](../factory/f6-deploy.md)                   |
-| `factory-09`  | factory  | Route a step to its model                     | [F12 Model routing](../factory/f12-model-routing.md)   |
+| Lab           | Lane     | Goal                                          | Pairs with                                                 |
+| ------------- | -------- | --------------------------------------------- | ---------------------------------------------------------- |
+| `start-01`    | start    | Ask Claude about the repo                     | [hand-built](../levels/hand-built.md)                      |
+| `start-02`    | start    | Run the gate yourself                         | [hand-built](../levels/hand-built.md)                      |
+| `start-03`    | start    | Plan before you edit                          | [context](../levels/context.md)                            |
+| `start-04`    | start    | Teach Claude a personal habit                 | [context](../levels/context.md)                            |
+| `daily-01`    | daily    | Continue where you left off                   | [hand-built](../levels/hand-built.md)                      |
+| `daily-02`    | daily    | Write a rule that loads only where it applies | [context](../levels/context.md)                            |
+| `daily-03`    | daily    | Package a habit as a skill                    | [skills](../levels/skills.md)                              |
+| `daily-04`    | daily    | Block a mistake with a hook                   | [boundary](../levels/boundary.md)                          |
+| `team-01`     | team     | Deny what Claude must never read              | [boundary](../levels/boundary.md)                          |
+| `team-02`     | team     | Write the review rules                        | [verification](../levels/verification.md)                  |
+| `team-03`     | team     | Run a proof and keep the receipt              | [verification](../levels/verification.md)                  |
+| `team-04`     | team     | Package your setup as a plugin                | [sharing](../levels/sharing.md)                            |
+| `factory-01`  | factory  | Turn a ticket into an intent                  | [F1 Plan](../factory/f1-plan.md)                           |
+| `factory-02`  | factory  | Write acceptance before code                  | [F2 Design](../factory/f2-design.md)                       |
+| `factory-03`  | factory  | See what a run would do                       | [F3 Build](../factory/f3-build.md)                         |
+| `factory-04`  | factory  | Check the workflow contract                   | [F8 Workflows](../factory/f8-workflows.md)                 |
+| `factory-05`  | factory  | Run the checks that stop a bad test           | [F4 Test](../factory/f4-test.md)                           |
+| `factory-06`  | factory  | Count the votes behind a review               | [F5 Review](../factory/f5-review.md)                       |
+| `factory-07`  | factory  | Trip a band and read the intent it writes     | [F7 Maintain](../factory/f7-maintain.md)                   |
+| `factory-08`  | factory  | Tier a diff and count its approvals           | [F6 Deploy](../factory/f6-deploy.md)                       |
+| `factory-09`  | factory  | Route a step to its model                     | [F12 Model routing](../factory/f12-model-routing.md)       |
 | `factory-10`  | factory  | Hit the spend cap                             | [F13 Spend and safety](../factory/f13-spend-and-safety.md) |
-| `advanced-01` | advanced | Write a read-only reviewer subagent           | [execution](../levels/execution.md)                    |
-| `advanced-02` | advanced | Measure what a call costs                     | [agent SDK](../agent/agent-sdk.md)                     |
-| `advanced-03` | advanced | Work in a parallel worktree                   | [agent teams](../electives/agent-teams.md)             |
-| `advanced-04` | advanced | Write a check that walks the whole tree       | [workflows](../levels/workflows.md)                    |
-| `advanced-05` | advanced | Check what a cloud session inherits           | [F11 Cloud sessions](../factory/f11-cloud-sessions.md) |
+| `advanced-01` | advanced | Write a read-only reviewer subagent           | [execution](../levels/execution.md)                        |
+| `advanced-02` | advanced | Measure what a call costs                     | [agent SDK](../agent/agent-sdk.md)                         |
+| `advanced-03` | advanced | Work in a parallel worktree                   | [agent teams](../electives/agent-teams.md)                 |
+| `advanced-04` | advanced | Write a check that walks the whole tree       | [workflows](../levels/workflows.md)                        |
+| `advanced-05` | advanced | Check what a cloud session inherits           | [F11 Cloud sessions](../factory/f11-cloud-sessions.md)     |
 
 ## How the labs are kept correct
 
