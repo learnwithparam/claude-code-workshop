@@ -27,7 +27,9 @@ export function proveBoundary(): Proof {
   const settings = JSON.parse(readFileSync(".claude/settings.json", "utf8"));
   const deny: string[] = settings.permissions?.deny ?? [];
   if (!deny.includes(`Read(**/${ENV_NAME}*)`)) problems.push("settings: Read deny missing");
-  if (!deny.includes("Bash(git push *)")) problems.push("settings: git push deny missing");
+  // A branch push is allowed so a cloud session can hand work back; main and force stay blocked.
+  for (const rule of ["Bash(git push --force*)", "Bash(git push * main*)"])
+    if (!deny.includes(rule)) problems.push(`settings: ${rule} deny missing`);
   if (!settings.sandbox?.enabled) problems.push("settings: sandbox off");
   if (!settings.sandbox?.filesystem?.denyRead?.includes(`**/${ENV_NAME}*`))
     problems.push("settings: sandbox denyRead missing");
