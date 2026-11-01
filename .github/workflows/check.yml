@@ -12,13 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
+        with: { node-version: 22, check-latest: true, cache: npm }
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: make check
       # The CLI judges the manifests; a missing binary fails the step instead of skipping it.
-      - run: npx --yes @anthropic-ai/claude-code@2.1.312 plugin validate plugins/factory-kit --strict
-      - run: npx --yes @anthropic-ai/claude-code@2.1.312 plugin validate . --strict
+      - run: npx --yes @anthropic-ai/claude-code@2.1.316 plugin validate plugins/factory-kit --strict
+      - run: npx --yes @anthropic-ai/claude-code@2.1.316 plugin validate . --strict
 
   # Each level is generated from trunk and must pass its own gate, so a fix on main
   # can never leave a learner's catch-up copy broken.
@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
+        with: { node-version: 22, check-latest: true, cache: npm }
       - run: npm ci
       - run: make levels LEVEL=${{ matrix.level }}
       - run: npm ci

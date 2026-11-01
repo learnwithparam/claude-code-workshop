@@ -15,6 +15,10 @@ export function paint(color: boolean, style: keyof typeof CODES, text: string): 
   return color ? `\u001b[${CODES[style]}m${text}\u001b[0m` : text;
 }
 
+// Every screen is drawn for 70 columns, so a rule never wraps in a narrow terminal.
+export const WIDTH = 70;
+export const rule = (color: boolean): string => paint(color, "dim", "─".repeat(WIDTH));
+
 export function bar(done: number, total: number, width: number, color: boolean): string {
   const filled = total === 0 ? 0 : Math.round((done / total) * width);
   return paint(color, "green", "█".repeat(filled)) + "░".repeat(width - filled);
@@ -55,7 +59,7 @@ export function renderMap(
   currentId: string | undefined,
   color: boolean,
 ): string {
-  const lines = [paint(color, "bold", "Lab map"), ""];
+  const lines = [paint(color, "bold", "Lab map"), rule(color), ""];
   for (const s of stats) {
     lines.push(`${s.lane.padEnd(9)} ${bar(s.done, s.total, 20, color)} ${s.done}/${s.total}`);
     for (const lab of labs.filter((l) => l.lane === s.lane)) {
@@ -90,7 +94,8 @@ export function renderBrief(lab: Lab, progress: Progress, color: boolean): strin
   const recall = lab.warmup && lab.warmup.from in progress.done ? lab.warmup : undefined;
   const lines = [
     paint(color, "bold", `${lab.id}  ${lab.title}`),
-    paint(color, "dim", `Pairs with ${lab.pairs}`),
+    paint(color, "dim", `${lab.lane} lane, pairs with ${lab.pairs}`),
+    rule(color),
     "",
     ...(recall
       ? [`${paint(color, "bold", `Warm-up (from ${recall.from})`)} ${recall.question}`, ""]
@@ -102,6 +107,7 @@ export function renderBrief(lab: Lab, progress: Progress, color: boolean): strin
     paint(color, "dim", 'Save your guess with: make lab GUESS="your guess"'),
     "",
     ...body(lab, color),
+    rule(color),
     paint(
       color,
       "dim",

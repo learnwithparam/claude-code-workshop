@@ -73,7 +73,7 @@ export function report(dir = RUNS) {
 
 // What `--watch` prints: the issues the factory would pick up next.
 export const ready = (label = "factory:ready") =>
-  JSON.parse(gh("issue", "list", "--label", label, "--json", "number,title"));
+  JSON.parse(gh("issue", "list", "--label", label, "--json", "number,title,body"));
 
 // What `--maintain` does: check the recorded metrics against their bands and, at 3 sigma, write the
 // intent.md that `--workflow=incident` starts from.

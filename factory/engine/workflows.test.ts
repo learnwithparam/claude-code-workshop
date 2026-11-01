@@ -101,6 +101,7 @@ describe("workflow set", () => {
       "spike",
       "docs",
       "incident",
+      "ci-fix",
     ])
       expect(names).toContain(n);
   });

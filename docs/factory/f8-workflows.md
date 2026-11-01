@@ -83,6 +83,7 @@ One workflow per kind of task. The test "covers every task type the plan names" 
 | an open question                    | `spike`        | the output is a decision record behind a human gate        |
 | documentation                       | `docs`         | `prose` and `gate`                                         |
 | an incident or band breach          | `incident`     | the incident becomes an eval before the fix                |
+| a red open PR                       | `ci-fix`       | the failing job log, a fix loop, an infra fault is rerun   |
 
 ## Choosing one
 

@@ -4,6 +4,7 @@ import { loadConfig } from "../config.ts";
 import { parseAuthFlag, resolveAuth, storedLogin } from "./auth.ts";
 import { ready, report, runIssue, runMaintain } from "./cli.ts";
 import { portable } from "./portable.ts";
+import { schedule } from "./schedule.ts";
 
 // Usage: tsx factory/engine/main.ts <issue-number> --workflow=<name> [--auth=api-key|subscription|auto]
 //        tsx factory/engine/main.ts <issue-number> --workflow=<name> --no-retro
@@ -14,7 +15,7 @@ const workflow = process.argv.find((a) => a.startsWith("--workflow="))?.slice(11
 
 if (first === "--report") console.log(JSON.stringify(report(), null, 2));
 else if (first === "--watch")
-  console.log(JSON.stringify(ready(loadConfig().labels.ready), null, 2));
+  console.log(JSON.stringify(schedule(ready(loadConfig().labels.ready)), null, 2));
 else if (first === "--maintain") {
   const r = await runMaintain(Number(process.argv[3]));
   console.log(r.lines.join("\n"));
