@@ -57,6 +57,10 @@ Answer: The full test summary, with a passed line and no failed line, because a 
 2. `2>&1` sends errors into the same log as the output.
 3. If a test fails, you changed something under `shared/`. Undo it and run the step again.
 
+## Trick
+
+Type `/gate` in Claude Code. The project command in `.claude/commands/gate.md` runs `make check` and reports only what failed.
+
 ## What you just learned
 
 A change is only done when a command you can run says so. Know the green output first, then judge Claude's work against it.

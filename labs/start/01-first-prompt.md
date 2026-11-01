@@ -48,6 +48,10 @@ Answer: Nothing prints and the answer lands in the file, because -p writes one a
 2. `-p` prints one answer and exits, so `>` can capture it.
 3. If `claude` is not found, install it from the official docs, then run `make doctor` again.
 
+## Trick
+
+Add `--output-format json` to `claude -p` and the answer comes back as one JSON result that a script can parse.
+
 ## What you just learned
 
 `claude -p` is Claude Code as a command: a question in, an answer out, no chat window.

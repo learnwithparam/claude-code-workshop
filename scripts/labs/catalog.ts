@@ -62,6 +62,13 @@ export const labSchema = z.object({
   proof: z.array(proofItem).min(1),
   // Two or more, so the first nudges and the last gives the answer away.
   hints: z.array(z.string().min(1)).min(2),
+  // A Claude Code habit the learner did not ask about but now uses; shown once the lab is done.
+  trick: z
+    .string()
+    .min(1)
+    .max(200)
+    .regex(/^[^\n]+$/, "must be one line")
+    .optional(),
   learned: oneLine,
 });
 export type Lab = z.infer<typeof labSchema>;
@@ -161,6 +168,7 @@ export function parseLab(lane: string, file: string, text: string): Lab {
     steps: listItems(parts.get("steps") ?? "").map(stepOf),
     proof: proofOf(parts.get("proof") ?? ""),
     hints: listItems(parts.get("hints") ?? ""),
+    trick: parts.get("trick"),
     learned: parts.get("what you just learned"),
   });
 }
