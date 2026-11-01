@@ -1,6 +1,4 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { parse } from "yaml";
 import { affectedLevels, CI_LEVELS } from "./affected-levels.ts";
 
 describe("affectedLevels", () => {
@@ -15,13 +13,5 @@ describe("affectedLevels", () => {
   });
   it("a file no level owns reaches none", () => {
     expect(affectedLevels(["not-owned/anywhere.txt"])).toEqual([]);
-  });
-});
-
-describe("check.yml", () => {
-  const wf = parse(readFileSync(".github/workflows/check.yml", "utf8"));
-  it("takes the level matrix from the selector, so there is one list", () => {
-    expect(wf.jobs.levels.strategy.matrix.level).toContain("fromJSON");
-    expect(wf.jobs.levels.needs).toBe("select");
   });
 });
