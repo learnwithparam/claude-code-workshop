@@ -19,6 +19,8 @@ export const ALLOWED: { path: string; reason: Reason }[] = [
   { path: "shared/src/render-video.ts", reason: "assignment-made" },
   { path: ".claude/settings.local.json", reason: "gitignored" },
   { path: ".claude/logs/teams.log", reason: "gitignored" },
+  { path: "api/.env", reason: "gitignored" },
+  { path: "web/dist", reason: "gitignored" },
   { path: ".factory/runs/", reason: "gitignored" },
   { path: ".factory/series.json", reason: "generated" },
   { path: ".factory/holdout/", reason: "generated" },

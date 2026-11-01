@@ -106,7 +106,7 @@ describe("assignment briefs", () => {
 describe("assignments/README.md", () => {
   it("has one row per brief, linked, in the same set", () => {
     const readme = readFileSync("assignments/README.md", "utf8");
-    const linked = [...readme.matchAll(/^\| \[[^\]]+\]\(([a-z-]+)\.md\) \|/gm)].map((m) => m[1]);
+    const linked = [...readme.matchAll(/^\| \[[^\]]+\]\(([a-z-]+)\.md\)\s*\|/gm)].map((m) => m[1]);
     expect([...linked].sort()).toEqual(names);
   });
 });

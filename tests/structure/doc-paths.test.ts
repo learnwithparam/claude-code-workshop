@@ -44,9 +44,12 @@ describe("doc paths", () => {
   });
 
   it("allows nothing that now exists, and every reason is honest", () => {
-    const stale = ALLOWED.filter((a) =>
-      a.path.startsWith("make ") ? targets.has(a.path.slice(5)) : existsSync(a.path),
-    ).map((a) => `${a.path}: exists now`);
+    // A gitignored file can exist on one machine and not on another, so existing never makes it stale.
+    const stale = ALLOWED.filter((a) => a.reason !== "gitignored")
+      .filter((a) =>
+        a.path.startsWith("make ") ? targets.has(a.path.slice(5)) : existsSync(a.path),
+      )
+      .map((a) => `${a.path}: exists now`);
     const ignored = ALLOWED.filter((a) => a.reason === "gitignored").filter((a) => {
       try {
         execFileSync("git", ["check-ignore", "--no-index", "-q", a.path]);
