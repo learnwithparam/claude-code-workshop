@@ -24,7 +24,7 @@ Proof in `factory/engine/engine.test.ts`: "binds an approval to the artifact dig
 
 ## The runner could not call `gh`. Is something misconfigured?
 
-By design. The gate runs the edited code with a throwaway `HOME`, `GIT_CONFIG_GLOBAL=/dev/null` and an empty `GH_CONFIG_DIR` (`scrubbedEnv` in `factory/stages.ts`), so code the agent wrote finds no credential to read. `.claude/settings.json` also denies `Bash(git push *)`.
+By design. The gate runs the edited code with a throwaway `HOME`, `GIT_CONFIG_GLOBAL=/dev/null` and an empty `GH_CONFIG_DIR` (`scrubbedEnv` in `factory/stages.ts`), so code the agent wrote finds no credential to read. `.claude/settings.json` also denies a force push and any push to `main`.
 
 So a stage cannot fetch its own issue. The runner fetches it and puts the text in the prompt, inside `<issue>` tags with a warning that it is untrusted data (`runIssue` in `factory/engine/cli.ts`). If a stage needs GitHub data, add it to the prompt in the runner. Do not hand a credential to the stage.
 

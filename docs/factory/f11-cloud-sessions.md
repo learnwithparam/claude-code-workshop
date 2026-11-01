@@ -4,7 +4,7 @@
 
 ## Goal
 
-Start several Claude Code cloud sessions on one repo, keep keys out of every prompt, understand why a cloud session cannot `git push` here, hand the push to a person or a gated step, and read what the sessions cost.
+Start several Claude Code cloud sessions on one repo, keep keys out of every prompt, understand what a cloud session can push here (its own branch) and what it cannot (`main`, force), hand the merge to a person or a gated step, and read what the sessions cost.
 
 ## Cloud or a local worktree
 
@@ -33,7 +33,7 @@ So the factory's guardrails travel with the clone, and so do `.factory/config.ya
 node -e 'const s=require("./.claude/settings.json");console.log(s.permissions.deny);console.log(Object.keys(s.hooks))'
 ```
 
-The deny list prints `Bash(git push *)` and the hook list includes `PreToolUse` and `Stop`.
+The deny list prints `Bash(git push --force*)`, `Bash(git push * main*)` and the hook list includes `PreToolUse` and `Stop`.
 
 ## Steps
 
@@ -71,19 +71,19 @@ Push first: the VM clones the remote at your branch, not your local checkout. If
 
 Give each session one ticket, one workflow and one branch. Two sessions that edit the same files recreate the problem F3 solved with worktrees, and the plan-drift check will not save you across sessions. Choose tickets whose plans list disjoint files.
 
-### 4. Know why `git push` fails, and what the team does
+### 4. Know what a push can and cannot do, and what the team does
 
-`.claude/settings.json` in this repo denies `Bash(git push *)`. A cloud session reads that file from the clone, so the session's agent cannot push by running `git push`. This is on purpose: the agents hold no GitHub token in the factory (`approvalIn` in `factory/engine/real-host.ts` counts only a human's comment), and a push is the step that needs a person.
+`.claude/settings.json` in this repo denies a force push and any push to `main` (`Bash(git push --force*)`, `Bash(git push * main*)`, `Bash(git push * HEAD:main*)`). A cloud session reads that file from the clone, so its agent can push its own branch with `git push origin <branch>` and cannot touch `main`. Run `git add`, `git commit` and `git push` as separate calls: a chained command is refused in the cloud sandbox. A session has no `gh`, so it pushes the branch and a person or the factory opens the PR. The agents hold no GitHub token in the factory (`approvalIn` in `factory/engine/real-host.ts` counts only a human's comment), and the merge is the step that needs a person.
 
 The GitHub proxy is a different layer. By the docs it rejects branch deletions and tag pushes, and it does not limit which branch a push may update, so protect `main` with a branch rule on GitHub. The proxy will not do that for you.
 
-Three ways a team handles the deny. Pick one and write it in `AGENTS.md`:
+Three ways a team handles the hand-back. Pick one and write it in `AGENTS.md`:
 
-1. **Keep the deny, a person ships.** Open the session, read the diff on the **Changes** card, and create the branch or PR from claude.ai/code yourself. Safest, and the default here.
-2. **Keep the deny, teleport.** Pull the session with `claude --teleport <session-id>` into a checkout of the same repo, run `make check`, and push from your terminal. Teleport needs a clean working tree and the same account.
-3. **Narrow the deny, with a hook.** Replace the blanket deny with a `PreToolUse` hook that allows `git push origin HEAD:refs/heads/factory/*` and exits 2 for anything else. Do this only after the hook has a test, and note that `.claude/settings.json` and `.claude/hooks/` are protected paths in `pretooluse-file-guard.mjs`, so a person makes the change, not an agent.
+1. **Branch push, a person merges.** The session pushes its branch, you open the PR and merge it after the checks. The default here.
+2. **Teleport.** Pull the session with `claude --teleport <session-id>` into a checkout of the same repo, run `make check`, and push from your terminal. Teleport needs a clean working tree and the same account.
+3. **Narrow it further, with a hook.** Add a `PreToolUse` hook that allows `git push origin HEAD:refs/heads/factory/*` and exits 2 for anything else. Do this only after the hook has a test, and note that `.claude/settings.json` and `.claude/hooks/` are protected paths in `pretooluse-file-guard.mjs`, so a person makes the change, not an agent.
 
-Do not delete the deny to get a session unstuck. A session that cannot push is the system working.
+Do not delete the `main` deny to get a session unstuck. A session that cannot push `main` is the system working.
 
 ### 5. Poll and supervise
 
@@ -115,11 +115,11 @@ Source: [Manage costs effectively](https://code.claude.com/docs/en/costs.md). F1
 The deny is the control, so prove it exists and prove it fails closed.
 
 1. Run `npx vitest run tests/structure/hooks.test.ts` and read which hooks it asserts.
-2. Start a cloud session on a throwaway branch and send: "Run `git push origin HEAD` and show me the exact result." The permission rule should refuse it. Read the transcript, not a summary.
-3. Remove `"Bash(git push *)"` from the deny list in a scratch copy, start another session with the same message, and see whether the push goes through. If it does, you have seen why the line exists. Delete the scratch branch afterwards.
+2. Start a cloud session on a throwaway branch and send: "Run `git push origin main` and show me the exact result." The permission rule should refuse it, while `git push origin HEAD` on the throwaway branch goes through. Read the transcript, not a summary.
+3. Remove `"Bash(git push * main*)"` from the deny list in a scratch copy, start another session with the same message, and see whether the push goes through. If it does, you have seen why the line exists. Delete the scratch branch afterwards.
 4. Restore the line and run `make check`.
 
-If step 2 pushes, stop. A different settings file is winning, and the docs list which settings reach a session with several repositories.
+If step 2 pushes `main`, stop. A different settings file is winning, and the docs list which settings reach a session with several repositories.
 
 ## Discussion
 
