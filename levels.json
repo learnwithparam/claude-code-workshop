@@ -75,6 +75,8 @@
     "tests/structure/levels.test.ts",
     "README.md",
     "scripts/levels.ts",
+    "scripts/affected-levels.ts",
+    "scripts/affected-levels.test.ts",
     "tests/structure/snapshots.test.ts",
     "tests/structure/walkthrough.test.ts",
     "vitest.config.ts",

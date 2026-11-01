@@ -56,4 +56,10 @@ describe("workflow Node setup", () => {
     expect(wf.concurrency?.["cancel-in-progress"]).toContain("pull_request");
     expect(text.match(/~\/\.cache\/ms-playwright/g)?.length).toBe(2);
   });
+
+  it("check.yml takes the level matrix from the selector, so there is one list", () => {
+    const { jobs } = parse(readFileSync(".github/workflows/check.yml", "utf8"));
+    expect(jobs.levels.strategy.matrix.level).toContain("fromJSON");
+    expect(jobs.levels.needs).toBe("select");
+  });
 });
