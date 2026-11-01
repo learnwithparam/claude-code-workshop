@@ -48,7 +48,7 @@ make lab ID=factory-01
 
 **What I got**
 
-The red run, trimmed to the proof lines:
+The first run is red on purpose. The proof lines, trimmed:
 
 ```text
 FAIL intent.md has a Problem heading.
@@ -59,9 +59,11 @@ FAIL intent.md has at least two bullet lines.
 FAIL intent.md has all three headings, and its Done when bullets name commands that exist.
 
 RED, as expected factory-01 this is the first run, so the proof fails on purpose.
+The FAIL lines above are the state your steps will change. Do the steps, then run make lab again.
+make: *** [lab] Error 1
 ```
 
-After you write the file, the same command reports every item as passed and records the lab. Not run in the sandbox: the green run, because it needs your own intent text.
+One line, `sh: line 0: test: : integer expression expected`, also appears while the file is missing. It is harmless noise and goes away once the file exists. I did not run the green pass here, because it needs your own intent text.
 
 ## Write acceptance before code
 
@@ -86,7 +88,7 @@ make lab ID=factory-02
 
 **What I got**
 
-The red run fails the same way as the first lab, on `acceptance.md` instead of `intent.md`. Not run in the sandbox: the green run, because it needs your own scenarios.
+The red run fails the same way as the first lab, on `acceptance.md` instead of `intent.md`. I did not run the green pass here, because it needs your own scenarios.
 
 ## See what a run would do
 
@@ -148,7 +150,7 @@ make lab ID=factory-04
 The end of `contract.log`:
 
 ```text
- ✓ factory/engine/workflows.test.ts (128 tests) 52ms
+ ✓ factory/engine/workflows.test.ts (128 tests) 45ms
 
  Test Files  1 passed (1)
       Tests  128 passed (128)

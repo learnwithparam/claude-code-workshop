@@ -7,7 +7,7 @@ Two workshops share this folder. Pick yours once with `make lab PATH_ID=pro` or 
 - **Claude Code, beginner to pro** (`PATH_ID=pro`): the `start`, `daily`, `team` and `advanced` lanes.
 - **Software Factory** (`PATH_ID=factory`): the `start`, `daily` and `factory` lanes.
 
-Each lane has a walkthrough that follows every step with the command, what you should see and why: [start](walkthrough-start.md), [daily](walkthrough-daily.md), [team](walkthrough-team.md), [advanced](walkthrough-advanced.md).
+Each lane has a walkthrough that follows every step with the command, what you should see and why: [start](walkthrough-start.md), [daily](walkthrough-daily.md), [team](walkthrough-team.md), [advanced](walkthrough-advanced.md), [factory](walkthrough-factory.md).
 
 ## Help fades as you go
 
