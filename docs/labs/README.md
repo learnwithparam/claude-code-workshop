@@ -60,6 +60,9 @@ Each step says where to type it: "in your shell", "in Claude Code" or "in your e
 | `factory-02`  | factory  | Write acceptance before code                  | [F2 Design](../factory/f2-design.md)                   |
 | `factory-03`  | factory  | See what a run would do                       | [F3 Build](../factory/f3-build.md)                     |
 | `factory-04`  | factory  | Check the workflow contract                   | [F8 Workflows](../factory/f8-workflows.md)             |
+| `factory-05`  | factory  | Run the checks that stop a bad test           | [F4 Test](../factory/f4-test.md)                       |
+| `factory-06`  | factory  | Count the votes behind a review               | [F5 Review](../factory/f5-review.md)                   |
+| `factory-07`  | factory  | Trip a band and read the intent it writes     | [F7 Maintain](../factory/f7-maintain.md)               |
 | `advanced-01` | advanced | Write a read-only reviewer subagent           | [execution](../levels/execution.md)                    |
 | `advanced-02` | advanced | Measure what a call costs                     | [agent SDK](../agent/agent-sdk.md)                     |
 | `advanced-03` | advanced | Work in a parallel worktree                   | [agent teams](../electives/agent-teams.md)             |

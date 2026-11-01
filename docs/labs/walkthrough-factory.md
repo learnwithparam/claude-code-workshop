@@ -158,6 +158,48 @@ The end of `contract.log`:
 
 The test loads every file in `.factory/workflows/`, so one bad workflow fails it by name. Change a stage in one file, rerun, and read which workflow broke.
 
+## factory-05: Run the checks that stop a bad test
+
+**Pairs with** [F4 Test](../factory/f4-test.md)
+
+**The problem.** "The tests pass" is the model's word until a check reproduces it. The checks (plan-drift, holdout, mutation, manifest-deps) are code with tests of their own.
+
+```sh
+make lab ID=factory-05
+mkdir -p .labs/work
+npx vitest run factory/engine/checks > .labs/work/checks.log 2>&1
+grep '✓' .labs/work/checks.log
+make lab ID=factory-05
+```
+
+**What I got.** The log lists `manifest-deps.test.ts` (23 tests), `mutation.test.ts` (3), `holdout.test.ts` (2) and `plan-drift.test.ts` (10), and ends with `Tests 38 passed (38)`. I ran the vitest command and read this output. I did not run the final green `make lab` here.
+
+## factory-06: Count the votes behind a review
+
+**Pairs with** [F5 Review](../factory/f5-review.md)
+
+**The problem.** One agent's opinion is not a finding. The engine keeps a finding only when enough verifiers agree, and it caps nits and rounds.
+
+```sh
+make lab ID=factory-06
+mkdir -p .labs/work
+npx tsx -e 'import("./factory/engine/review.ts").then(m=>console.log("voters",m.VOTERS,"needed",m.NEEDED,"nits",m.MAX_NITS,"rounds",m.MAX_ROUNDS))' > .labs/work/review-rules.txt
+npx vitest run factory/engine/review.test.ts > .labs/work/review.log 2>&1
+make lab ID=factory-06
+```
+
+**What I got.** `review-rules.txt` holds `voters 3 needed 2 nits 3 rounds 3`, and `review.log` shows `factory/engine/review.test.ts (12 tests)` and `Tests 12 passed (12)`. The proof prints the constants again and compares, so a typed number fails. I did not run the final green `make lab` here.
+
+## factory-07: Trip a band and read the intent it writes
+
+**Pairs with** [F7 Maintain](../factory/f7-maintain.md)
+
+**The problem.** Maintain is arithmetic. A metric that leaves its band by three sigma writes the `intent.md` a new run starts from, with no model involved.
+
+You pick a number for `ci-failure-rate` against a fixed history of ten runs, then save the intent the factory writes for it. The lab's own proof scripts show how to print the sigma and the action.
+
+**What I got.** With the proof's history, a latest value of 30 gave `3 intent` and a latest value of 10 gave `0 none`. I ran both through `detect` and `actionFor`. I did not run the final green `make lab` here.
+
 ## What this lane does not cover yet
 
-The factory lane stops at the contract. Test, review, deploy and maintain have docs ([F4](../factory/f4-test.md), [F5](../factory/f5-review.md), [F6](../factory/f6-deploy.md), [F7](../factory/f7-maintain.md)) but no lab of their own yet. For a hands-on run past this lane, use the [cloud sessions](../factory/f11-cloud-sessions.md) lab `advanced-05`, then pick an [assignment](../factory/f10-assignments.md).
+Deploy has a doc ([F6](../factory/f6-deploy.md)) but no lab of its own yet. For a hands-on run past this lane, use the [cloud sessions](../factory/f11-cloud-sessions.md) lab `advanced-05`, then pick an [assignment](../factory/f10-assignments.md).
