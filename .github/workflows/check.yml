@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: "0 5 * * *"
 
+# A newer push to the same PR replaces the run in flight; main and nightly runs always finish.
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   trunk:
     runs-on: ubuntu-latest
@@ -14,6 +19,10 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, check-latest: true, cache: npm }
       - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npx playwright install --with-deps chromium
       - run: make check
       # The CLI judges the manifests; a missing binary fails the step instead of skipping it.
@@ -48,6 +57,10 @@ jobs:
       - run: make levels LEVEL=${{ matrix.level }}
       - run: npm ci
         working-directory: supplied/${{ matrix.level }}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npx playwright install --with-deps chromium
         working-directory: supplied/${{ matrix.level }}
       - run: make check

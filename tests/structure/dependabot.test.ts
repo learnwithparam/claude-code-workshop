@@ -49,4 +49,11 @@ describe("workflow Node setup", () => {
       }
     }
   });
+
+  it("check.yml cancels superseded PR runs and caches the Playwright browser", () => {
+    const text = readFileSync(".github/workflows/check.yml", "utf8");
+    const wf = parse(text);
+    expect(wf.concurrency?.["cancel-in-progress"]).toContain("pull_request");
+    expect(text.match(/~\/\.cache\/ms-playwright/g)?.length).toBe(2);
+  });
 });
