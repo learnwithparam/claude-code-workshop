@@ -1,7 +1,6 @@
 name: diag
 on:
-  push:
-    branches: [ci/diag]
+  pull_request:
 permissions:
   contents: read
   pull-requests: write
