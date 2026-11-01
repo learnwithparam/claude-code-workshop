@@ -194,6 +194,7 @@
     "scripts/prove/sharing.ts",
     "docs/levels/sharing.md",
     "docs/when-to-use-what.md",
+    "docs/run-of-show.md",
     "tests/structure/when-to-use-what.test.ts",
     "docs/recordings/sharing.cast",
     "docs/recordings/sharing.gif",
