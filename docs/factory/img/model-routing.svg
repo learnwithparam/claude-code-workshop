@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 398" width="960" height="398" role="img" aria-labelledby="t d">
   <title id="t">Model routing by stage</title>
-  <desc id="d">Each workflow step name maps through stepStages to a config stage, and the stage sets the model. Intent maps to triage on Haiku. Spec, plan and decide map to plan on Sonnet. Tests, build, fix and the other build steps map to build on Sonnet. Review maps to review on Sonnet. Ci, eval and reproduce map to verify on Haiku. Routes override this for an epic plan, which runs on Opus, and a docs build, which runs on Haiku. The docs workflow names its step write, which is unmapped, so it falls back to the middle model. Review lenses and verifiers take their model from frontmatter.</desc>
+  <desc id="d">Each workflow step name maps through stepStages to a config stage, and the stage sets the model. Intent maps to triage on Haiku. Spec, plan and decide map to plan on Sonnet. Tests, build, write, fix and the other build steps map to build on Sonnet. Review maps to review on Sonnet. Ci, eval and reproduce map to verify on Haiku. Routes override this for an epic plan, which runs on Opus, and a docs build, which runs on Haiku. The docs workflow names its step write, which maps to build, so the docs route sends it to Haiku. Review lenses and verifiers take their model from frontmatter.</desc>
   <style>
     text { font-family: Geist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 12px; fill: #171717; }
     .mono { font-family: "Geist Mono", ui-monospace, Menlo, Consolas, monospace; }
@@ -57,7 +57,7 @@
   <rect class="model" x="644" y="140" width="140" height="34" rx="8"/>
   <text class="s" x="714" y="162" text-anchor="middle">Sonnet</text>
   <rect class="card" x="24" y="184" width="400" height="34" rx="8"/>
-  <text class="mono" x="40" y="206">tests, build, fix, harden, refactor, bump, release</text>
+  <text class="mono" x="40" y="206">tests, build, write, fix, harden, refactor, bump, release</text>
   <path class="ln" d="M424 201H450" marker-end="url(#a)"/>
   <rect class="file" x="452" y="184" width="160" height="34" rx="8"/>
   <text class="mono" x="532" y="206" text-anchor="middle">build</text>
@@ -88,8 +88,8 @@
   <text class="mono" x="816" y="204">docs build</text>
   <text class="s" x="816" y="224">Haiku</text>
   <rect class="fail" x="24" y="324" width="444" height="54" rx="8"/>
-  <text x="40" y="346">docs names its step write, which is in neither list,</text>
-  <text x="40" y="366">so it falls back to the middle model and misses the route.</text>
+  <text x="40" y="346">docs names its step write: stepStages maps it to build,</text>
+  <text x="40" y="366">so the docs route applies and the step runs on Haiku.</text>
   <rect class="card" x="492" y="324" width="444" height="54" rx="8"/>
   <text x="508" y="346">Lens and verifier calls in a review pass no model:</text>
   <text class="m" x="508" y="366">frontmatter decides, Sonnet lenses and a Haiku verifier.</text>

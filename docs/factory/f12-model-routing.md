@@ -4,15 +4,15 @@
 
 ## Story
 
-**The ticket.** The `docs` workflow. No run shows this one; the config and the workflow file do.
+**The ticket.** The `docs` workflow. No run shows this one; the config, the workflow file and a test do.
 
-**Without the layer.** `routes.docs.build` in `.factory/config.json` sends a docs build to Haiku, but `.factory/workflows/docs.yaml` names its step `write`, which is not in `stepStages`. The route never applies and the step runs on the middle model.
+**Without the layer.** `routes.docs.build` in `.factory/config.json` sends a docs build to Haiku. `.factory/workflows/docs.yaml` names its step `write`, and a step name with no entry in `stepStages` would skip the route and run on the middle model.
 
-**What the layer did.** `run.log` records the model on every round, so the miss is visible in a file, not hidden in a bill. The assignment "A model for every stage name" in F10 closes it.
+**What the layer did.** `stepStages` maps `write` to `build`, so the `write` step takes the `build` model and the docs route replaces it with Haiku. `factory/engine/docs-routing.test.ts` asserts both: a docs ticket gets `claude-haiku-5-5`, a bug ticket gets the `build` default. `run.log` records the model on every call, so a miss shows in a file, not in a bill.
 
 ![Step names map through stepStages to a config stage and its model, with route overrides beside them](img/model-routing.svg)
 
-_Notice:_ the red box is a route that never fires.
+_Notice:_ the red box is the case a mapping prevents: a step name with no stage.
 
 ## Goal
 

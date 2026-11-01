@@ -12,7 +12,7 @@
 
 ![Three risk tiers set by the changed paths, with the approvals each needs](img/risk-ladder.svg)
 
-_Notice:_ this ladder sets the count at a human gate today. `release` in `deploy.ts` asks it again before production, once something calls it.
+_Notice:_ this ladder sets the count at every human gate. `release` in `deploy.ts` asks `approvalsMet` again before production, and `interpret.ts` reaches `release` through `deploy-step.ts` for a `deploy: production` step. No shipped workflow has one yet: `bug-tdd` ends at the merge queue.
 
 ## Goal
 

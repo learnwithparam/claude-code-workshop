@@ -8,7 +8,7 @@
 
 **Without the layer.** "`factory/engine/cli.ts` builds `approvers` as a list of one login, the person running the CLI." So "a high-tier gate could never reach two".
 
-**What the layer did.** Nothing yet. That gap is the assignment "Two people at a high-risk gate" below. Every assignment here starts from a gap like it.
+**What the layer did.** Nothing yet. That gap is the assignment on naming approvers for a high-risk gate, below. Every assignment here starts from a gap like it.
 
 ![The six stages from a ready ticket to a merged pull request, with the artifact and the deciding check under each](img/pipeline.svg)
 
