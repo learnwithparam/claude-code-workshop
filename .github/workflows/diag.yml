@@ -1,0 +1,20 @@
+name: diag
+on:
+  push:
+    branches: [ci/diag]
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@d70510b174a1244958df0b03166a54912811f3e6 # v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: Reply with the single word ok.
+          show_full_output: true
+          claude_args: --model claude-sonnet-5-5 --max-turns 2
