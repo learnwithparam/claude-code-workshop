@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@workshop/shared": "*",
-    "astro": "7.4.2",
+    "astro": "7.4.4",
     "cookie": "^2.0.1"
   },
   "devDependencies": {
