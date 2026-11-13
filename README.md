@@ -1,3 +1,11 @@
+> **Archived.** This workshop is now three courses:
+
+- [Claude Code for Everyone](https://github.com/learnwithparam/claude-code-for-everyone)
+- [Software Factory on Claude Code](https://github.com/learnwithparam/software-factory-claude-code)
+- [AI SDLC with Agentic Workflows](https://github.com/learnwithparam/ai-sdlc-agentic-workflows)
+>
+> This repo stays here for reference and gets no more updates.
+
 # Claude Code workshop: Worksheet Studio
 
 A chat agent that turns a prompt into a printable worksheet for any grade, from early reader to university. You build it, then you build the factory that builds it.
